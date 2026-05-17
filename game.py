@@ -11,7 +11,8 @@ from data import (BUILDINGS, UPGRADES, SKILLS, ACHIEVEMENTS, EVENTS, STORY,
                   ALUMNI_UPGRADES, SCHOLARS, EVENT_RARITY_WEIGHTS,
                   DYNAMIC_NEWS_BUILDING, DYNAMIC_NEWS_ACHIEVEMENT,
                   DYNAMIC_NEWS_PRESTIGE, DYNAMIC_NEWS_MILESTONE,
-                  BUILDING_SACRIFICE, QUIZ_QUESTIONS, QUIZ_REWARDS)
+                  BUILDING_SACRIFICE, QUIZ_QUESTIONS, QUIZ_REWARDS,
+                  HERO_CREATION_COST, HERO_PATH_STATS)
 
 SAVE_FILE    = os.path.join(os.path.dirname(__file__), "save.json")
 COMBO_MAX    = 10
@@ -218,6 +219,9 @@ class Game:
         # School identity
         self.school_name    = "Edu Empire Academy"
         self.show_headmaster = True
+
+        # Hero (Zone 10)
+        self.hero: Optional[dict] = None   # None until created
 
         # Dynamic news (session-only; not persisted)
         self.dynamic_news_queue:   list[str] = []
@@ -1230,6 +1234,43 @@ class Game:
         self._check_achievements()
         self.save()
 
+    # ── Hero Creation ─────────────────────────────────────────────────────────
+
+    def can_create_hero(self) -> bool:
+        return self.hero is None and self.diplomas >= HERO_CREATION_COST
+
+    def create_hero(self, world_manager=None) -> bool:
+        """Sacrifice diplomas, compute hero stats from path investment, grant Hero Academy."""
+        if not self.can_create_hero():
+            return False
+        # Count MP spent per path
+        path_mp: dict[str, int] = {p: 0 for p in HERO_PATH_STATS}
+        for sk in SKILLS:
+            if sk.id in self.skills_purchased and sk.path in path_mp:
+                path_mp[sk.path] += sk.cost
+        total_mp = max(1, sum(path_mp.values()))
+        # Convert to 0-50 stat scores (proportional, capped at 50)
+        stats: dict[str, int] = {}
+        dominant_path = max(path_mp, key=lambda p: path_mp[p]) if total_mp > 0 else "Foundation"
+        for path, (stat_key, _) in HERO_PATH_STATS.items():
+            score = min(50, round(path_mp[path] / total_mp * 100))
+            stats[stat_key] = score
+        self.diplomas -= HERO_CREATION_COST
+        self.hero = {
+            "name":           f"Hero of {self.school_name}",
+            "dominant_path":  dominant_path,
+            "stats":          stats,
+        }
+        # Grant first Hero Academy in Zone 10
+        if world_manager is not None:
+            zg = world_manager.zones.get(10)
+            if zg is not None:
+                bname = "Hero Academy"
+                zg.building_counts[bname] = zg.building_counts.get(bname, 0) + 1
+        self._queue_news(f"A hero has risen from {self.school_name}! The first Hero Academy opens its doors.")
+        self.save()
+        return True
+
     # ── Offline ───────────────────────────────────────────────────────────────
 
     def _apply_offline(self, elapsed: float):
@@ -1307,6 +1348,7 @@ class Game:
             "quiz_perm_kps_bonus":      self.quiz_perm_kps_bonus,
             "quiz_perm_diploma_bonus":  self.quiz_perm_diploma_bonus,
             "one_in_million":           self.one_in_million,
+            "hero":                     self.hero,
             "last_save":                time.time(),
         }
         with open(SAVE_FILE, "w") as f:
@@ -1375,6 +1417,7 @@ class Game:
             self.quiz_perm_kps_bonus        = d.get("quiz_perm_kps_bonus", 0.0)
             self.quiz_perm_diploma_bonus    = d.get("quiz_perm_diploma_bonus", 0)
             self.one_in_million             = d.get("one_in_million", False)
+            self.hero                       = d.get("hero", None)
             elapsed = time.time() - d.get("last_save", time.time())
             if elapsed > 30:
                 self._apply_offline(elapsed)

@@ -122,49 +122,53 @@ UPGRADES: list[UpgradeDef] = [
 # ── Skills (30 total — 13 Foundation + 17 new path skills) ───────────────────
 
 SKILLS: list[SkillDef] = [
-    # ── Foundation (original 13) ──────────────────────────────────────────────
-    SkillDef("eager_student",  "Eager Student",    "+2 base click power",               1,  None,            "click_base",       "",                2.0),
-    SkillDef("speed_reader",   "Speed Reader",     "All buildings +10% KP/s",           2,  None,            "global_kps",       "",                0.10),
-    SkillDef("class_rep",      "Class Rep",        "Classrooms +25% KP/s",              2,  None,            "building_bonus",   "Classroom",       0.25),
-    SkillDef("library_card",   "Library Card",     "Libraries +25% KP/s",               2,  None,            "building_bonus",   "Library",         0.25),
-    SkillDef("lab_safety",     "Lab Safety",       "Science Labs +25% KP/s",            3,  None,            "building_bonus",   "Science Lab",     0.25),
-    SkillDef("tech_savvy",     "Tech Savvy",       "Computer Labs +25% KP/s",           3,  None,            "building_bonus",   "Computer Lab",    0.25),
-    SkillDef("team_captain",   "Team Captain",     "Sports Hall +25% KP/s",             3,  None,            "building_bonus",   "Sports Hall",     0.25),
-    SkillDef("study_group",    "Study Group",      "Offline earnings cap +2 hrs",       4,  None,            "offline_cap",      "",                2.0),
-    SkillDef("deans_list",     "Dean's List",      "Click power × 3",                   5,  "eager_student", "click_mult",       "",                3.0),
-    SkillDef("scholarship",    "Scholarship",      "Prestige diploma gain +50%",        6,  None,            "prestige_bonus",   "",                0.5),
-    SkillDef("extra_credit",   "Extra Credit",     "+1 Merit per achievement",          5,  None,            "merit_bonus",      "",                1.0),
-    SkillDef("valedictorian",  "Valedictorian",    "All KP/s × 1.5",                    8,  "speed_reader",  "global_kps_mult",  "",                1.5),
-    SkillDef("perfect_score",  "Perfect Score",    "All KP/s × 2",                     12,  "valedictorian", "global_kps_mult",  "",                2.0),
+    # ── Foundation — shared baseline, everyone buys these ────────────────────
+    SkillDef("eager_student",  "Eager Student",    "+2 base click power",               2,  None,            "click_base",       "",                2.0),
+    SkillDef("speed_reader",   "Speed Reader",     "All buildings +10% KP/s",           3,  None,            "global_kps",       "",                0.10),
+    SkillDef("class_rep",      "Class Rep",        "Classrooms +25% KP/s",              3,  None,            "building_bonus",   "Classroom",       0.25),
+    SkillDef("library_card",   "Library Card",     "Libraries +25% KP/s",               3,  None,            "building_bonus",   "Library",         0.25),
+    SkillDef("lab_safety",     "Lab Safety",       "Science Labs +25% KP/s",            4,  None,            "building_bonus",   "Science Lab",     0.25),
+    SkillDef("tech_savvy",     "Tech Savvy",       "Computer Labs +25% KP/s",           4,  None,            "building_bonus",   "Computer Lab",    0.25),
+    SkillDef("team_captain",   "Team Captain",     "Sports Hall +25% KP/s",             4,  None,            "building_bonus",   "Sports Hall",     0.25),
+    SkillDef("study_group",    "Study Group",      "Offline earnings cap +2 hrs",       5,  None,            "offline_cap",      "",                2.0),
+    SkillDef("extra_credit",   "Extra Credit",     "+1 Merit per achievement",          6,  None,            "merit_bonus",      "",                1.0),
+    SkillDef("deans_list",     "Dean's List",      "Click power × 3",                  10,  "eager_student", "click_mult",       "",                3.0),
+    SkillDef("scholarship",    "Scholarship",      "Prestige diploma gain +50%",        10,  None,            "prestige_bonus",   "",                0.5),
+    SkillDef("valedictorian",  "Valedictorian",    "All KP/s × 1.5",                   15,  "speed_reader",  "global_kps_mult",  "",                1.5),
+    SkillDef("perfect_score",  "Perfect Score",    "All KP/s × 2",                     25,  "valedictorian", "global_kps_mult",  "",                2.0),
 
-    # ── Academic Excellence Path ──────────────────────────────────────────────
-    SkillDef("academic_gw",   "Academic Excellence", "Unlock Academic path (+5% KPS)", 3,  "valedictorian", "global_kps",       "",                0.05, "Academic"),
-    SkillDef("all_rounder",   "Well-Rounded",        "All buildings +20% KP/s",        5,  "academic_gw",   "global_kps",       "",                0.20, "Academic"),
-    SkillDef("synergy_expert","Synergy Expert",       "All synergy bonuses ×2",         6,  "academic_gw",   "synergy_amp",      "",                1.0,  "Academic"),
-    SkillDef("merit_master",  "Merit Master",         "+2 Merit per achievement",       6,  "academic_gw",   "merit_bonus",      "",                2.0,  "Academic"),
-    SkillDef("dean_scholar",  "Dean's Scholar",       "Diploma gain +100% on prestige", 8,  "academic_gw",   "prestige_bonus",   "",                1.0,  "Academic"),
+    # ── Academic Excellence Path — Intelligence & knowledge depth ─────────────
+    # Tier 1→5 costs: 5, 12, 25, 50, 100  (total 192 MP)
+    SkillDef("academic_gw",   "Academic Excellence", "Unlock Academic path (+5% KPS)",  5,  "valedictorian", "global_kps",       "",                0.05, "Academic"),
+    SkillDef("all_rounder",   "Well-Rounded",        "All buildings +20% KP/s",         12, "academic_gw",   "global_kps",       "",                0.20, "Academic"),
+    SkillDef("synergy_expert","Synergy Expert",       "All synergy bonuses ×2",          25, "academic_gw",   "synergy_amp",      "",                1.0,  "Academic"),
+    SkillDef("merit_master",  "Merit Master",         "+2 Merit per achievement",        50, "academic_gw",   "merit_bonus",      "",                2.0,  "Academic"),
+    SkillDef("dean_scholar",  "Dean's Scholar",       "Diploma gain +100% on prestige", 100, "academic_gw",   "prestige_bonus",   "",                1.0,  "Academic"),
 
-    # ── Innovation Path ───────────────────────────────────────────────────────
-    SkillDef("innov_gw",       "Innovation Track",    "Unlock Innovation path (+5% KPS)", 3, "tech_savvy",  "global_kps",       "",                0.05, "Innovation"),
-    SkillDef("research_synergy","Research Synergy",   "Research Centres +40% KP/s",     6,  "innov_gw",    "building_bonus",   "Research Centre", 0.40, "Innovation"),
-    SkillDef("late_learner",   "Late Bloomer",        "Innovation Hubs +50% KP/s",      6,  "innov_gw",    "building_bonus",   "Innovation Hub",  0.50, "Innovation"),
-    SkillDef("quantum_mind",   "Quantum Mindset",     "All KP/s × 1.25",                8,  "innov_gw",    "global_kps_mult",  "",                1.25, "Innovation"),
+    # ── Innovation Path — Tech Power & building synergies ────────────────────
+    # Tier 1→4 costs: 5, 12, 25, 50  (total 92 MP)
+    SkillDef("innov_gw",       "Innovation Track",    "Unlock Innovation path (+5% KPS)", 5,  "tech_savvy",  "global_kps",       "",                0.05, "Innovation"),
+    SkillDef("research_synergy","Research Synergy",   "Research Centres +40% KP/s",      12,  "innov_gw",    "building_bonus",   "Research Centre", 0.40, "Innovation"),
+    SkillDef("late_learner",   "Late Bloomer",        "Innovation Hubs +50% KP/s",       25,  "innov_gw",    "building_bonus",   "Innovation Hub",  0.50, "Innovation"),
+    SkillDef("quantum_mind",   "Quantum Mindset",     "All KP/s × 1.25",                 50,  "innov_gw",    "global_kps_mult",  "",                1.25, "Innovation"),
 
-    # ── Prestige Mastery Path ─────────────────────────────────────────────────
-    SkillDef("prestige_gw",   "Prestige Mastery",    "Unlock Prestige path (+5% KPS)",  5,  "scholarship",  "global_kps",       "",                0.05, "Prestige"),
-    SkillDef("honor_scholar", "Honor Scholar",        "KPS += 25% × Honors held",       8,  "prestige_gw",  "honor_kps",        "",                0.25, "Prestige"),
-    SkillDef("endow_speciali","Endow. Specialist",    "KPS += 50% × Endowments held",   10, "prestige_gw",  "endow_kps",        "",                0.50, "Prestige"),
-    SkillDef("diploma_hoard", "Diploma Hoarder",      "Honors cost only 10 Diplomas",   8,  "prestige_gw",  "honor_rate",       "",                10.0, "Prestige"),
+    # ── Prestige Mastery Path — Reputation & diploma economy ──────────────────
+    # Tier 1→4 costs: 5, 12, 25, 50  (total 92 MP)
+    SkillDef("prestige_gw",   "Prestige Mastery",    "Unlock Prestige path (+5% KPS)",   5,  "scholarship",  "global_kps",       "",                0.05, "Prestige"),
+    SkillDef("honor_scholar", "Honor Scholar",        "KPS += 25% × Honors held",        12,  "prestige_gw",  "honor_kps",        "",                0.25, "Prestige"),
+    SkillDef("endow_speciali","Endow. Specialist",    "KPS += 50% × Endowments held",    25,  "prestige_gw",  "endow_kps",        "",                0.50, "Prestige"),
+    SkillDef("diploma_hoard", "Diploma Hoarder",      "Honors cost only 10 Diplomas",    50,  "prestige_gw",  "honor_rate",       "",                10.0, "Prestige"),
 
-    # ── Active Learning Path ──────────────────────────────────────────────────
-    SkillDef("active_gw",     "Active Learner",       "Unlock Active path (+3 click)",  2,  None,           "click_base",       "",                3.0,  "Active"),
-    SkillDef("rapid_clicker", "Rapid Clicker",        "+5 base click power",            4,  "active_gw",    "click_base",       "",                5.0,  "Active"),
-    SkillDef("focus_burst",   "Focus Burst",          "Offline cap +4 extra hours",     4,  "active_gw",    "offline_cap",      "",                4.0,  "Active"),
-    SkillDef("combo_master",  "Combo Master",         "Max combo increased by 5",       5,  "active_gw",    "combo_cap_bonus",  "",                5.0,  "Active"),
-    SkillDef("focus_pool",    "Focus Pool",           "+5 max Focus Points",            4,  "active_gw",    "focus_cap",        "",                5.0,  "Active"),
-    SkillDef("focus_charge",  "Quick Charge",         "FP regens 50% faster",           5,  "focus_pool",   "focus_regen",      "",                0.5,  "Active"),
+    # ── Active Learning Path — Agility, clicks & focus (open to all) ─────────
+    # Tier 1→6 costs: 3, 8, 8, 15, 8, 15  (total 57 MP — cheapest path)
+    SkillDef("active_gw",     "Active Learner",       "Unlock Active path (+3 click)",   3,  None,           "click_base",       "",                3.0,  "Active"),
+    SkillDef("rapid_clicker", "Rapid Clicker",        "+5 base click power",             8,  "active_gw",    "click_base",       "",                5.0,  "Active"),
+    SkillDef("focus_burst",   "Focus Burst",          "Offline cap +4 extra hours",      8,  "active_gw",    "offline_cap",      "",                4.0,  "Active"),
+    SkillDef("combo_master",  "Combo Master",         "Max combo increased by 5",        15, "active_gw",    "combo_cap_bonus",  "",                5.0,  "Active"),
+    SkillDef("focus_pool",    "Focus Pool",           "+5 max Focus Points",             8,  "active_gw",    "focus_cap",        "",                5.0,  "Active"),
+    SkillDef("focus_charge",  "Quick Charge",         "FP regens 50% faster",            15, "focus_pool",   "focus_regen",      "",                0.5,  "Active"),
 
-    # ── Mastery Path (very expensive, end-game) ───────────────────────────────
+    # ── Mastery Path — Transcendence, end-game only ───────────────────────────
     SkillDef("mastery_gw",    "Grand Scholar",        "Unlock Mastery path — All KP/s +20%",  15, "perfect_score","global_kps",      "",                0.20, "Mastery"),
     SkillDef("deep_focus",    "Deep Focus",           "Offline earnings cap +24 hours",        15, "focus_burst",  "offline_cap",     "",                24.0, "Mastery"),
     SkillDef("cosmic_click",  "Cosmic Click",         "Click power ×20",                       35, "mastery_gw",   "click_mult",      "",                20.0, "Mastery"),
@@ -174,6 +178,18 @@ SKILLS: list[SkillDef] = [
     SkillDef("time_warden",   "Time Warden",          "All KP/s ×5",                           40, "mult_stack",   "global_kps_mult", "",                5.0,  "Mastery"),
     SkillDef("omniscient",    "Omniscient",           "All KP/s ×10 — true mastery",           60, "time_warden",  "global_kps_mult", "",                10.0, "Mastery"),
 ]
+
+HERO_CREATION_COST = 50   # Diplomas sacrificed to create your hero
+
+# Maps skill path → hero stat name and flavour
+HERO_PATH_STATS = {
+    "Foundation":  ("resilience",    "Resilience"),
+    "Academic":    ("intelligence",  "Intelligence"),
+    "Innovation":  ("tech_power",    "Tech Power"),
+    "Prestige":    ("reputation",    "Reputation"),
+    "Active":      ("agility",       "Agility"),
+    "Mastery":     ("transcendence", "Transcendence"),
+}
 
 # ── Achievements ─────────────────────────────────────────────────────────────
 

@@ -106,15 +106,28 @@ PATH_ORDER = ["Foundation", "Academic", "Innovation", "Prestige", "Active", "Mas
 BUY_OPTS = [(1, "×1"), (2, "×2"), (5, "×5"), (10, "×10"), (100, "×100"), ("max", "Max")]
 
 TAB_HINTS = {
-    "Buildings":   "Buy buildings to generate KP per second.\nMore buildings = faster learning!",
-    "Upgrades":    "Upgrades multiply building output.\nBuy them as soon as you can afford them!",
-    "Curriculum":  "Spend Merit Points on permanent skills.\nMeet prerequisites to unlock new paths.",
+    "Buildings":   "Buy buildings to earn KP/s passively.\n"
+                   "Each new building requires you to SACRIFICE a number of the previous one.\n"
+                   "e.g. 1 Library costs 10 Classrooms — they are consumed on purchase.\n"
+                   "The red/green badge shows if you have enough to buy right now.",
+    "Upgrades":    "Upgrades multiply a building's KP/s output — buy them as soon as you can!\n"
+                   "Upgrades survive prestige resets and stack multiplicatively.",
+    "Curriculum":  "Spend Merit Points (MP) on permanent skills that survive every prestige.\n"
+                   "MP is earned from achievements. Choose your paths wisely — you cannot\n"
+                   "afford all 6 paths. Each path gets exponentially more expensive.",
     "Report Card": "Complete achievements to earn Merit Points.\nHigher grades give bigger rewards!",
-    "Campus":      "Watch your school grow in real time!\nBuildings appear as you purchase them.",
-    "Prestige":    "Graduate to earn Diplomas — they survive resets.\nEach diploma adds +2% global KPS forever!",
-    "Legacy":      "Convert Diplomas → Honors → Endowments → Alumni\nfor permanent KPS bonuses that never reset.",
-    "Worlds":      "Explore 8 unique zones — each with its own theme, buildings, and prestige system.\nZones unlock as you prestige and earn Alumni Points in earlier zones.",
-    "Settings":    "Name your school — it appears in the news feed!\nTrack your overall progress here.",
+    "Campus":      "Watch your school grow in real time!\n"
+                   "Buildings appear as you purchase them. The day/night cycle and seasons are visual only.",
+    "Prestige":    "Graduate to earn Diplomas — they survive ALL resets forever.\n"
+                   "Each diploma permanently adds to your global KPS multiplier.\n"
+                   "You need 2M KP to graduate. The more KP you have, the more Diplomas you earn.",
+    "Legacy":      "Convert Diplomas → Honors → Endowments → Alumni Points for stacking permanent bonuses.\n"
+                   "Each tier is more powerful but costs more of the tier below. Never resets.",
+    "Worlds":      "Explore 10 unique zones — each with its own buildings, prestige system, and mechanic.\n"
+                   "Zones unlock by prestiging or earning Alumni Points in earlier zones.\n"
+                   "Zone 10 (Hero World) lets you create a hero using your Curriculum investments.",
+    "Settings":    "Name your school — it appears in the news ticker!\n"
+                   "Fullscreen toggle, audio mute, stats, and the reset button are all here.",
 }
 
 
@@ -438,6 +451,13 @@ class App:
             self._tc(F_XS, qbtn_lbl, WHITE, qbtn)
             if g._quiz_cooldown <= 0:
                 self._buy_items.append((qbtn, None, "quiz_start"))
+            if qbtn.collidepoint(mx, my):
+                self.tooltip = ((mx, my), [
+                    "Quiz Me!",
+                    "Answer 3 knowledge questions correctly to earn a reward.",
+                    "Rewards: bonus KP, permanent +Diplomas/prestige, or a free prestige.",
+                    "Wrong answer = no reward. Cooldown applies after each attempt.",
+                ])
             _fy += 30
             if g._quiz_fail_msg:
                 self._tc(F_XS, g._quiz_fail_msg, (220, 80, 80),
@@ -460,13 +480,26 @@ class App:
             rem = g.focus_active["timer"]
             self._t(F_XS, f"  {ab_name} {rem:.0f}s", (130, 200, 255), 12, _fy)
             _fy += 14
+        _FOCUS_TIPS = {
+            "surge":  ["Study Surge  (2 FP)", "Triples your click power for 20 seconds.",
+                       "Great when you're about to click a lot."],
+            "burst":  ["KPS Burst  (3 FP)", "Doubles your KP/s for 30 seconds.",
+                       "Use before going idle for a short burst of passive income."],
+            "lucky":  ["Lucky Hour  (5 FP)", "Forces a rare random event to trigger immediately.",
+                       "Random events give bonus KP, boosts, or special effects."],
+            "recall": ["Recall  (4 FP)", "Instantly earns 10 minutes of offline KP.",
+                       "Use when you're short on KP and can't wait."],
+        }
         ab_w, ab_g = 74, 4
+        mx_f, my_f = pygame.mouse.get_pos()
         for i, ab in enumerate(FOCUS_ABILITIES):
             can = g.focus_points >= ab["cost"] and (g.focus_active is None or ab["duration"] == 0)
             abr = pygame.Rect(12 + i * (ab_w + ab_g), _fy, ab_w, 24)
             self._r((65, 124, 175) if can else (120, 120, 120), abr, radius=4)
             self._tc(F_XS, f"{ab['name']} {ab['cost']}⚡", WHITE, abr)
             self._buy_items.append((abr, ab["id"], "use_focus"))
+            if abr.collidepoint(mx_f, my_f):
+                self.tooltip = ((mx_f, my_f), _FOCUS_TIPS.get(ab["id"], [ab["name"]]))
         _fy += 28
 
         _fp_ui_bottom = _fy
@@ -818,19 +851,22 @@ class App:
                 fac = g.faculty_bonuses.get(b.name, 0.0)
                 fac_tag = f"  [+{fac*100:.0f}% faculty]" if fac > 0 else ""
                 self._t(F_SM, f"Producing: {fmt(kps_val)} KP/s{fac_tag}", (48, 126, 55), x+14, iy+52)
-            # Sacrifice requirement line
-            if sac and not g.sandbox_mode:
-                need = n_buy * sac[1]
-                sac_col = (48, 160, 55) if sac_have >= need else (195, 55, 55)
-                self._t(F_XS, f"⚡ Needs {need} {sac[0]} (have {sac_have})", sac_col, x+14, iy+64)
             btn = pygame.Rect(x + w - 168, iy + (self.ITEM_H-36)//2, 160, 36)
             self._r(GREEN if ok else GRAY, btn, radius=6)
             self._tc(F_SM, btn_label, WHITE, btn)
             self._buy_items.append((btn, b.name, "building"))
             if not ok:
                 pct = min(1.0, g.kp / max(1, total_cost))
-                pygame.draw.rect(self.screen, (175,168,155), (x+14, iy+self.ITEM_H-10, 220, 5), border_radius=2)
-                pygame.draw.rect(self.screen, (100,180,100), (x+14, iy+self.ITEM_H-10, int(220*pct), 5), border_radius=2)
+                pygame.draw.rect(self.screen, (175,168,155), (x+14, iy+self.ITEM_H-6, 220, 4), border_radius=2)
+                pygame.draw.rect(self.screen, (100,180,100), (x+14, iy+self.ITEM_H-6, int(220*pct), 4), border_radius=2)
+            # Sacrifice requirement badge — drawn last so it sits on top
+            if sac and not g.sandbox_mode:
+                need = n_buy * sac[1]
+                met = sac_have >= need
+                badge_col = (38, 120, 45) if met else (165, 38, 38)
+                badge_r = pygame.Rect(x+10, iy+56, 234, 16)
+                pygame.draw.rect(self.screen, badge_col, badge_r, border_radius=3)
+                self._t(F_XS, f"⚡ Needs {need} {sac[0]}  (have {sac_have})", WHITE, x+14, iy+58)
             if card.collidepoint(pygame.mouse.get_pos()) and cnt > 0:
                 upg_names = [u.name for u in UPGRADES if u.target == b.name and u.name in g.upgrades_purchased]
                 syn_parts = [
@@ -1700,6 +1736,56 @@ class App:
             self._r(GREEN, collect_btn, radius=5)
             self._tc(F_SM, "Collect!", WHITE, collect_btn)
             self._buy_items.append((collect_btn, zid, "zone_event"))
+
+        # ── Hero Creation / Hero Display (Zone 10 only) ──────────────────────
+        if zid == 10:
+            from data import HERO_CREATION_COST, HERO_PATH_STATS
+            hero_y = act_y + 68 + (42 if zg.pending_event else 0) + 8
+            g = self.game
+            if g.hero is None:
+                # Creation panel
+                can_h = g.diplomas >= HERO_CREATION_COST
+                hpanel = pygame.Rect(x, hero_y, w, 110)
+                self._r((48, 36, 80) if can_h else (60, 55, 70), hpanel, radius=8)
+                self._t(F_LG, "⚔  Create Your Hero", (220, 180, 255), x+10, hero_y+6)
+                self._t(F_SM,
+                        "Your curriculum choices shape the hero's stats.",
+                        (180, 160, 220), x+10, hero_y+30)
+                self._t(F_SM,
+                        f"Cost: {HERO_CREATION_COST} Diplomas (you have {g.diplomas})",
+                        (220, 200, 100) if can_h else (160, 140, 140),
+                        x+10, hero_y+50)
+                self._t(F_XS,
+                        "The hero will open the first Hero Academy in Zone 10.",
+                        (150, 140, 180), x+10, hero_y+70)
+                hbtn = pygame.Rect(x + w - 178, hero_y + 36, 170, 38)
+                self._r((100, 60, 180) if can_h else GRAY, hbtn, radius=6)
+                self._tc(F_MD, "Create Hero!", WHITE, hbtn)
+                if can_h:
+                    self._buy_items.append((hbtn, None, "create_hero"))
+            else:
+                # Hero display panel
+                hero = g.hero
+                hpanel = pygame.Rect(x, hero_y, w, 120)
+                self._r((30, 25, 58), hpanel, radius=8)
+                dom = hero.get("dominant_path", "Foundation")
+                dom_col = PATH_FG.get(dom, (200, 180, 255))
+                self._t(F_LG, f"⚔  {hero['name']}", (220, 200, 255), x+10, hero_y+6)
+                self._t(F_XS, f"Dominant Path: {dom}", dom_col, x+10, hero_y+28)
+                stats = hero.get("stats", {})
+                stat_labels = [(v[1], stats.get(v[0], 0))
+                               for v in HERO_PATH_STATS.values()]
+                col_w2 = w // 3
+                for si, (label, score) in enumerate(stat_labels):
+                    sx = x + (si % 3) * col_w2 + 6
+                    sy = hero_y + 46 + (si // 3) * 32
+                    self._t(F_XS, label, (160, 150, 200), sx, sy)
+                    bar_r = pygame.Rect(sx, sy + 14, col_w2 - 12, 6)
+                    pygame.draw.rect(self.screen, (60, 50, 80), bar_r, border_radius=3)
+                    pygame.draw.rect(self.screen, dom_col,
+                                     pygame.Rect(sx, sy+14, int((col_w2-12)*score/50), 6),
+                                     border_radius=3)
+                    self._t(F_XS, str(score), (200, 190, 255), sx + col_w2 - 22, sy)
 
         # Study Zone button
         study_y = h + y0 - 52
@@ -2868,6 +2954,11 @@ class App:
                             g.answer_quiz(obj)
                         elif kind == "quiz_reward":
                             g.claim_quiz_reward(obj)
+                        elif kind == "create_hero":
+                            if self.game.create_hero(world_manager=self.world):
+                                audio.play("skill")
+                            else:
+                                audio.play("error")
                         elif kind == "toggle_fullscreen":
                             self._fullscreen = not self._fullscreen
                             flags = pygame.SCALED

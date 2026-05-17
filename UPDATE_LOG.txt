@@ -1307,3 +1307,46 @@ campus.py — Sun & Moon in all zones except Zone 5:
   • Sun/moon tinted against each zone's sky colours
 
 ====================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 14 — SKILL REBALANCE, HERO CREATION, UX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+data.py — Skill tree rebalanced (exponential cost curve):
+  • Foundation skills: slight cost increase (2–25 MP), still cheap shared baseline
+  • Academic path:   5 → 12 → 25 → 50 → 100 MP  (total 192 MP)
+  • Innovation path: 5 → 12 → 25 → 50 MP         (total  92 MP)
+  • Prestige path:   5 → 12 → 25 → 50 MP          (total  92 MP)
+  • Active path:     3 → 8 → 8 → 15 → 8 → 15 MP  (total  57 MP, cheapest)
+  • Mastery path:    unchanged (245 MP, endgame)
+  • Goal: player can realistically fully invest in 2–3 paths max
+  • Added HERO_CREATION_COST = 50 and HERO_PATH_STATS mapping
+
+game.py — Hero Creation system (Zone 10 MVP):
+  • self.hero = None until created
+  • create_hero(world_manager): costs 50 Diplomas, computes 6 stats (0–50)
+    from proportion of MP spent per curriculum path
+  • Dominant path recorded; hero name defaults to "Hero of <school name>"
+  • On creation: grants 1 free Hero Academy in Zone 10
+  • Fires news line; auto-saves; persisted in save.json
+
+main.py — Hero UI (Zone 10 → Worlds → Overview):
+  • Pre-creation: dark panel showing cost, path influence info, "Create Hero!" button
+  • Post-creation: hero card with name, dominant path, 6 stat bars (0–50 each)
+  • "create_hero" buy-item action wired to game.create_hero(world_manager)
+
+main.py — Sacrifice badge fix:
+  • Badge now drawn LAST (on top of progress bar, no more overlap)
+  • Progress bar moved to very bottom edge of card (iy+74, 4px)
+  • Badge sits at iy+56 with white text on coloured background
+
+main.py — Tooltip / onboarding improvements:
+  • Buildings tab: explains sacrifice system for new players
+  • Prestige tab: explains diploma formula and why more KP = more diplomas
+  • Curriculum tab: explains exponential cost and path choice consequence
+  • Worlds tab: mentions hero creation in Zone 10
+  • Settings tab: fuller description
+  • Quiz Me button: hover tooltip explains the 3-question reward system
+  • All 4 Focus abilities: hover tooltips (Study Surge, KPS Burst, Lucky Hour, Recall)
+
+====================================================
