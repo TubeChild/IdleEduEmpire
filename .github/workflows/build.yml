@@ -51,12 +51,10 @@ jobs:
 
       - name: Get version
         id: ver
-        shell: python
+        shell: pwsh
         run: |
-          import re, os
-          m = re.search(r'VERSION\s*=\s*"(.+?)"', open('main.py').read())
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f'version={m.group(1)}\n')
+          $v = (Select-String -Path main.py -Pattern 'VERSION\s*=\s*"(.+?)"').Matches[0].Groups[1].Value
+          echo "version=$v" >> $env:GITHUB_OUTPUT
 
       - name: Build
         run: pyinstaller IdleEduEmpire.spec --clean -y
