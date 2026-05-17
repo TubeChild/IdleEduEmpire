@@ -1,0 +1,71 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # lets you trigger a build manually from the GitHub UI
+
+jobs:
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install pygame pyinstaller
+
+      - name: Get version
+        id: ver
+        run: |
+          VERSION=$(python -c "import re; m=re.search(r'VERSION\s*=\s*\"(.+?)\"', open('main.py').read()); print(m.group(1))")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build
+        run: pyinstaller IdleEduEmpire.spec --clean -y
+
+      - name: Zip
+        run: cd dist && zip -r ../IdleEduEmpire-v${{ steps.ver.outputs.version }}-linux.zip IdleEduEmpire/
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: IdleEduEmpire-linux
+          path: IdleEduEmpire-v${{ steps.ver.outputs.version }}-linux.zip
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install pygame pyinstaller
+
+      - name: Get version
+        id: ver
+        shell: python
+        run: |
+          import re, os
+          m = re.search(r'VERSION\s*=\s*"(.+?)"', open('main.py').read())
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'version={m.group(1)}\n')
+
+      - name: Build
+        run: pyinstaller IdleEduEmpire.spec --clean -y
+
+      - name: Zip
+        run: Compress-Archive -Path dist\IdleEduEmpire -DestinationPath IdleEduEmpire-v${{ steps.ver.outputs.version }}-windows.zip
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: IdleEduEmpire-windows
+          path: IdleEduEmpire-v${{ steps.ver.outputs.version }}-windows.zip
