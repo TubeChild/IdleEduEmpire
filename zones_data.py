@@ -1,0 +1,576 @@
+"""Zone definitions for all 10 worlds (zones 2-10)."""
+
+# Each zone building: name, desc, base_cost, base_kps, unlock_at (all_time_kp)
+# Scale mirrors Zone 1 so cross-zone balancing is consistent.
+
+def _zone_buildings(names_descs: list, costs: list, kps_vals: list, unlocks: list) -> list:
+    return [
+        {"name": n, "desc": d, "base_cost": c, "base_kps": k, "unlock_at": u}
+        for (n, d), c, k, u in zip(names_descs, costs, kps_vals, unlocks)
+    ]
+
+
+_COSTS = [12, 95, 620, 4_000, 30_000, 260_000, 2_500_000,
+          28_000_000, 360_000_000, 5_000_000_000]
+_KPS   = [0.1, 0.5, 1.8, 5.5, 16.0, 50.0, 165.0, 550.0, 1800.0, 6000.0]
+_UNLK  = [0, 5, 60, 600, 6_000, 60_000, 600_000, 6_000_000, 60_000_000, 600_000_000]
+
+
+def _upg(uid, name, desc, cost, target, mult=2.0):
+    return {"id": uid, "name": name, "desc": desc, "cost": cost, "target": target, "mult": mult}
+
+
+ZONE_DEFS: list[dict] = [
+
+    # ── Zone 2: The Ruins ─────────────────────────────────────────────────────
+    {
+        "id": 2,
+        "name": "The Ruins",
+        "desc": "Restore an abandoned school to its former glory.",
+        "theme_color": (180, 150, 80),
+        "icon": "🏚",
+        "unlock": {"zone": 1, "type": "prestige", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Cracked Classroom",     "Crumbling walls, hungry minds"),
+                ("Dusty Library",         "Forgotten books still hold wisdom"),
+                ("Flooded Lab",           "Science persists through the damp"),
+                ("Rusted Workshop",       "Salvaged tools, salvaged minds"),
+                ("Overgrown Courtyard",   "Nature reclaimed — students push back"),
+                ("Crumbling Clock Tower", "Still ticking, still teaching time"),
+                ("Underground Vault",     "Knowledge preserved beneath rubble"),
+                ("Condemned Theatre",     "Drama lives on in the ruins"),
+                ("Restoration Hall",      "Where old meets new — history reborn"),
+                ("Grand Foundation",      "The cornerstone of civilisation rebuilt"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("r_class1",  "Patch the Walls",       "Cracked Classrooms × 2 KP/s",    100,           "Cracked Classroom"),
+            _upg("r_class2",  "Emergency Repairs",     "Cracked Classrooms × 2 KP/s",    800,           "Cracked Classroom"),
+            _upg("r_lib1",    "Dust the Shelves",      "Dusty Libraries × 2 KP/s",       1_000,         "Dusty Library"),
+            _upg("r_lib2",    "Restoration Grant",     "Dusty Libraries × 2 KP/s",       6_000,         "Dusty Library"),
+            _upg("r_lab1",    "Pump the Water",        "Flooded Labs × 2 KP/s",          14_000,        "Flooded Lab"),
+            _upg("r_lab2",    "Dry It Out",            "Flooded Labs × 2 KP/s",          130_000,       "Flooded Lab"),
+            _upg("r_work1",   "De-rust the Tools",     "Rusted Workshops × 2 KP/s",      140_000,       "Rusted Workshop"),
+            _upg("r_court1",  "Clear the Vines",       "Overgrown Courtyards × 2 KP/s",  1_500_000,     "Overgrown Courtyard"),
+            _upg("r_tower1",  "Restore the Chimes",    "Crumbling Towers × 2 KP/s",      15_000_000,    "Crumbling Clock Tower"),
+            _upg("r_vault1",  "Reinforce the Beams",   "Underground Vaults × 2 KP/s",    140_000_000,   "Underground Vault"),
+            _upg("r_all1",    "Heritage Status",       "All ruins buildings × 1.5 KP/s", 2_600_000,     "all", 1.5),
+            _upg("r_all2",    "Reconstruction Fund",   "All ruins buildings × 2 KP/s",   260_000_000,   "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Restoration Certs",  "abbr": "RC", "color": (180, 150, 70),  "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Cert",   "global_bonus": 0.02},
+            {"name": "Heritage Bonds",     "abbr": "HB", "color": (200, 160, 50),  "from_l1": 15,
+             "desc": "+4% KPS per Bond",   "global_bonus": 0.04},
+            {"name": "Endowment Trust",    "abbr": "ET", "color": (100, 200, 150), "from_l2": 5,
+             "desc": "+12% KPS per Trust", "global_bonus": 0.12},
+            {"name": "Legacy Grant",       "abbr": "LG", "color": (150, 80, 210),  "from_l3": 3,
+             "desc": "+30% KPS per Grant", "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Decay",
+            "passive_desc": "Buildings deteriorate over time, reducing output.",
+            "active_name":  "Restoration Rush",
+            "active_desc":  "Spend 1 Restoration Cert to reset decay to 0.",
+            "active_cost_layer": 1,
+            "active_cost": 1,
+            "fill_rate": 1.0 / 300.0,   # 5 min to full decay
+            "inverted": True,            # high value = bad (decay)
+            "max_effect": 0.50,          # −50% KPS at full decay
+            "active_effect": "empty",    # sets mechanic_value to 0
+        },
+    },
+
+    # ── Zone 3: The Future ────────────────────────────────────────────────────
+    {
+        "id": 3,
+        "name": "The Future",
+        "desc": "Run a hyper-advanced school on a space station in 3000 AD.",
+        "theme_color": (60, 160, 220),
+        "icon": "🚀",
+        "unlock": {"zone": 1, "type": "alumni", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Holo-Classroom",      "Holographic lessons beam straight to the brain"),
+                ("Neural Library",      "Direct synaptic uploads of ancient texts"),
+                ("Quantum Lab",         "Experiments that exist in superposition"),
+                ("AI Tutor Pod",        "Personalised AI mentor for every student"),
+                ("Gravity Gymnasium",   "Zero-G fitness and spatial reasoning"),
+                ("Synth Art Studio",    "Generative art and creative algorithms"),
+                ("Data University",     "Petabyte-scale knowledge clusters"),
+                ("Fusion Research Core","Clean-energy powered discovery engines"),
+                ("Dyson Academy",       "A school that wraps the sun"),
+                ("Singularity Hub",     "Knowledge beyond human comprehension"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("f_holo1",  "Better Projectors",    "Holo-Classrooms × 2 KP/s",    100,           "Holo-Classroom"),
+            _upg("f_holo2",  "Neural Sync",          "Holo-Classrooms × 2 KP/s",    800,           "Holo-Classroom"),
+            _upg("f_lib1",   "Faster Upload",        "Neural Libraries × 2 KP/s",   1_000,         "Neural Library"),
+            _upg("f_lib2",   "Quantum Encoding",     "Neural Libraries × 2 KP/s",   6_000,         "Neural Library"),
+            _upg("f_qlab1",  "Entanglement Engine",  "Quantum Labs × 2 KP/s",       14_000,        "Quantum Lab"),
+            _upg("f_qlab2",  "Wave Collapse Unit",   "Quantum Labs × 2 KP/s",       130_000,       "Quantum Lab"),
+            _upg("f_ai1",    "GPT-∞ Model",          "AI Tutor Pods × 2 KP/s",      140_000,       "AI Tutor Pod"),
+            _upg("f_grav1",  "Anti-Grav Boosters",   "Gravity Gymnasia × 2 KP/s",   1_500_000,     "Gravity Gymnasium"),
+            _upg("f_art1",   "Creative Matrix",      "Synth Studios × 2 KP/s",      15_000_000,    "Synth Art Studio"),
+            _upg("f_data1",  "Exabyte Expansion",    "Data Universities × 2 KP/s",  140_000_000,   "Data University"),
+            _upg("f_all1",   "Tech Singularity",     "All future buildings × 1.5",  2_600_000,     "all", 1.5),
+            _upg("f_all2",   "Post-Scarcity Education","All future buildings × 2",  260_000_000,   "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Patents",             "abbr": "PT", "color": (60, 160, 220),  "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Patent",   "global_bonus": 0.02},
+            {"name": "Research Licenses",   "abbr": "RL", "color": (40, 200, 180),  "from_l1": 15,
+             "desc": "+4% KPS per License",  "global_bonus": 0.04},
+            {"name": "Quantum Grants",      "abbr": "QG", "color": (80, 240, 80),   "from_l2": 5,
+             "desc": "+12% KPS per Grant",   "global_bonus": 0.12},
+            {"name": "Singularity Tokens",  "abbr": "ST", "color": (200, 80, 255),  "from_l3": 3,
+             "desc": "+30% KPS per Token",   "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Automation",
+            "passive_desc": "Each prestige permanently boosts automation. Current bonus visible below.",
+            "active_name":  "Overclock",
+            "active_desc":  "Double all KPS for 30 seconds. Cooldown: 3 minutes.",
+            "active_cost_layer": 0,     # free (cooldown gated)
+            "active_cost": 0,
+            "fill_rate": 1.0 / 180.0,  # 3 min to fill
+            "inverted": False,
+            "max_effect": 0.50,
+            "active_effect": "kps_boost",  # temp 2× KPS
+        },
+    },
+
+    # ── Zone 4: Ancient Academy ───────────────────────────────────────────────
+    {
+        "id": 4,
+        "name": "Ancient Academy",
+        "desc": "Teach philosophy and rhetoric in the golden age of Greece.",
+        "theme_color": (210, 180, 80),
+        "icon": "🏛",
+        "unlock": {"zone": 2, "type": "prestige", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Stone Classroom",       "Philosophy scratched into stone tablets"),
+                ("Scroll Repository",     "Thousands of papyrus scrolls stacked high"),
+                ("The Agora",             "Open-air debates that shape the mind"),
+                ("Alchemist Workshop",    "Where matter and meaning are transmuted"),
+                ("Olympic Garden",        "Mens sana in corpore sano"),
+                ("Parthenon Annex",       "Learning in the shadow of the gods"),
+                ("Great Library Wing",    "A wing of the Library of Alexandria"),
+                ("Amphitheatre",          "Wisdom performed for thousands"),
+                ("School of Athens",      "Plato, Aristotle, and beyond"),
+                ("Temple of Knowledge",   "Where knowledge becomes divine"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("a_class1", "Stone Chisel",          "Stone Classrooms × 2 KP/s",   100,           "Stone Classroom"),
+            _upg("a_class2", "Wax Tablets",           "Stone Classrooms × 2 KP/s",   800,           "Stone Classroom"),
+            _upg("a_scr1",   "Papyrus Supply",        "Scroll Repositories × 2 KP/s",1_000,         "Scroll Repository"),
+            _upg("a_scr2",   "Illuminated Scrolls",   "Scroll Repositories × 2 KP/s",6_000,         "Scroll Repository"),
+            _upg("a_ag1",    "Sophist Debates",       "The Agoras × 2 KP/s",         14_000,        "The Agora"),
+            _upg("a_ag2",    "Socratic Method",       "The Agoras × 2 KP/s",         130_000,       "The Agora"),
+            _upg("a_alch1",  "Philosopher's Stone",   "Alch. Workshops × 2 KP/s",    140_000,       "Alchemist Workshop"),
+            _upg("a_olym1",  "Olympic Sponsorship",   "Olympic Gardens × 2 KP/s",    1_500_000,     "Olympic Garden"),
+            _upg("a_part1",  "Temple Endowment",      "Parthenon Annexes × 2 KP/s",  15_000_000,    "Parthenon Annex"),
+            _upg("a_lib1",   "Ptolemaic Funding",     "Great Library Wings × 2 KP/s",140_000_000,   "Great Library Wing"),
+            _upg("a_all1",   "Classical Revival",     "All ancient buildings × 1.5", 2_600_000,     "all", 1.5),
+            _upg("a_all2",   "Golden Age",            "All ancient buildings × 2",   260_000_000,   "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Scrolls",             "abbr": "SC", "color": (210, 180, 80),  "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Scroll",   "global_bonus": 0.02},
+            {"name": "Philosophical Works", "abbr": "PW", "color": (200, 150, 50),  "from_l1": 15,
+             "desc": "+4% KPS per Work",     "global_bonus": 0.04},
+            {"name": "Great Libraries",     "abbr": "GL", "color": (160, 200, 80),  "from_l2": 5,
+             "desc": "+12% KPS per Library", "global_bonus": 0.12},
+            {"name": "Eternal Wisdom",      "abbr": "EW", "color": (255, 215, 0),   "from_l3": 3,
+             "desc": "+30% KPS per Wisdom", "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Discourse",
+            "passive_desc": "Number of distinct building types owned boosts all KPS.",
+            "active_name":  "Great Debate",
+            "active_desc":  "Instantly earn 60 seconds of KPS.",
+            "active_cost_layer": 0,
+            "active_cost": 0,
+            "fill_rate": 1.0 / 120.0,
+            "inverted": False,
+            "max_effect": 0.60,
+            "active_effect": "kp_burst",  # instant 60s KPS
+        },
+    },
+
+    # ── Zone 5: Moon Colony ───────────────────────────────────────────────────
+    {
+        "id": 5,
+        "name": "Moon Colony",
+        "desc": "Build the first school on the Moon — knowledge under low gravity.",
+        "theme_color": (140, 160, 200),
+        "icon": "🌙",
+        "unlock": {"zone": 3, "type": "prestige", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Habitat Classroom",    "Pressurised pods filled with eager minds"),
+                ("Digital Archive",      "The sum of human knowledge, backed up to the Moon"),
+                ("Vacuum Lab",           "Science in the ultimate clean environment"),
+                ("Regolith Workshop",    "Crafting new tools from lunar soil"),
+                ("Lunar Garden",         "Hydroponic learning about ecosystems"),
+                ("Observation Dome",     "Stargazing that makes every lesson cosmic"),
+                ("Deep Crater Station",  "Research far below the lunar surface"),
+                ("Lunar University",     "Full degree programmes under a black sky"),
+                ("Orbital Campus",       "Classrooms in low lunar orbit"),
+                ("Moon Knowledge Hub",   "The brightest beacon in the solar system"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("m_hab1",   "O2 Scrubbers",         "Habitat Classrooms × 2 KP/s",  100,          "Habitat Classroom"),
+            _upg("m_hab2",   "VR Field Trips",        "Habitat Classrooms × 2 KP/s",  800,          "Habitat Classroom"),
+            _upg("m_arch1",  "Quantum Backup",        "Digital Archives × 2 KP/s",    1_000,        "Digital Archive"),
+            _upg("m_arch2",  "Laser Uplink",          "Digital Archives × 2 KP/s",    6_000,        "Digital Archive"),
+            _upg("m_vac1",   "Vacuum Seals",          "Vacuum Labs × 2 KP/s",         14_000,       "Vacuum Lab"),
+            _upg("m_vac2",   "Cryogenic Storage",     "Vacuum Labs × 2 KP/s",         130_000,      "Vacuum Lab"),
+            _upg("m_reg1",   "3D Printers",           "Regolith Workshops × 2 KP/s",  140_000,      "Regolith Workshop"),
+            _upg("m_gard1",  "Grow Lights",           "Lunar Gardens × 2 KP/s",       1_500_000,    "Lunar Garden"),
+            _upg("m_dome1",  "Telescope Array",       "Observation Domes × 2 KP/s",   15_000_000,   "Observation Dome"),
+            _upg("m_crat1",  "Deep Drill",            "Deep Crater Stations × 2 KP/s",140_000_000,  "Deep Crater Station"),
+            _upg("m_all1",   "Lunar Charter",         "All moon buildings × 1.5",     2_600_000,    "all", 1.5),
+            _upg("m_all2",   "Colony Independence",   "All moon buildings × 2",       260_000_000,  "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Moon Rocks",       "abbr": "MR", "color": (140, 160, 200), "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Rock",  "global_bonus": 0.02},
+            {"name": "Lunar Licenses",   "abbr": "LL", "color": (100, 180, 220), "from_l1": 15,
+             "desc": "+4% KPS per Lic.",  "global_bonus": 0.04},
+            {"name": "Orbital Grants",   "abbr": "OG", "color": (60, 200, 200),  "from_l2": 5,
+             "desc": "+12% KPS per Grant","global_bonus": 0.12},
+            {"name": "Cosmic Degrees",   "abbr": "CD", "color": (200, 220, 255), "from_l3": 3,
+             "desc": "+30% KPS per Deg.", "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Orbit Bonus",
+            "passive_desc": "Total building count boosts KPS — more buildings, stronger orbital network.",
+            "active_name":  "EVA Launch",
+            "active_desc":  "Spend 1 Moon Rock to earn 5 minutes of KPS instantly.",
+            "active_cost_layer": 1,
+            "active_cost": 1,
+            "fill_rate": 1.0 / 180.0,
+            "inverted": False,
+            "max_effect": 0.60,
+            "active_effect": "kp_burst_5m",
+        },
+    },
+
+    # ── Zone 6: Magical Realm ─────────────────────────────────────────────────
+    {
+        "id": 6,
+        "name": "Magical Realm",
+        "desc": "Run a school of sorcery where mana powers learning.",
+        "theme_color": (160, 80, 220),
+        "icon": "✨",
+        "unlock": {"zone": 3, "type": "alumni", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Enchanted Classroom",  "Spells replace textbooks"),
+                ("Arcane Library",       "Grimoires that read themselves"),
+                ("Transmutation Lab",    "Lead → gold → knowledge"),
+                ("Potion Workshop",      "Brew intelligence, courage, and curiosity"),
+                ("Faerie Garden",        "Nature spirits teaching botany"),
+                ("Crystal Tower",        "Scrying the future to improve the present"),
+                ("Wizard Academy",       "Advanced degrees in arcane arts"),
+                ("Grand Grimoire Hall",  "The repository of all spells ever cast"),
+                ("Archmage Sanctum",     "Where masters of the art teach masters"),
+                ("Ethereal Nexus",       "Knowledge transcending physical form"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("mg_class1","Levitation Desks",      "Enchanted Classrooms × 2",    100,          "Enchanted Classroom"),
+            _upg("mg_class2","Speaking Portraits",    "Enchanted Classrooms × 2",    800,          "Enchanted Classroom"),
+            _upg("mg_lib1",  "Self-Updating Tomes",   "Arcane Libraries × 2",        1_000,        "Arcane Library"),
+            _upg("mg_lib2",  "Endless Shelves",       "Arcane Libraries × 2",        6_000,        "Arcane Library"),
+            _upg("mg_lab1",  "Dragon's Breath Forge", "Transmutation Labs × 2",      14_000,       "Transmutation Lab"),
+            _upg("mg_lab2",  "Philosopher's Crucible","Transmutation Labs × 2",      130_000,      "Transmutation Lab"),
+            _upg("mg_pot1",  "Master Brewer",         "Potion Workshops × 2",        140_000,      "Potion Workshop"),
+            _upg("mg_fae1",  "Dryad Pact",            "Faerie Gardens × 2",          1_500_000,    "Faerie Garden"),
+            _upg("mg_crys1", "Seeing Stone",          "Crystal Towers × 2",          15_000_000,   "Crystal Tower"),
+            _upg("mg_wiz1",  "Grand Sorcery",         "Wizard Academies × 2",        140_000_000,  "Wizard Academy"),
+            _upg("mg_all1",  "Mana Ley Lines",        "All magic buildings × 1.5",   2_600_000,    "all", 1.5),
+            _upg("mg_all2",  "Arcane Convergence",    "All magic buildings × 2",     260_000_000,  "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Spell Tomes",      "abbr": "SP", "color": (160, 80, 220),  "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Tome",  "global_bonus": 0.02},
+            {"name": "Grimoires",        "abbr": "GR", "color": (120, 60, 200),  "from_l1": 15,
+             "desc": "+4% KPS per Grim.", "global_bonus": 0.04},
+            {"name": "Arcane Scrolls",   "abbr": "AS", "color": (200, 120, 240), "from_l2": 5,
+             "desc": "+12% KPS per Scr.", "global_bonus": 0.12},
+            {"name": "Grand Grimoire",   "abbr": "GG", "color": (255, 180, 50),  "from_l3": 3,
+             "desc": "+30% KPS per GG",  "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Mana Pool",
+            "passive_desc": "Mana accumulates over time. Full mana adds +50% KPS.",
+            "active_name":  "Cast Spell",
+            "active_desc":  "Spend all mana to instantly earn 5 min of KPS.",
+            "active_cost_layer": 0,   # costs mana (mechanic_value), not currency
+            "active_cost": 0,
+            "fill_rate": 1.0 / 120.0,
+            "inverted": False,
+            "max_effect": 0.50,
+            "active_effect": "spend_mana_burst",  # drain mechanic_value, burst KP
+        },
+    },
+
+    # ── Zone 7: Prehistoric ───────────────────────────────────────────────────
+    {
+        "id": 7,
+        "name": "Prehistoric",
+        "desc": "Spark the first flame of learning in the age of mammoths.",
+        "theme_color": (180, 120, 60),
+        "icon": "🦕",
+        "unlock": {"zone": 2, "type": "alumni", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Savanna Clearing",     "Open-air lessons under a prehistoric sky"),
+                ("Cave Drawings",        "The first art, the first curriculum"),
+                ("Fire Circle",          "Knowledge passed around the flame"),
+                ("Stone Workshop",       "Flint-knapping and tool-making 101"),
+                ("Hunting Grounds",      "Field trips that feed the village"),
+                ("Tribal Council",       "Elders share hard-won wisdom"),
+                ("Ancient Monument",     "Megaliths aligned to teach the cosmos"),
+                ("Shaman Temple",        "Spiritual knowledge guides the tribe"),
+                ("Ancestral Grounds",    "Sacred sites where ancestors teach"),
+                ("Dawn of Wisdom",       "The first true school — the world changes"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("p_sav1",   "Clear the Brush",       "Savanna Clearings × 2",       100,          "Savanna Clearing"),
+            _upg("p_sav2",   "Shade Canopy",           "Savanna Clearings × 2",       800,          "Savanna Clearing"),
+            _upg("p_cave1",  "Better Pigments",        "Cave Drawings × 2",           1_000,        "Cave Drawings"),
+            _upg("p_cave2",  "Stone Stylus",           "Cave Drawings × 2",           6_000,        "Cave Drawings"),
+            _upg("p_fire1",  "Dry Wood",               "Fire Circles × 2",            14_000,       "Fire Circle"),
+            _upg("p_fire2",  "Clay Pots",              "Fire Circles × 2",            130_000,      "Fire Circle"),
+            _upg("p_stone1", "Obsidian Edge",          "Stone Workshops × 2",         140_000,      "Stone Workshop"),
+            _upg("p_hunt1",  "Tracking Skills",        "Hunting Grounds × 2",         1_500_000,    "Hunting Grounds"),
+            _upg("p_tribe1", "Elder's Blessing",       "Tribal Councils × 2",         15_000_000,   "Tribal Council"),
+            _upg("p_mon1",   "Stellar Alignment",      "Ancient Monuments × 2",       140_000_000,  "Ancient Monument"),
+            _upg("p_all1",   "Oral Tradition",         "All prehistoric buildings × 1.5",2_600_000, "all", 1.5),
+            _upg("p_all2",   "Cultural Memory",        "All prehistoric buildings × 2",260_000_000, "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Cave Paintings",   "abbr": "CP", "color": (180, 120, 60),  "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Paint.","global_bonus": 0.02},
+            {"name": "Stone Tablets",    "abbr": "ST", "color": (160, 140, 100), "from_l1": 15,
+             "desc": "+4% KPS per Tablet","global_bonus": 0.04},
+            {"name": "Tribal Knowledge", "abbr": "TK", "color": (100, 160, 80),  "from_l2": 5,
+             "desc": "+12% KPS per TK",  "global_bonus": 0.12},
+            {"name": "Ancestral Wisdom", "abbr": "AW", "color": (220, 180, 80),  "from_l3": 3,
+             "desc": "+30% KPS per AW",  "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Discovery",
+            "passive_desc": "Each new building type you first buy gives a permanent +3% KPS bonus.",
+            "active_name":  "Great Hunt",
+            "active_desc":  "Earn 10 minutes of KPS instantly. Cooldown: 2 minutes.",
+            "active_cost_layer": 0,
+            "active_cost": 0,
+            "fill_rate": 1.0 / 60.0,   # fills in 1 min
+            "inverted": False,
+            "max_effect": 0.30,         # up to +30% from discovery
+            "active_effect": "kp_burst_10m",
+        },
+    },
+
+    # ── Zone 8: The Heavens ───────────────────────────────────────────────────
+    {
+        "id": 8,
+        "name": "The Heavens",
+        "desc": "A school in paradise — angelic teachers, infinite patience.",
+        "theme_color": (255, 230, 100),
+        "icon": "☀",
+        "unlock": {"zone": 4, "type": "prestige", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Cloud Classroom",      "Lessons drift between sunbeams"),
+                ("Celestial Archive",    "Every thought ever thunk, preserved forever"),
+                ("Star Observatory",     "Study the heavens from within the heavens"),
+                ("Angel Workshop",       "Crafting instruments of enlightenment"),
+                ("Garden of Eden",       "Botanical perfection teaches natural law"),
+                ("Angelic Academy",      "Seraphim as faculty — impeccable standards"),
+                ("Heavenly Halls",       "Architecture that mirrors mathematical truth"),
+                ("Divine University",   "Degrees granted by the cosmos itself"),
+                ("Seraphim Institute",   "Ordered knowledge in nine-fold hierarchy"),
+                ("Throne of Omniscience","All that is knowable, known"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("h_cloud1", "Gold-Lining",          "Cloud Classrooms × 2",         100,          "Cloud Classroom"),
+            _upg("h_cloud2", "Sunbeam Channels",     "Cloud Classrooms × 2",         800,          "Cloud Classroom"),
+            _upg("h_arch1",  "Akashic Access",       "Celestial Archives × 2",       1_000,        "Celestial Archive"),
+            _upg("h_arch2",  "Memory of God",        "Celestial Archives × 2",       6_000,        "Celestial Archive"),
+            _upg("h_obs1",   "Astrolabe Network",    "Star Observatories × 2",       14_000,       "Star Observatory"),
+            _upg("h_obs2",   "Constellation Maps",   "Star Observatories × 2",       130_000,      "Star Observatory"),
+            _upg("h_ang1",   "Blessed Tools",        "Angel Workshops × 2",          140_000,      "Angel Workshop"),
+            _upg("h_gard1",  "Eternal Bloom",        "Gardens of Eden × 2",          1_500_000,    "Garden of Eden"),
+            _upg("h_acad1",  "Choir of Scholars",    "Angelic Academies × 2",        15_000_000,   "Angelic Academy"),
+            _upg("h_hall1",  "Sacred Geometry",      "Heavenly Halls × 2",           140_000_000,  "Heavenly Halls"),
+            _upg("h_all1",   "Divine Blessing",      "All heavenly buildings × 1.5", 2_600_000,    "all", 1.5),
+            _upg("h_all2",   "Apotheosis",           "All heavenly buildings × 2",   260_000_000,  "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Halos",            "abbr": "HA", "color": (255, 230, 100), "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Halo", "global_bonus": 0.02},
+            {"name": "Divine Decrees",   "abbr": "DD", "color": (240, 200, 60),  "from_l1": 15,
+             "desc": "+4% KPS per Decree","global_bonus": 0.04},
+            {"name": "Celestial Grants", "abbr": "CG", "color": (200, 240, 120), "from_l2": 5,
+             "desc": "+12% KPS per Grant","global_bonus": 0.12},
+            {"name": "Eternal Blessings","abbr": "EB", "color": (255, 255, 200), "from_l3": 3,
+             "desc": "+30% KPS per Bless.","global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Divine Grace",
+            "passive_desc": "Each prestige multiplies divine grace — grows exponentially.",
+            "active_name":  "Prayer",
+            "active_desc":  "Invoke a miracle: 75% chance of ×3 KPS for 20s, 25% chance of +1 Halo.",
+            "active_cost_layer": 0,
+            "active_cost": 0,
+            "fill_rate": 1.0 / 90.0,
+            "inverted": False,
+            "max_effect": 0.80,
+            "active_effect": "rng_miracle",
+        },
+    },
+
+    # ── Zone 9: The Underworld ────────────────────────────────────────────────
+    {
+        "id": 9,
+        "name": "The Underworld",
+        "desc": "Run a school in the depths of the abyss. Power has a price.",
+        "theme_color": (180, 40, 40),
+        "icon": "🔥",
+        "unlock": {"zone": 4, "type": "alumni", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Shadow Classroom",     "Lessons in the dark breed sharp minds"),
+                ("Cursed Library",       "Forbidden texts unlock forbidden power"),
+                ("Brimstone Lab",        "Experiments that defy natural law"),
+                ("Demon Workshop",       "Forged in hellfire — indestructible tools"),
+                ("Bone Garden",          "Where the dead teach the living"),
+                ("Hellfire Academy",     "Advanced studies in infernal arts"),
+                ("Infernal University",  "Degrees in chaos, entropy, and damnation"),
+                ("Leviathan Hall",       "Where the oldest evil teaches wisdom"),
+                ("Dark Citadel",         "The fortress of forbidden knowledge"),
+                ("Void of Knowledge",    "What lies beyond the end of learning?"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("u_shad1",  "Shadowmeld",            "Shadow Classrooms × 2",        100,          "Shadow Classroom"),
+            _upg("u_shad2",  "Dark Tuition",          "Shadow Classrooms × 2",        800,          "Shadow Classroom"),
+            _upg("u_curs1",  "Cursed Ink",            "Cursed Libraries × 2",         1_000,        "Cursed Library"),
+            _upg("u_curs2",  "Infernal Index",        "Cursed Libraries × 2",         6_000,        "Cursed Library"),
+            _upg("u_brim1",  "Sulfur Catalyst",       "Brimstone Labs × 2",           14_000,       "Brimstone Lab"),
+            _upg("u_brim2",  "Hellstone Core",        "Brimstone Labs × 2",           130_000,      "Brimstone Lab"),
+            _upg("u_dem1",   "Dark Pact Tools",       "Demon Workshops × 2",          140_000,      "Demon Workshop"),
+            _upg("u_bone1",  "Necromantic Lessons",   "Bone Gardens × 2",             1_500_000,    "Bone Garden"),
+            _upg("u_hell1",  "Infernal Charter",      "Hellfire Academies × 2",       15_000_000,   "Hellfire Academy"),
+            _upg("u_inf1",   "Damnation Curriculum",  "Infernal Universities × 2",    140_000_000,  "Infernal University"),
+            _upg("u_all1",   "Demonic Syndicate",     "All dark buildings × 1.5",     2_600_000,    "all", 1.5),
+            _upg("u_all2",   "Lord of Knowledge",     "All dark buildings × 2",       260_000_000,  "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Soul Marks",         "abbr": "SM", "color": (180, 40, 40),  "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Mark",   "global_bonus": 0.02},
+            {"name": "Infernal Contracts", "abbr": "IC", "color": (220, 80, 20),  "from_l1": 15,
+             "desc": "+4% KPS per Cont.",  "global_bonus": 0.04},
+            {"name": "Brimstone Endow.",   "abbr": "BE", "color": (200, 120, 20), "from_l2": 5,
+             "desc": "+12% KPS per Endow.","global_bonus": 0.12},
+            {"name": "Dark Apotheosis",    "abbr": "DA", "color": (255, 60, 200), "from_l3": 3,
+             "desc": "+30% KPS per Dark",  "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Sin Meter",
+            "passive_desc": "High sin = high KPS. But sin brings periodic punishment (−50% KPS, 15s).",
+            "active_name":  "Dark Pact",
+            "active_desc":  "Spend 1 Soul Mark to add 25 sin and gain ×2 KPS for 30 seconds.",
+            "active_cost_layer": 1,
+            "active_cost": 1,
+            "fill_rate": 1.0 / 60.0,    # fills in 1 min
+            "inverted": False,
+            "max_effect": 1.00,          # up to +100% KPS (but risky)
+            "active_effect": "sin_boost",
+        },
+    },
+
+    # ── Zone 10: The Hero World ───────────────────────────────────────────────
+    {
+        "id": 10,
+        "name": "The Hero World",
+        "desc": "Heroes and villains clash — knowledge is the ultimate superpower.",
+        "theme_color": (80, 50, 180),
+        "icon": "🦸",
+        "unlock": {"zone": 5, "type": "alumni", "value": 1},
+        "buildings": _zone_buildings(
+            [
+                ("Hero Academy",       "Where the next generation learns to fly"),
+                ("Training Dojo",      "Discipline, focus, and punching things really hard"),
+                ("Gadget Workshop",    "Science class meets crime-fighting utility belts"),
+                ("Hero HQ",           "Every team needs a base. Ours has a jet."),
+                ("Watchtower",        "Eyes on every corner — knowledge is power"),
+                ("Battle Arena",      "Practice your powers in a safe(ish) environment"),
+                ("Quantum Forge",     "Harness quantum energy for stronger heroes"),
+                ("Villain Prison",    "Keep the villains contained and learn from them"),
+                ("Dimension Gate",    "Travel to other dimensions — extra credit required"),
+                ("Champion's Citadel","The ultimate stronghold of justice and higher learning"),
+            ],
+            _COSTS, _KPS, _UNLK,
+        ),
+        "upgrades": [
+            _upg("h_acad1",   "Heroics 101",          "Hero Academies × 2 KP/s",        100,           "Hero Academy"),
+            _upg("h_acad2",   "Advanced Heroics",     "Hero Academies × 2 KP/s",        800,           "Hero Academy"),
+            _upg("h_dojo1",   "Iron Fist Drills",     "Training Dojos × 2 KP/s",        1_000,         "Training Dojo"),
+            _upg("h_dojo2",   "Zen Mastery",          "Training Dojos × 2 KP/s",        6_000,         "Training Dojo"),
+            _upg("h_gadg1",   "Prototype Gear",       "Gadget Workshops × 2 KP/s",      14_000,        "Gadget Workshop"),
+            _upg("h_gadg2",   "Mass Production",      "Gadget Workshops × 2 KP/s",      130_000,       "Gadget Workshop"),
+            _upg("h_hq1",     "Satellite Link",       "Hero HQs × 2 KP/s",             140_000,       "Hero HQ"),
+            _upg("h_watch1",  "Long-range Sensors",   "Watchtowers × 2 KP/s",           1_500_000,     "Watchtower"),
+            _upg("h_arena1",  "Championship Rules",   "Battle Arenas × 2 KP/s",         15_000_000,    "Battle Arena"),
+            _upg("h_forge1",  "Quantum Amplifier",    "Quantum Forges × 2 KP/s",        140_000_000,   "Quantum Forge"),
+            _upg("h_all1",    "United Front",         "All hero buildings × 1.5 KP/s",  2_600_000,     "all", 1.5),
+            _upg("h_all2",    "Legendary Alliance",   "All hero buildings × 2 KP/s",    260_000_000,   "all", 2.0),
+        ],
+        "prestige_layers": [
+            {"name": "Power Badges",    "abbr": "PB", "color": (80,  120, 255), "prestige_kp": 2_000_000,
+             "desc": "+2% KPS per Badge",  "global_bonus": 0.02},
+            {"name": "Star Tokens",     "abbr": "ST", "color": (255, 210,  40), "from_l1": 15,
+             "desc": "+4% KPS per Token",  "global_bonus": 0.04},
+            {"name": "Legend Marks",    "abbr": "LM", "color": (200,  80, 255), "from_l2": 5,
+             "desc": "+12% KPS per Mark",  "global_bonus": 0.12},
+            {"name": "Cosmic Seals",    "abbr": "CS", "color": (255, 160,  30), "from_l3": 3,
+             "desc": "+30% KPS per Seal",  "global_bonus": 0.30},
+        ],
+        "mechanic": {
+            "passive_name": "Battle Meter",
+            "passive_desc": "Heroes gain the upper hand over time. At max, +50% KPS.",
+            "active_name":  "Decisive Strike",
+            "active_desc":  "Spend 1 Power Badge — heroes deliver a decisive blow (5 min KPS instantly).",
+            "active_cost_layer": 1,
+            "active_cost": 1,
+            "fill_rate": 1.0 / 240.0,   # 4 min to full
+            "inverted": False,
+            "max_effect": 0.50,          # +50% KPS at full battle meter
+            "active_effect": "kp_burst_5m",
+        },
+    },
+]
+
+# Quick lookup
+ZONE_BY_ID: dict[int, dict] = {z["id"]: z for z in ZONE_DEFS}

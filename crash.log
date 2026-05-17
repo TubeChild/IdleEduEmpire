@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/np/idle_edu_empire/main.py", line 2939, in <module>
+    App().run()
+  File "/home/np/idle_edu_empire/main.py", line 2843, in run
+    popup_btns, story_btns = self._draw(dt)
+  File "/home/np/idle_edu_empire/main.py", line 2427, in _draw
+    self._draw_topbar()
+  File "/home/np/idle_edu_empire/main.py", line 262, in _draw_topbar
+    pct = ab["remaining"] / ab["duration"]
+KeyError: 'duration'

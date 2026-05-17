@@ -1,0 +1,1309 @@
+====================================================
+  IDLE EDU EMPIRE  —  FULL CONTENT OVERVIEW
+  Everything that is in the game right now
+====================================================
+
+This log covers every feature, building, upgrade, and
+system currently in the game. Great for testing!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ZONE 1 — MODERN SCHOOL  (the main game)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BUILDINGS  (13 total)
+─────────────────────
+You earn Knowledge Points (KP) per second from buildings,
+and more from clicking. Buildings unlock as your total
+all-time KP grows — not all are available from the start.
+
+  1.  Classroom
+  2.  Library
+  3.  Science Lab
+  4.  Computer Lab
+  5.  Sports Hall
+  6.  Art Studio
+  7.  University Wing
+  8.  Research Centre
+  9.  Innovation Hub
+  10. Space Academy
+  11. World Campus
+  12. Quantum Institute
+  13. Nexus of Knowledge
+
+  Each building has a star milestone system.
+  At certain ownership counts a building levels up
+  (⭐ to ⭐⭐⭐⭐), granting a permanent output bonus.
+  The milestone counts vary per building.
+
+
+UPGRADES  (34 total)
+─────────────────────
+Bought with KP. Each doubles the output of its target
+building. Some upgrade click power instead.
+
+  Building upgrades:
+    Classroom ×3, Library ×3, Science Lab ×2,
+    Computer Lab ×2, Sports Hall ×2, Art Studio ×2,
+    University Wing ×2, Research Centre ×2,
+    Innovation Hub ×3, Space Academy ×3,
+    World Campus ×2, Quantum Institute ×2,
+    Nexus of Knowledge ×2
+
+  Click upgrades ×4:
+    Sharp Pencil → Fountain Pen → Laptop → Gaming Tablet
+
+
+BUILDING SYNERGIES
+──────────────────
+Some buildings passively boost each other based on how
+many of the linked building you own. There are 12
+synergy links across the full building chain — for
+example, Libraries help Classrooms, and Research Centres
+boost University Wings and Innovation Hubs.
+
+
+CLICKING & COMBO
+─────────────────
+Click the main school building to earn KP manually.
+Build up a combo by clicking quickly — each hit within
+a short window adds to the streak and multiplies your
+click power. The combo resets if you stop clicking.
+Base max combo is 10 (can be raised by skills).
+
+
+FOCUS POINTS
+─────────────
+Focus Points (FP) regenerate over time up to a cap.
+Spend them on special active abilities:
+
+  ⚡ Study Burst     — earn a burst of KP instantly
+  ⚡ Overdrive       — temporary KPS multiplier
+  ⚡ Recall          — earn 10 minutes of offline KP now
+  ⚡ Inspiration     — temporary click power boost
+
+The FP bar and ability buttons are in the left sidebar.
+Skills can raise the cap and the regen rate.
+
+
+EVENTS  (20 types)
+────────────────────
+Random events pop up during play. Click to collect them.
+
+  Common events:
+    School Fundraiser, Pop Quiz Craze, Science Fair Day,
+    Time Capsule Opened, Star Student
+
+  Uncommon events:
+    Inspiring Guest Speaker, Education Grant (+5 Merit),
+    Inspection Outstanding, Coding Hackathon,
+    Scholarship Wave (+7 Merit), Research Published,
+    Scholar in Residence, Research Breakthrough
+
+  Rare events:
+    Faculty Hire (permanent building bonus!),
+    School Goes Viral, Alumni Donation Drive,
+    Mystery Benefactor, Academic Olympiad (click ×20),
+    National Medal (+12 Merit), World Education Record
+
+  Inspector Events (separate system):
+    The school inspector arrives and gives you a task.
+    Complete it in time for a bonus, or face a small
+    debuff if you fail.
+
+
+FACULTY HIRES
+─────────────
+Faculty Hire events (rare) permanently boost a specific
+building's output. The building is chosen based on what
+you currently own. Collecting 1, 5, and 10 faculty
+hires earns achievements.
+
+
+DAILY MISSIONS
+──────────────
+Three missions reset every day:
+  • Click X times
+  • Earn X KP
+  • Buy X buildings
+
+Complete all three to earn Merit Points and progress
+toward daily streak achievements (1 / 7 / 30 days).
+
+
+SEASONS
+────────
+The game calendar has four seasons, each with a bonus:
+  Spring  — +8% KP/s
+  Summer  — +12% click power
+  Autumn  — +15% diploma gain on prestige
+  Winter  — +25% offline earnings efficiency
+
+Experiencing all four seasons earns an achievement.
+
+
+OFFLINE EARNINGS
+────────────────
+KP accumulates while you are away, up to a cap
+(default 8 hours, extendable via skills and upgrades).
+An offline earnings popup tells you what you earned
+when you return. Winter gives a bonus to offline rates.
+
+
+CAMPUS VIEW
+────────────
+The left sidebar shows a live mini-view of your campus.
+Buildings appear visually as you buy them.
+The season badge and current KP/s are displayed here too.
+
+
+SCHOOL NAME
+────────────
+You can rename your school in the Settings tab.
+Your school name appears in the news ticker and
+dynamic news headlines.
+
+
+NEWS TICKER
+────────────
+A scrolling ticker at the bottom shows school news.
+Dynamic headlines are generated when you:
+  • Open a building for the first time
+  • Hit a KP milestone (100 → 1 Trillion)
+  • Unlock an achievement
+  • Prestige (graduation ceremony headlines)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PRESTIGE SYSTEM  (4 layers)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prestige resets your KP and buildings but grants
+permanent bonuses. There are four prestige layers,
+each with its own shop that persists forever.
+
+LAYER 1 — DIPLOMAS  (Prestige tab)
+────────────────────────────────────
+Prestige when you reach the KP threshold (shown on
+the Prestige tab). You receive Diplomas based on your
+total KP. More Diplomas = better permanent bonuses.
+
+  Diploma Shop  (11 upgrades — survive all resets):
+    Endowed Chair, Alumni Network, Research Grant,
+    Campus Expansion (−15% costs), Click Mastery,
+    Distinguished Faculty, Ivy League Status (−25% costs),
+    Nobel Legacy, Golden Campus, Grand Endowment,
+    Extended Leave (+12 hrs offline cap)
+
+
+LAYER 2 — HONORS  (Legacy tab)
+────────────────────────────────
+Convert 15 Diplomas into 1 Honor.
+
+  Honor Shop  (10 upgrades):
+    Honorary Lecture, Research Fellowship, Merit Scholarship,
+    Extended Study Hall, Honours Desk, Honours Discount,
+    Academic Prestige, Synergy Amplifier,
+    Diploma Surplus, Apex Scholar
+
+  Also: buy Historical Scholars with Honors (see below).
+
+
+LAYER 3 — ENDOWMENTS  (Legacy tab)
+─────────────────────────────────────
+Convert 5 Honors into 1 Endowment.
+
+  Endowment Shop  (6 upgrades):
+    Foundation Grant, Endowed Clicks, Endowed Campus,
+    Distinguished Faculty II, Endowment Study Cap,
+    Eternal Legacy
+
+
+LAYER 4 — ALUMNI POINTS  (Legacy tab)
+───────────────────────────────────────
+Convert Endowments into Alumni Points (rates improve
+with skills). Alumni Points never reset.
+
+  Alumni Shop  (7 upgrades):
+    Pioneer Legacy, Tenure Track, Research Network,
+    Alumni Discount, Century Endowment,
+    Distinguished Alumni, Infinite Knowledge
+
+  Research Legacy (repeatable):
+    Spend 2 Alumni Points to permanently gain +10% KPS.
+    Can be bought as many times as you like.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CURRICULUM  (Skills — 30 total, 5 paths)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Skills are bought with Merit Points (earned from
+achievements and events). They are permanent and
+survive prestige.
+
+FOUNDATION PATH  (13 skills — always available)
+  Eager Student, Speed Reader, Class Rep, Library Card,
+  Lab Safety, Tech Savvy, Team Captain, Study Group,
+  Dean's List, Scholarship, Extra Credit,
+  Valedictorian, Perfect Score
+
+ACADEMIC EXCELLENCE PATH  (5 skills)
+  Unlocks via Valedictorian.
+  Well-Rounded, Synergy Expert, Merit Master,
+  Dean's Scholar, Academic Excellence gateway
+
+INNOVATION PATH  (4 skills)
+  Unlocks via Tech Savvy.
+  Research Synergy, Late Bloomer, Quantum Mindset,
+  Innovation Track gateway
+
+PRESTIGE MASTERY PATH  (4 skills)
+  Unlocks via Scholarship.
+  Honor Scholar, Endow. Specialist, Diploma Hoarder,
+  Prestige Mastery gateway
+
+ACTIVE LEARNING PATH  (6 skills)
+  Always available (cheap entry point).
+  Active Learner, Rapid Clicker, Focus Burst,
+  Combo Master, Focus Pool, Quick Charge
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  HISTORICAL SCHOLARS  (12 total)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Buy famous educators and thinkers using Honors.
+Each one permanently boosts a building or global KPS.
+
+  Socrates    — Classrooms +20% KPS
+  Plato       — Libraries +20% KPS
+  Confucius   — Global +10% KPS
+  Archimedes  — Science Labs +25% KPS
+  Isaac Newton — Science Labs +35% KPS
+  Nikola Tesla — Computer Labs +30% KPS
+  John Dewey  — University Wings +30% KPS
+  Ada Lovelace — Computer Labs +40% KPS
+  Marie Curie — Research Centres +35% KPS
+  Leonardo da Vinci — Art Studios +35% KPS
+  Albert Einstein — Global +20% KPS
+  Aristotle   — Global +15% KPS
+
+Hiring all 12 earns the "Timeless Wisdom" achievement.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ACHIEVEMENTS  (64 total)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Achievements are shown in the Report Card tab with a
+grade (C / B / A / S / S+) and a Merit Point reward.
+
+Categories:
+  KP milestones     — 8 (1K through 1 Quadrillion)
+  Click milestones  — 5 (10 through 100K clicks)
+  Building counts   — 18 (individual buildings + totals)
+  Star milestones   — 4 (⭐ through ⭐⭐⭐⭐ on any building)
+  Prestige          — 5 (1×, 5×, 10×, 25×, 50×)
+  Combo             — 1 (reach max combo)
+  Honors/Endowments — 4
+  Scholars          — 3 (hire 1, 5, all 12)
+  Faculty hires     — 3 (collect 1, 5, 10)
+  Daily missions    — 3 (complete 1, 7, 30 full days)
+  Seasons           — 1 (see all 4)
+  Alumni Network    — 3 (earn 1, 3, 5 Alumni Points)
+  Research Legacy   — 1 (buy 10 Research Legacy grants)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  STORY  (16 chapters)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Short story chapters unlock as you hit milestones.
+They are shown in the Campus tab.
+
+  Ch 1  The Empty Lot           — game start
+  Ch 2  First Day of Class      — buy first Classroom
+  Ch 3  Word Spreads            — reach 500 KP
+  Ch 4  An Institution          — open a Library
+  Ch 5  The Golden Age          — reach 50,000 KP
+  Ch 6  Graduation Day          — first prestige
+  Ch 7  The Legacy Continues    — second prestige
+  Ch 8  The First Honour        — earn first Honor
+  Ch 9  Into the Cosmos         — open a Space Academy
+  Ch 10 Among the Elite         — reach 1 Trillion KP
+  Ch 11 The Endowment           — earn first Endowment
+  Ch 12 The Nexus Awakens       — open Nexus of Knowledge
+  Ch 13 The Alumni Network      — earn first Alumni Point
+  Ch 14 A Scholar Arrives       — hire first Scholar
+  Ch 15 The Seasons Turn        — experience a full year
+  Ch 16 A Thousand of One       — reach a building star milestone
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  THE INSTRUCTOR CHARACTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A small character slides in from the right side when
+you switch tabs and gives a hint about what that tab does.
+The character disappears after a few seconds.
+
+When you are viewing a zone in the Worlds tab,
+the instructor's outfit changes to match the theme
+(see the Worlds section below for costumes).
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  WORLDS — 8 EXTRA ZONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The Worlds tab lets you manage 8 extra zones.
+Each runs independently and has its own buildings,
+upgrades, prestige layers, and mechanic.
+All zones earn KP in the background even when you
+are looking at a different tab.
+
+WHAT EVERY ZONE HAS
+────────────────────
+  • 10 themed buildings
+  • 12 upgrades
+  • 4 prestige layers with their own currency names
+  • 1 passive mechanic (runs automatically)
+  • 1 active ability (triggered manually, usually costs
+    a prestige currency or the mechanic meter)
+  • A lock requirement — see unlock tree below
+
+
+THE 8 ZONES
+────────────
+
+  Zone 2  The Ruins  🏚
+    Restore an abandoned school to its former glory.
+    Passive: Decay — buildings deteriorate over time,
+    reducing output by up to −50%.
+    Active: Restoration Rush — spend 1 Restoration Cert
+    to wipe the decay instantly.
+    Instructor: khaki explorer outfit, orange hard hat.
+
+  Zone 3  The Future  🚀
+    Run a hyper-advanced school on a space station.
+    Passive: Automation — slowly builds a KPS bonus.
+    Active: Overclock — spend 1 Sync Token for an
+    instant KP burst.
+    Instructor: silver jumpsuit, sci-fi dome helmet.
+
+  Zone 4  Ancient Academy  🏛
+    Build the great schools of antiquity.
+    Passive: Discourse — fills over time for a KPS bonus.
+    Active: Great Debate — spend 1 Discourse Token
+    for a large instant KP burst.
+    Instructor: white toga, green laurel wreath, scroll.
+
+  Zone 5  Moon Colony  🌙
+    The first school on the Moon — low gravity included.
+    Passive: Orbit Bonus — scales with total buildings
+    owned, adding a steady KPS multiplier.
+    Active: EVA Launch — spend 1 Moon Rock to earn
+    5 minutes of KPS instantly.
+    Instructor: white spacesuit, bubble helmet.
+    Unlocks: Zone 3 prestige ×1
+
+  Zone 6  Magical Realm  ✨
+    A school of sorcery where mana powers learning.
+    Passive: Mana Pool — fills over time, +50% KPS
+    when full.
+    Active: Cast Spell — drain all mana for an
+    instant KP burst.
+    Instructor: purple robes, tall pointy wizard hat.
+    Unlocks: Zone 3 Alumni ×1
+
+  Zone 7  Prehistoric  🦕
+    Spark the very first flame of learning.
+    Passive: Discovery — fills slowly.
+    Active: Great Hunt — triggers a large KP burst
+    and resets the meter.
+    Instructor: brown fur outfit, bone hair-pin.
+    Unlocks: Zone 2 Alumni ×1
+
+  Zone 8  The Heavens  ☁
+    Teach among the gods.
+    Passive: Divine Grace — fills over time for
+    a steady KPS bonus.
+    Active: Prayer — spend Divine Grace for an
+    instant KP burst.
+    Instructor: glowing white robes, golden halo, wing nubs.
+    Unlocks: Zone 4 prestige ×1
+
+  Zone 9  The Underworld  🔥
+    Knowledge at a price. Sin builds up and punishes you.
+    Passive: Sin Meter — accumulates and reduces KPS
+    the higher it gets.
+    Active: Dark Pact — clear your sin, but waiting too
+    long triggers a punishment timer.
+    Instructor: dark red robes, small horns, glowing red eyes.
+    Unlocks: Zone 4 Alumni ×1
+
+
+ZONE UNLOCK TREE
+─────────────────
+Zones open up as you progress in earlier ones.
+
+  Modern School  →  The Ruins        (prestige Zone 1 once)
+  Modern School  →  The Future       (earn 1 Alumni Point)
+
+  The Ruins      →  Ancient Academy  (prestige Zone 2 once)
+  The Ruins      →  Prehistoric      (earn Zone 2 Alumni ×1)
+
+  The Future     →  Moon Colony      (prestige Zone 3 once)
+  The Future     →  Magical Realm    (earn Zone 3 Alumni ×1)
+
+  Ancient Academy →  The Heavens     (prestige Zone 4 once)
+  Ancient Academy →  The Underworld  (earn Zone 4 Alumni ×1)
+
+The lock screen in the Worlds tab always tells you
+exactly what is needed before a zone is available.
+
+
+COSMIC WISDOM
+─────────────
+Prestiges and currency conversions in any zone earn
+Cosmic Wisdom (CW) — a special cross-zone currency.
+Shown at the bottom of the zone list.
+
+  Zone prestige   →  1 CW
+  Prestige → L2   →  5 CW
+  L2 → L3         →  15 CW
+  L3 → L4         →  50 CW
+
+A Multiverse Shop to spend CW is coming in a future update.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  KNOWN GAPS  (coming later)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • Multiverse Shop (spending Cosmic Wisdom)
+  • Zone-specific achievements
+  • Zone story chapters
+  • Art / visual polish pass (Zone 1 buildings now use sprites ✓)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  RECENT CHANGES  (patch notes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MANY MORE ACHIEVEMENTS  (+80 new)
+──────────────────────────────────
+The achievement list has grown massively. New categories:
+
+  Easy / Exploration (0 merit — just fun to collect)
+    Reach 3, 8, 25, 50 clicks; hit 50K, 500K KP;
+    own 3 or 5 different buildings; buy first upgrade;
+    collect your first event; use Focus for the first
+    time; try combos; and more.
+
+  Funny / Silly (0–2 merit)
+    "The Answer"     — click exactly 42 times
+    "Study Break"    — click 420 times
+    "It's Over 9000" — click 9001 times
+    "Nice."          — click 69,000 times
+    "Leet Scholar"   — earn 1,337 KP
+    "Overcaffeinated"— use Focus 10 times
+    "Living in Flow" — use Focus 50 times
+    "Mass Production"— own 100 of a single building
+    …and several more.
+
+  Pop Culture Game References (0–2 merit)
+    "One More Cookie"     — earn 1 billion KP  (Cookie Clicker)
+    "Butterfly Effect"    — first prestige  (Prestige the game)
+    "Dirt Hut Scholar"    — own 64 Classrooms  (Minecraft)
+    "Gotta Buy 'Em All"   — own every building type  (Pokémon)
+    "You Died (and Reset)"— prestige 5 times  (Dark Souls)
+    "Deal or No Deal"     — collect an event  (Monty Hall)
+    "Mayor of Edu Town"   — own 200 buildings  (SimCity)
+    "Idle Warrior"        — buy a Research Legacy  (idle games)
+    "GG EZ"               — prestige 10 times  (MOBAs)
+    "Half Knowledge 3"    — earn 3 Alumni  (Half-Life 3)
+
+  Medium difficulty (2–4 merit)
+    Buy 20 upgrades; collect 10–50 events; use Focus 25×;
+    earn 10–100 Diplomas; reach 10M or 1B KP; prestige
+    3–7 times; earn 3–10 Honors.
+
+  Hard difficulty (5–10 merit)
+    Prestige 15–20×; earn 10 Trillion or 100 Trillion KP;
+    own 300 or 750 buildings; collect 100 events;
+    earn 10 Alumni; convert 5–10 Endowments; earn 250
+    Diplomas; reach Research Legacy 25; use Focus 100×.
+
+  Very Hard (10–15 merit)
+    Prestige 75×; earn 10 Quadrillion KP; own 1500 buildings;
+    earn 25 Alumni; own 500 of one building; reach Legacy 50;
+    collect 200 events; earn 20 Honors or 20 Endowments.
+
+  Almost Impossible (20–25 merit each — 10 total)
+    Prestige 100 times
+    Earn 1 Quintillion KP
+    Own 2000 buildings at once
+    Earn 50 Alumni Points
+    Own 1000 of a single building type
+    Reach Research Legacy level 100
+    Collect 500 events
+    Click 1,000,000 times
+    Earn 50 Endowments
+    Earn 100 Alumni Points
+
+
+DIPLOMA FORMULA TUNED
+──────────────────────
+Diplomas earned on prestige used to grow too fast (square
+root). It now uses a cube root so the pace feels more
+rewarding over a longer game, not front-loaded.
+  Old: ~232 diplomas at second prestige with heavy play
+  New: ~47 diplomas — much more meaningful progression.
+
+
+ZONE-THEMED CAMPUS VIEW
+────────────────────────
+The isometric mini-view on the left panel and the campus
+tab now change appearance based on which zone you are in.
+
+  Zone 1 (Modern School) — unchanged classic look
+  Zone 2 (Ancient Ruins)  — warm sand sky, crumbling
+                             stone-wall silhouettes
+  Zone 3 (Future City)    — deep-blue/cyan sky, neon
+                             accent lines on cityscape
+  Zone 4 (Ancient Greece) — warm golden sky, Greek column
+                             silhouettes on the horizon
+  Zone 5 (Moon Colony)    — black starfield, stars always
+                             visible, silver ground
+  Zone 6 (Magical Realm)  — violet/magenta sky, sparkle
+                             particles floating in sky
+  Zone 7 (Prehistoric)    — orange-red sky, 3 volcanoes
+                             (2 smoking + 1 erupting),
+                             PTERODACTYLS flying overhead
+  Zone 8 (The Heavens)    — pale blue/white sky, golden
+                             light rays, glowing wing feathers
+  Zone 9 (The Underworld) — dark red/black sky, lava pools
+                             glowing on the ground, embers
+                             drifting upward
+
+
+ZONE-THEMED INSTRUCTOR
+───────────────────────
+The instructor character shown while browsing the Worlds tab
+now dresses to match the zone you are viewing:
+
+  Zone 1 — Classic academic: dark gown, mortarboard, glasses
+  Zone 2 — Explorer: khaki outfit, orange hard hat
+  Zone 3 — Sci-fi: silver jumpsuit, bubble helmet with visor
+  Zone 4 — Classical: white toga, green laurel wreath, scroll
+  Zone 5 — Astronaut: white spacesuit, oxygen tube, bubble helm
+  Zone 6 — Wizard: purple robes, tall pointy hat, sparkles
+  Zone 7 — Prehistoric: brown furs, bone hairpin, tooth necklace
+  Zone 8 — Celestial: glowing white robes, golden halo, wings
+  Zone 9 — Infernal: dark red robes, horns, glowing red eyes
+
+
+SIDEBAR HIDES WHEN BROWSING WORLDS
+─────────────────────────────────────
+Previously, the Study button and Zone 1 controls would
+stay visible even when you switched to the Worlds tab.
+Now the left sidebar shows relevant zone stats instead
+(KP/s, prestige count, or the unlock condition if locked).
+
+
+"OWNED" PANEL IS NOW COLLAPSIBLE
+──────────────────────────────────
+The "Owned:" list at the bottom-left can now be toggled
+open or closed. Click the "Owned ▲ / ▼ (N types)" header
+to collapse it and make more room for the Goals panel.
+
+
+PRESTIGE TAB SCROLL FIXED
+───────────────────────────
+The prestige shop could not be scrolled below "Ivy League
+Status". This is now fixed — you can scroll through all
+diploma upgrades, honor conversions, endowment perks,
+and alumni options.
+
+
+SCHOOL BUS REPOSITIONED
+────────────────────────
+The school bus that occasionally drives past was rendering
+too low on screen (overlapping the goals panel). It now
+drives along the bottom of the campus mini-view where it
+looks intentional.
+
+
+ZONE UNLOCK ORDER IMPROVED
+────────────────────────────
+The zone unlock chain was reordered for better thematic
+coherence:
+
+  Ruins     → unlock by prestiging Zone 1 once
+  Future    → unlock by earning Alumni in Zone 1
+  Moon      → unlock by prestiging Future once  (sci-fi → space)
+  Magical   → unlock by earning Alumni in Future
+  Prehistoric→ unlock by earning Alumni in Ruins (ancient → primal)
+  Greece    → unlock from Ruins (prestige) — ancient world branch
+  Heavens   → unlock from Greece (prestige)
+  Underworld→ unlock from Greece (alumni)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PATCH — BUG FIXES & BALANCE (Session 3)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CRASH FIX — OVERFLOW ON PRESTIGE
+──────────────────────────────────
+Prestiging with extreme building counts caused an
+OverflowError from the diploma multiplier (1.02 ^ diplomas).
+Fixed by switching to a log-based formula:
+  diploma_mult = 1.0 + ln(1 + diplomas) × 1.5
+This grows meaningfully but never overflows.
+A crash.log file is now written if the game crashes.
+
+
+NUMBER FORMATTING OVERHAULED
+──────────────────────────────
+All large numbers now display in compact suffix notation
+with adaptive decimal places (e.g. 14.123 Qa, 3.45 De).
+Suffixes go up to Qd (10^48). Numbers in the topbar
+(KP, Merit, Diplomas, Honors, Endowments) are now
+formatted the same way.
+
+
+BUILDING SACRIFICE MECHANIC
+─────────────────────────────
+Buying a higher-tier building now consumes lower-tier
+buildings. For example, buying a Library costs 10
+Classrooms. This slows mid-game progression and makes
+each tier feel meaningful.
+
+  Library         eats 10 Classrooms
+  Science Lab     eats 10 Libraries
+  Computer Lab    eats 10 Science Labs
+  Sports Hall     eats 10 Computer Labs
+  Art Studio      eats 10 Sports Halls
+  University Wing eats 15 Art Studios
+  Research Centre eats 15 University Wings
+  Innovation Hub  eats 20 Research Centres
+  Space Academy   eats 20 Innovation Hubs
+  World Campus    eats 25 Space Academies
+  Quantum Inst.   eats 25 World Campuses
+  Nexus of Know.  eats 30 Quantum Institutes
+
+Sacrifice is shown on each building card in red/green.
+Sandbox mode bypasses sacrifice.
+
+
+ALUMNI POINTS NOW DIRECTLY BOOST KP/S
+────────────────────────────────────────
+Previously, once all 7 Alumni upgrades were purchased,
+additional alumni points had no effect. Now each alumni
+point provides +15% KP/s as a direct multiplier:
+  alumni_mult = 1.0 + alumni_points × 0.15
+
+
+ENDOWMENT MULTIPLIER VISIBLE
+──────────────────────────────
+Endowments now contribute via a compounding multiplier
+(1.10 per endowment) in the global KPS formula, and the
+effect is shown in the Legacy tab breakdown.
+
+
+ZONE 9 (UNDERWORLD) IN ZONE SELECTOR
+──────────────────────────────────────
+Zone 9 was being clipped off the bottom of the zone
+selector list. Card height was reduced from 72 to 62px,
+allowing all 9 zones to fit on screen.
+
+
+STAFF STRIKE EVENT
+────────────────────
+A new random negative event: "Staff on Strike!"
+Teachers, janitors, and cafeteria staff walk out.
+Effect: all idle KP/s reduced by 75% for 60 seconds.
+A red warning banner appears in the left sidebar.
+You can pay 5 Merit to resolve the strike early.
+
+
+ZONE-SPECIFIC BUILDING VISUALS
+────────────────────────────────
+Each zone now has architecture appropriate to its theme
+instead of showing Zone 1's modern school buildings:
+
+  Zone 1 (Modern)      — standard isometric school blocks
+  Zone 2 (Ruins)       — crumbled stone towers, crack lines
+  Zone 3 (Future)      — tall glass towers, neon-cyan stripes
+  Zone 4 (Greece)      — white marble temples, Doric columns
+  Zone 5 (Moon Colony) — no buildings; animated Earth & Sun
+                          orbit the campus in real-time
+  Zone 6 (Magical)     — thin crystal spires
+  Zone 7 (Prehistoric) — squat stone huts with arc doorways
+  Zone 8 (Heavens)     — cloud-palace buildings, golden arches
+  Zone 9 (Underworld)  — dark obsidian towers, lava cracks
+
+
+WIZARD BATTLES IN MAGICAL REALM
+─────────────────────────────────
+Zone 6's campus view now shows wizard duels in the
+background: a purple-robed wizard and a dark-red warlock
+trade spell orbs that bounce between them, changing
+colour on each hit.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PATCH — DEPTH & RETENTION UPDATE (Session 4)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AUTO-LECTURER DIPLOMA UPGRADES
+────────────────────────────────
+Three new Diploma upgrades automate clicking so you can
+transition from active play to idle strategy:
+
+  Auto-Lecturer I   (12 Diplomas) — 0.5 clicks/second
+  Auto-Lecturer II  (28 Diplomas) — 2 clicks/second total
+  Auto-Lecturer III (60 Diplomas) — 8 clicks/second total
+
+Auto-clicks grant full click power but do NOT build
+the combo multiplier — active clicking still matters.
+A green badge in the left sidebar shows the current rate.
+
+
+MULTIVERSE SHOP  (Cosmic Wisdom)
+──────────────────────────────────
+Cosmic Wisdom (CW) earned from zone prestige and
+conversions can now be spent in the Multiverse Shop.
+Click "✦ MULTIVERSE SHOP" in the Worlds tab zone list.
+
+10 upgrades available:
+
+  Multiversal Synergy I/II/III  — +25%, +75%, ×3 KP/s
+                                   in all zones including Zone 1
+  Academic Resonance I/II       — +2 and +5 extra Diplomas
+                                   per prestige in Zone 1
+  Cosmic Click I/II             — ×2 and ×4 click power
+                                   in Zone 1
+  Night Campus                  — Unlock night theme (3 CW)
+  Golden Hour                   — Unlock sunset theme (3 CW)
+  Stormy Academy                — Unlock storm theme (5 CW)
+
+Multiversal Synergy bonuses feed directly into Zone 1's
+KPS multiplier and all zone KPS every game tick.
+
+
+ZONE INTERCONNECTION
+──────────────────────
+CW upgrades now create real cross-zone effects. Zone KPS
+multipliers from the Multiverse Shop apply simultaneously
+to Zone 1 and all other zones, making zone progression
+feel like a unified empire rather than isolated silos.
+
+
+CAMPUS COSMETIC THEMES
+───────────────────────
+Four visual themes for the Zone 1 campus mini-view,
+selectable in the Settings tab:
+
+  Classic Day   — default look (always available)
+  Night Campus  — dark blue sky, deep green ground
+  Golden Hour   — warm orange-amber tint, earthy ground
+  Stormy Academy— grey overcast sky, muted colours
+
+Night, Sunset, and Storm themes are unlocked by
+purchasing the matching item in the Multiverse Shop.
+The theme also applies to the full Campus tab view.
+
+
+SCHOOL INSPECTION MINIGAME
+────────────────────────────
+A new random event: "Ofsted Inspection!"
+The inspector is watching — click the Study button
+30 times in 20 seconds. If you succeed, you earn a
+temporary ×2 KPS boost for 60 seconds. A modal overlay
+shows your progress bar, click count, and timer.
+
+
+EXPANDED MILESTONES
+─────────────────────
+The milestone flash system now covers 25 thresholds
+from 100 KP all the way up to 1 nonillion (10^30 KP),
+with intermediate 5× steps in the lower ranges so you
+see milestone moments more frequently early on.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PATCH — QUIZ SYSTEM & ZONE 3 VISUALS (Session 5)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CRASH FIX — WORLDS TAB / ZONE 2 & 9 BUILDINGS
+────────────────────────────────────────────────
+The game crashed when viewing Zone 2 (Ruins) or Zone 9
+(Underworld) in the Worlds tab due to a randint range
+error in the crack-line drawing code. Fixed by clamping
+the random range arguments to always be valid.
+
+
+AUTO-CLICK FLOATING NUMBERS FIXED
+────────────────────────────────────
+The Auto-Lecturer upgrades were granting KP silently.
+Auto-click gains now spawn green "+X KP" floating
+numbers near the Study button (same as manual clicks
+but green-tinted to distinguish them).
+
+
+ZONE 3 (FUTURE) — FLYING VEHICLES
+────────────────────────────────────
+The Future zone campus mini-view now shows:
+
+  • Flying Cars — 3 futuristic cars that skim across the
+    sky at various altitudes, bobbing and trailing cyan
+    exhaust. They fly in both directions at random speeds.
+
+  • Spaceship Battle — An Alliance fighter (X-wing style,
+    blue/white) and an Empire fighter (TIE-fighter style,
+    dark grey/red) periodically cross from opposite sides,
+    trading red and green laser blasts as they pass.
+    Battle passes occur every 7–14 seconds.
+
+
+EDUCATIONAL QUIZ SYSTEM
+────────────────────────
+A "Quiz Me!" button appears in the left sidebar. Tap it
+to answer 3 questions — one each from Math, Spelling, and
+History. Get all 3 correct and choose a reward.
+
+  30 questions across 3 categories:
+  • Math: arithmetic, algebra, geometry, number facts
+  • Spelling: commonly misspelled English words
+  • History: world events, famous figures, key dates
+
+  Reward tiers (6 levels):
+  ▪ Basic      — +100% KP/s for 60 seconds
+  ▪ Common     — ×3 click power for 90 seconds
+  ▪ Rare       — Permanent +10% KP/s (stacks)
+  ▪ Epic       — +2 Diplomas on next prestige
+  ▪ Legendary  — Permanent +25% KP/s (stacks)
+  ▪ Mythic     — Prestige without losing any progress!
+
+  After completing a quiz, a 3-minute cooldown applies.
+  Wrong answer gives a 2-minute cooldown.
+
+  7 new achievements tied to quiz rewards:
+    Pop Quiz        — earn a Basic reward
+    Honour Roll     — earn a Common reward
+    Academic Star   — earn a Rare reward
+    Dean's List     — earn an Epic reward
+    Nobel Candidate — earn a Legendary reward
+    Valedictorian   — earn the Mythic reward
+    One in a Million— the rarest achievement in the game
+
+  "One in a Million" has a 1-in-1,000,000 chance of
+  triggering each time you complete a quiz. If it fires,
+  all stats are permanently increased by 15%.
+  Achievement quote: "Like Bosson sang —
+  You're one in a million."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PATCH — UI / VISUAL POLISH (Session 6)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LEFT SIDEBAR LAYOUT OVERHAULED
+────────────────────────────────
+All elements below the Study button now flow in a
+strict top-to-bottom sequence using a single layout
+cursor. Nothing can overlap regardless of which
+combination of elements is visible:
+
+  Study button
+    ↓ Strike warning  OR  Combo meter  OR  Auto badge
+    ↓ Graduate button  (only when prestige eligible)
+    ↓ Quiz Me button   (always visible unless quiz open)
+    ↓ Focus bar + ability buttons
+    ↓ Goals / Owned panel
+
+Previously, the Quiz Me button and Focus ability buttons
+used hardcoded y-positions that collided with each other
+and with the Graduate button.
+
+
+TOPBAR CURRENCY DISPLAY FIXED
+───────────────────────────────
+Diplomas, Honors, Endowments, Alumni Points, and Merit
+now display as whole integers in the topbar (e.g.
+"Merit: 54") instead of "Merit: 54.0" from the float
+formatter. KP and KP/s still use the compact suffix
+notation as they are genuine large floats.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PATCH — VISUAL POLISH & ART PASS (Session 7)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CRASH FIX — QUIZ REWARD BOOST
+────────────────────────────────
+Claiming a quiz reward that grants a timed boost crashed
+with KeyError: 'duration'. Both the quiz reward code and
+the inspector event code now include "duration" in the
+active_boost dict alongside "remaining", matching what
+the topbar progress bar expected.
+
+
+GRADIENT SKY FOR CAMPUS VIEW
+──────────────────────────────
+The campus sky now draws a horizon glow band during
+dawn (0.22–0.33 tod) and dusk (0.66–0.78 tod): the
+bottom third of the sky blends toward warm orange as
+the sun rises or sets. The glow fades to a subtle
+daytime warmth mid-day and disappears at night.
+
+Pre-baked alpha surfaces are used for the sun corona
+glow, moon glow, and firefly halos — none of these
+allocate new surfaces per frame.
+
+
+DEPTH SHADOWS IN THE UI
+─────────────────────────
+Drop shadows are added under key UI elements to give
+the interface visual depth:
+
+  • Topbar bottom edge — dark gradient strip
+  • Left sidebar right edge — dark gradient strip
+  • Study / Graduate buttons — soft box shadow
+  • All item cards (Buildings, Upgrades, Curriculum,
+    Prestige shop, Legacy) — subtle card shadow
+
+Shadow surfaces are pre-baked in __init__ or cached by
+size so no per-frame allocation occurs.
+
+
+THEME WEATHER PARTICLES
+────────────────────────
+The three cosmetic campus themes now have ambient
+weather particles appropriate to their mood:
+
+  Night Campus — fireflies drift and pulse across the
+    campus, with a soft yellow glow halo per fly.
+  Golden Hour  — glowing orange embers float upward
+    from the lower half of the view.
+  Stormy Academy — angled rain streaks fall across
+    the full campus at varying speeds.
+
+Particles are spawned in CampusView.update() and drawn
+after the tint overlay so they appear on top.
+
+
+ZONE 5 SEASONAL PROPS FIXED
+─────────────────────────────
+Pumpkins, leaf piles, Christmas trees, hearts, and Easter
+eggs were appearing in Zone 5 (Moon Colony) and other
+zones because _draw_props() was called for every zone.
+It is now guarded with "if zone_id == 1:" so decorations
+only appear in the Modern School zone.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PATCH — SPRITE ASSET INTEGRATION (Session 8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KENNEY SPRITE ASSETS ADDED
+───────────────────────────
+Four Kenney asset packs are now included under assets/:
+
+  kenney_isometric-buildings  — 132 individual 133×127px
+    isometric building PNG files (transparent background)
+  kenney_roguelike-characters — modular character spritesheet
+    (918×203, 17×17 cells)
+  kenney_holiday-extras       — holiday items tilesheet
+    (203×67, 17×17 cells)
+  dinosaurs                   — pixel-art dinosaur sprites
+    including pterosaur1.png and pterosaur2.png (96×96)
+
+
+ISOMETRIC BUILDING TILES FOR ZONE 1
+──────────────────────────────────────
+All 13 Zone 1 buildings now render using Kenney isometric
+building sprites instead of the procedural colored box
+system. Each building is mapped to a specific tile:
+
+  Classroom         → buildingTiles_001
+  Library           → buildingTiles_030
+  Science Lab       → buildingTiles_015
+  Computer Lab      → buildingTiles_010
+  Sports Hall       → buildingTiles_025
+  Art Studio        → buildingTiles_020
+  University Wing   → buildingTiles_035
+  Research Centre   → buildingTiles_055
+  Innovation Hub    → buildingTiles_040
+  Space Academy     → buildingTiles_050
+  World Campus      → buildingTiles_100
+  Quantum Institute → buildingTiles_045
+  Nexus of Knowledge→ buildingTiles_005
+
+Tiles are scaled to match the current campus tile width
+(which shrinks with prestige) and cached by (name, tw)
+so rescaling only happens when the tile size changes.
+Falls back to the procedural _box() system if an asset
+is missing.
+
+
+SPRITE PTERODACTYLS FOR ZONE 7
+────────────────────────────────
+Zone 7 (Prehistoric) pterodactyls now use the pterosaur1/
+pterosaur2 PNG sprites instead of procedural line art.
+Key details:
+
+  • Sprites are recoloured at load time using luminance
+    remapping (numpy): the teal/blue pixel-art is converted
+    to warm brown/tan (e.g. teal (54,197,244) → tan (188,133,70))
+    to match the zone's earthy palette.
+  • Wing animation is driven by math.sin(self.t) — the same
+    phase variable that governs the flap rate — so each
+    pterodactyl flaps at its own natural frequency.
+  • Left and right-facing versions are pre-baked at load time
+    to avoid per-frame surface flips.
+  • Falls back to the procedural Pterodactyl if the PNG
+    assets cannot be loaded.
+
+
+CHRISTMAS TREE SPRITE
+──────────────────────
+The procedural Christmas tree drawn during the christmas/
+christmas_eve holiday now uses a sprite cell extracted
+from the roguelikeHoliday tilesheet (cell 0,2 — the large
+green tree). Falls back to the procedural _draw_xmas_tree()
+if the asset cannot be loaded.
+
+====================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 9 — ZONE 5 SPACE BASE + ZONE 10 HERO WORLD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ZONE 5 MOON BASE STRUCTURES (campus.py)
+─────────────────────────────────────────
+Zone 5 (Moon Colony) buildings now render as moon base
+structures instead of being invisible. Three structure
+types cycle through based on building index (bi % 3):
+
+  Type 0 — Geodesic Dome
+    • Silver/glass hemisphere with grid lines and porthole
+    • Glass window circle highlights on upper-right
+    • Short airlock tube at the base
+
+  Type 1 — Habitat Module
+    • Rectangular pressurised habitat block
+    • Two circular portholes on the front face
+    • Horizontal solar panel arm extending left
+
+  Type 2 — Antenna Tower
+    • Tall silver vertical mast
+    • Parabolic dish arc at the top
+    • Blinking red warning light (animated via self._time)
+
+All three use silver/glass colour palette with ambient
+lighting applied.
+
+
+ZONE 10 — THE HERO WORLD (all files)
+──────────────────────────────────────
+Zone 10 is fully playable and unlocks after Zone 5 (1 alumni
+prestige token from Zone 5 required).
+
+  campus.py — background and buildings
+    • Dark purple night sky (18,12,48) → (55,35,115)
+    • Purple-toned ground tiles with two-tone iso highlights
+    • Searchlights sweep the sky, lightning flashes fire
+      between towers, explosion bursts light the skyline
+    • _draw_zone_tile() draws tall urban hero towers:
+        - Deep blue body / shadow / lighter top faces
+        - Neon-blue vertical accent stripe on right face
+        - Gold "H" symbol on top face for stage ≥ 3
+
+  sprites.py — animated characters
+    • FlyingHero class: caped hero arcs across the sky with
+      a yellow sparkle trail. Three hero colour schemes
+      (blue/red, red/gold, green/purple). Resets from the
+      opposite side when it exits the screen.
+    • GroundFighter class: hero-vs-villain ground brawl at
+      three fixed y-positions. Fighters swing toward each
+      other in a sine-wave pattern and emit yellow impact
+      sparks at the punch connection point.
+    • SpriteManager zone 10 update: updates all 3 FlyingHero
+      and 3 GroundFighter instances per frame.
+    • SpriteManager draw_left zone 10: draws clouds, then
+      flying heroes above ground fighters, then bus.
+
+  main.py — instructor superhero costume
+    • Blue hero suit + darker blue legs
+    • Red billowing cape (drawn behind arms like zone 8 wings)
+    • Gold "H" emblem on chest
+    • Red boots
+    • Hero domino mask (black eye masks) + glowing blue eyes
+    • Blue fin-cowl on top of head + gold star on forehead
+
+  zones_data.py — zone definition (added in Session 8)
+    • 10 hero-themed buildings: Hero Academy, Training Dojo,
+      Gadget Workshop, Hero HQ, Watchtower, Battle Arena,
+      Quantum Forge, Villain Prison, Dimension Gate,
+      Champion's Citadel
+    • Prestige currencies: Power Badges, Star Tokens,
+      Legend Marks, Cosmic Seals
+    • Mechanic: Battle Meter passive (+50% KPS when full)
+      + Decisive Strike active (kp_burst_5m, costs 1 Power Badge)
+    • Unlock: Zone 5 alumni prestige (l4 ≥ 1)
+
+====================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 10 — BUG FIXES + 26 NEW ACHIEVEMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BUG FIXES
+──────────
+
+  Zone card layout overflow (main.py):
+    With Zone 10 added, 10 zone cards no longer fit in the
+    660px Worlds panel. CARD_H reduced from 62 → 56 (saving
+    60px total). Bottom-row text nudged from y+50 → y+44.
+    All 10 zone cards + Multiverse Shop + CW bar now fit
+    with 22px to spare (638px used of 660px available).
+
+  Achievement name duplicate (data.py):
+    quiz_common was named "Honour Roll" — same as kp_10k.
+    Renamed to "Class Act".
+
+  Zone 10 building achievements wired through (game.py, world.py, main.py):
+    _check_achievements() in game.py only saw Zone 1 building
+    counts. Zone 10 buildings live in WorldManager ZoneGame
+    instances. Fixed by:
+      • Added GameState._zone_building_counts dict
+      • Added WorldManager.all_zone_building_counts() method
+      • Main loop updates _zone_building_counts after world.update()
+      • _check_achievements building_count case now checks both
+        dicts so Zone 10 building achievements can trigger
+
+26 NEW ACHIEVEMENTS (data.py — total: 190)
+────────────────────────────────────────────
+
+  Zone 10 hero buildings (all use building_count check):
+    own_hero1    "Hero Rising"            — Buy 1 Hero Academy       (B,  1 merit)
+    own_hero10   "League of Scholars"     — Own 10 Hero Academies    (A,  3 merit)
+    own_dojo1    "Enter the Dojo"         — Buy 1 Training Dojo      (B,  1 merit)
+    own_hq1      "Heroes Need a Base"     — Buy 1 Hero HQ            (B+, 2 merit)
+    own_arena1   "The Crowd Goes Wild"    — Buy 1 Battle Arena       (B,  1 merit)
+    own_prison1  "Justice Served"         — Buy 1 Villain Prison     (B+, 2 merit)
+    own_citadel1 "Champion Crowned"       — Buy 1 Champion's Citadel (S,  6 merit)
+
+  Building gap-fillers:
+    own_sci1     "Lab Coat"               — Buy 1 Science Lab        (C,  0 merit)
+    own_sci10    "Scientific Method"      — Own 10 Science Labs      (B,  1 merit)
+    own_lib50    "Endless Pages"          — Own 50 Libraries         (A+, 2 merit)
+    own_class100 "Packed Halls"           — Own 100 Classrooms       (A+, 3 merit)
+
+  More KP milestones:
+    kp_5m        "Five Million Strong"    — Earn 5M KP               (B+, 2 merit)
+    kp_50m       "Fifty Million Club"     — Earn 50M KP              (A,  2 merit)
+
+  More clicks / combo / upgrades / focus:
+    click_50k    "Relentless"             — Click 50,000 times       (A,  2 merit)
+    combo_5      "Getting in the Groove"  — Reach a combo of 5       (C,  0 merit)
+    upg_10       "Well Stocked"           — Buy 10 upgrades          (B,  1 merit)
+    focus_5      "Caffeinated"            — Use Focus 5 times        (C,  0 merit)
+
+  More diplomas:
+    dipl_500     "Diploma Mountain"       — 500 Diplomas             (A+, 4 merit)
+    dipl_1000    "Diploma Dynasty"        — 1,000 Diplomas           (S,  6 merit)
+
+  Silly / funny:
+    click_360    "Full Rotation"          — Click 360 times          (C,  0 merit)
+    click_999    "Almost There"           — Click 999 times          (C,  0 merit)
+    kp_2048      "Power of Two"           — Earn 2,048 KP            (C,  0 merit)
+    dipl_69      "Nice Diplomas"          — 69 Diplomas              (B,  0 merit)
+
+  Pop-culture (Zone 10 themed):
+    ref_avengers "Assembled"              — 10 Hero Academies        (S+, 0 merit)
+    ref_batman   "I Am the Night School"  — 1 Villain Prison         (A,  0 merit)
+    ref_xmen     "Gifted Students"        — 1 Champion's Citadel     (S,  0 merit)
+
+====================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 11 — VISUAL POLISH: ZONES 2, 5, 8
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+campus.py — Zone 2 (The Ruins):
+  • Flickering torches added to the ruined walls near horizon
+  • Torch flame uses math.sin() for per-frame flicker; orange/yellow inner flame
+  • Soft glow halo drawn behind each flame using SRCALPHA surface
+
+campus.py — Zone 8 (The Heavens):
+  • Pearly gates added near horizon: two tall golden pillars with capitals & bases
+  • Golden arch spans between pillars, drawn via dotted circle segments
+  • Cross-bar between pillars; shimmering glow fill inside gate opening
+  • Layered gold + light-gold highlights on pillars
+
+campus.py — Zone 5 (Moon Colony):
+  • Earth radius reduced 60→30 (visible from the moon — smaller in sky)
+  • Sun radius reduced 20→8 (much farther away than Earth — tiny disc)
+  • Both objects repositioned high in the sky (near top of sky region)
+  • Sun orbit centre moved to upper-left quadrant; Earth orbit centre right-of-centre
+  • Continent patches and cloud swirls scaled proportionally to new radius
+  • Sun glow halo radius adjusted to match new size
+
+====================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 12 — FULLSCREEN, MERIT EXPANSION, MOON FIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+sprites.py — Zone 5 (Moon Colony):
+  • Removed cloud sprites from moon view (no atmosphere on the moon)
+
+main.py — Settings tab:
+  • Added "Enter Fullscreen / Exit Fullscreen" toggle button
+  • Uses pygame.FULLSCREEN | pygame.SCALED — fills entire monitor
+  • Clicking again returns to resizable windowed mode
+  • Added "Mastery" path to PATH_ORDER, PATH_BG, PATH_FG, PATH_LABELS
+
+data.py — Curriculum (Mastery Path):
+  • 8 new end-game skills added (~245 MP total cost):
+      Grand Scholar     — All KP/s +20%        — 15 MP  (requires Perfect Score)
+      Deep Focus        — Offline cap +24 hrs   — 15 MP  (requires Focus Burst)
+      Cosmic Click      — Click power ×20       — 35 MP  (requires Grand Scholar)
+      Zone Harmonics    — All zones KP ×1.5     — 25 MP  (requires Well-Rounded)
+      Multiplier Stack  — All KP/s ×3           — 25 MP  (requires Grand Scholar)
+      Prestige Veteran  — Diploma gain +200%    — 30 MP  (requires Dean's Scholar)
+      Time Warden       — All KP/s ×5           — 40 MP  (requires Multiplier Stack)
+      Omniscient        — All KP/s ×10          — 60 MP  (requires Time Warden)
+
+====================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 13 — SKY BODIES, ZONE BUILDINGS, VERSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+main.py:
+  • Added VERSION = "0.12.0" constant
+  • Window title now shows "Idle Edu Empire  v0.12.0"
+  • Version shown in top-bar next to Merit points (small label)
+
+campus.py — City silhouette removed from all non-Zone-1 views:
+  • _draw_city_tinted() no longer called for zones 2–10
+  • New _zone_bg_buildings() method draws zone-appropriate silhouettes:
+      Zone 3 (The Future)    — tall rounded/dome-top towers, lit windows
+      Zone 6 (Magical Realm) — pointy spires with sharp triangle tips, magic glow
+      Zone 9 (The Underworld)— jagged fortress towers with battlements, lava slits
+      Zone 10 (Hero World)   — modern heroic skyline with antennae, blue windows
+      Zones 2,4,7,8 left clean (their _zone_bg content provides enough character)
+
+campus.py — Sun & Moon in all zones except Zone 5:
+  • Sun follows same arc as Zone 1 (rises 0.25 tod, sets 0.75 tod)
+  • Moon follows same arc as Zone 1 (rises 0.75 tod, sets 0.25 tod)
+  • Stars fade in/out at night in all non-moon zones
+  • Sun/moon tinted against each zone's sky colours
+
+====================================================

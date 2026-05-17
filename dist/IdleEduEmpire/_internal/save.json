@@ -1,0 +1,41 @@
+{
+  "kp": 0.0,
+  "total_kp": 0.0,
+  "all_time_kp": 0.0,
+  "total_clicks": 0,
+  "click_base": 1.0,
+  "building_counts": {
+    "Classroom": 0,
+    "Library": 0,
+    "Science Lab": 0,
+    "Computer Lab": 0,
+    "Sports Hall": 0,
+    "Art Studio": 0,
+    "University Wing": 0,
+    "Research Centre": 0,
+    "Innovation Hub": 0,
+    "Space Academy": 0,
+    "World Campus": 0,
+    "Quantum Institute": 0,
+    "Nexus of Knowledge": 0
+  },
+  "upgrades_purchased": [],
+  "skills_purchased": [],
+  "achievements_unlocked": [],
+  "diplomas": 0,
+  "merit_points": 0,
+  "prestige_count": 0,
+  "diploma_upgrades_purchased": [],
+  "honors": 0,
+  "total_honors_earned": 0,
+  "honor_upgrades_purchased": [],
+  "endowments": 0,
+  "total_endow_earned": 0,
+  "endow_upgrades_purchased": [],
+  "max_combo_reached": 0,
+  "story_shown": [
+    "ch1"
+  ],
+  "milestones_hit": [],
+  "last_save": 1778533639.8910437
+}
