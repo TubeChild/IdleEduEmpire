@@ -1419,4 +1419,87 @@ Global git config set:
   user.name  = Niklas Persson
   user.email = niklas90persson@icloud.com
 
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 16 — ZONE PRESTIGE DIFFERENTIATION
+              (ZONES 2, 3, 5, 6, 7, 8)  v0.14.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Each zone now has a distinct prestige identity. Six zones
+were updated:
+
+ZONE 2 — ANCIENT RUINS  (Ruin Memory)
+────────────────────────────────────────
+Every building first bought in a run is "remembered".
+Across runs, remembered buildings get progressively cheaper:
+  -15% per run remembered, capped at -60% (max 4 runs).
+The Prestige tab shows the top 3 remembered buildings.
+State persists in _remembered_buildings (saved/loaded).
+
+ZONE 3 — INDUSTRIAL REVOLUTION  (Automation Legacy)
+─────────────────────────────────────────────────────
+40% of the automation mechanic value carries over into
+the next run after prestige. This means a well-automated
+player starts the next run with a head-start on KPS.
+l1_on_prestige also scales with mechanic_value (×1.5 at max).
+Info panel shows current automation %, expected Gear yield,
+and the carry-over percentage.
+
+ZONE 5 — SPACE AGE  (Orbital Momentum)
+────────────────────────────────────────
+30% of orbital mechanic value carries over on prestige.
+l1_on_prestige scales with mechanic_value (×1.0 at max).
+Info panel shows orbit %, Signal yield, and carry-over.
+
+ZONE 6 — ARCANE ACADEMY  (Arcane Tradition)
+─────────────────────────────────────────────
+Prestige pauses for a permanent Arcane Tradition choice:
+
+  Evocation (red)       — +10% zone KPS per choice
+  Transmutation (teal)  — +20% more Crystals per prestige
+                          per choice (applies immediately)
+  Enchantment (purple)  — -5% building costs per choice
+                          (cap 50%)
+
+Summary bar shows accumulated tradition totals.
+Methods: do_prestige_with_arcane(tradition).
+
+ZONE 7 — PREHISTORIC  (Ancestral Wisdom)
+──────────────────────────────────────────
+Every building first discovered in a run earns +5% KPS
+for that building permanently across all future runs
+(stacks per additional discovery run). Up to dozens of
+stacks over many prestiges.
+Info panel shows the top 3 discovered buildings.
+State persists in _ancestral_discoveries (saved/loaded).
+
+ZONE 8 — MYTHOLOGICAL  (Divine Patron)
+────────────────────────────────────────
+Prestige pauses for a Divine Patron choice:
+
+  Apollo (gold)  — +12% zone KPS per choice
+  Athena (blue)  — +20% more Stars per prestige per choice
+  Hermes (green) — -5% building costs per choice (cap 50%)
+
+Summary bar shows accumulated patron totals.
+Methods: do_prestige_with_patron(patron).
+
+TECHNICAL CHANGES
+──────────────────
+  world.py:
+    - l1_on_prestige: zones 3, 5, 6, 8 scaling added
+    - _global_mult():  zones 6 (Evocation), 8 (Apollo) bonus
+    - _cost_at():      zones 2, 6, 8 cost reductions
+    - building_kps():  zone 7 ancestral wisdom per-building ×
+    - do_prestige():   full rewrite handles all 8 zones
+    - _complete_prestige_reset(): shared helper (DRY)
+    - do_prestige_with_arcane(), do_prestige_with_patron()
+    - save_data() / load_data(): 6 new fields persisted
+
+  main.py:
+    - _draw_zone_prestige(): choice panels for zones 6 & 8;
+      info panels for zones 2, 3, 5, 7; summary bars for
+      zones 6 & 8; zone 4 summary unchanged
+    - Click handlers: zone_arcane and zone_patron added
+
 ====================================================

@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.13.0"
+VERSION    = "0.14.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -1912,12 +1912,12 @@ class App:
         l1  = pl[0]
         can_p = zg.prestige_eligible
 
-        # Zone 4: pending School of Thought choice replaces the prestige button
+        # Choice zones: show pick panel instead of prestige button
         if zid == 4 and getattr(zg, '_pending_thought_choice', False):
             schools = [
                 ("platonic",     "Platonic",     "+12% zone KPS per choice",   (88, 44, 152)),
                 ("aristotelian", "Aristotelian", "+25% Scrolls per prestige",  (38, 110, 58)),
-                ("stoic",        "Stoic",         "-5% building costs per choice (cap 50%)", (50, 80, 148)),
+                ("stoic",        "Stoic",        "-5% building costs per choice (cap 50%)", (50, 80, 148)),
             ]
             choice_h = 52 + len(schools) * 44
             pane_r = pygame.Rect(x, py, w, choice_h)
@@ -1934,6 +1934,49 @@ class App:
                         x + 16, by + 22)
                 self._buy_items.append((btn_r, (zid, key), "zone_thought"))
             py += choice_h + 5
+
+        elif zid == 6 and getattr(zg, '_pending_arcane_choice', False):
+            traditions = [
+                ("evocation",    "Evocation",    "+10% zone KPS per choice",              (160, 40, 40)),
+                ("transmutation","Transmutation","+20% Crystals per prestige",            (40, 120, 100)),
+                ("enchantment",  "Enchantment",  "-5% building costs per choice (cap 50%)",(60, 40, 160)),
+            ]
+            choice_h = 52 + len(traditions) * 44
+            pane_r = pygame.Rect(x, py, w, choice_h)
+            self._r((220, 215, 245), pane_r, radius=6, border=2, bc=(100, 60, 180))
+            self._t(F_MD, "Choose Your Arcane Tradition", (60, 20, 140), x+10, py+8)
+            self._t(F_XS, "Your tradition is permanent for this prestige.", (80, 40, 160), x+10, py+28)
+            for si, (key, name, desc, col) in enumerate(traditions):
+                by = py + 48 + si * 44
+                count = zg._arcane_tradition_counts.get(key, 0)
+                btn_r = pygame.Rect(x + 6, by, w - 12, 38)
+                self._r(col, btn_r, radius=6)
+                self._t(F_MD, f"{name}  (chosen ×{count})", WHITE, x + 16, by + 5)
+                self._t(F_XS, desc, (230, 210, 255), x + 16, by + 22)
+                self._buy_items.append((btn_r, (zid, key), "zone_arcane"))
+            py += choice_h + 5
+
+        elif zid == 8 and getattr(zg, '_pending_patron_choice', False):
+            patrons = [
+                ("apollo", "Apollo",  "+12% zone KPS per choice",              (180, 140, 20)),
+                ("athena", "Athena",  "+20% Stars per prestige",                (30, 90, 160)),
+                ("hermes", "Hermes",  "-5% building costs per choice (cap 50%)",(40, 140, 80)),
+            ]
+            choice_h = 52 + len(patrons) * 44
+            pane_r = pygame.Rect(x, py, w, choice_h)
+            self._r((245, 240, 210), pane_r, radius=6, border=2, bc=(160, 130, 20))
+            self._t(F_MD, "Choose Your Divine Patron", (110, 90, 10), x+10, py+8)
+            self._t(F_XS, "The gods grant you a permanent boon.", (120, 100, 20), x+10, py+28)
+            for si, (key, name, desc, col) in enumerate(patrons):
+                by = py + 48 + si * 44
+                count = zg._divine_patron_counts.get(key, 0)
+                btn_r = pygame.Rect(x + 6, by, w - 12, 38)
+                self._r(col, btn_r, radius=6)
+                self._t(F_MD, f"{name}  (chosen ×{count})", WHITE, x + 16, by + 5)
+                self._t(F_XS, desc, (255, 240, 200), x + 16, by + 22)
+                self._buy_items.append((btn_r, (zid, key), "zone_patron"))
+            py += choice_h + 5
+
         else:
             pane_r = pygame.Rect(x, py, w, panel_h)
             self._r((230, 225, 215), pane_r, radius=6, border=1, bc=(180,175,165))
@@ -1954,8 +1997,91 @@ class App:
             self._buy_items.append((pbtn, zid, "zone_prestige"))
             py += panel_h + 5
 
-        # Zone 9: Dark Legacy info — show sin-at-prestige consequence
-        if zid == 9:
+        # Per-zone info / summary bars below the prestige button
+        if zid == 2:
+            rb = zg._remembered_buildings
+            total_rem = sum(rb.values())
+            inf_h = 48
+            inf_r = pygame.Rect(x, py, w, inf_h)
+            self._r((30, 40, 55), inf_r, radius=6)
+            self._t(F_MD, "Ruin Memory", (120, 180, 255), x + 10, py + 6)
+            if total_rem:
+                top = sorted(rb.items(), key=lambda kv: -kv[1])[:3]
+                top_txt = "  ·  ".join(f"{k} ×{v}" for k, v in top)
+                self._t(F_XS, f"Remembered: {top_txt}  →  costs reduced up to 60%",
+                        (150, 200, 240), x + 10, py + 26)
+            else:
+                self._t(F_XS, "Prestige to start remembering building costs.",
+                        (130, 160, 200), x + 10, py + 26)
+            py += inf_h + 5
+
+        elif zid == 3:
+            leg = zg._automation_legacy * 100
+            inf_h = 48
+            inf_r = pygame.Rect(x, py, w, inf_h)
+            self._r((20, 50, 30), inf_r, radius=6)
+            self._t(F_MD, "Automation Legacy", (100, 220, 130), x + 10, py + 6)
+            cur  = zg.mechanic_value * 100
+            earn = zg.l1_on_prestige
+            self._t(F_XS,
+                    f"Automation {cur:.0f}% → earn {earn} Gears · {cur*0.4:.0f}% auto-level carries over",
+                    (160, 230, 180), x + 10, py + 26)
+            py += inf_h + 5
+
+        elif zid == 5:
+            inf_h = 48
+            inf_r = pygame.Rect(x, py, w, inf_h)
+            self._r((20, 30, 60), inf_r, radius=6)
+            self._t(F_MD, "Orbital Momentum", (120, 160, 255), x + 10, py + 6)
+            cur  = zg.mechanic_value * 100
+            earn = zg.l1_on_prestige
+            self._t(F_XS,
+                    f"Orbit {cur:.0f}% → earn {earn} Signals · {cur*0.3:.0f}% momentum carries over",
+                    (170, 200, 255), x + 10, py + 26)
+            py += inf_h + 5
+
+        elif zid == 6 and not getattr(zg, '_pending_arcane_choice', False):
+            ac = zg._arcane_tradition_counts
+            if any(ac.values()):
+                sum_h = 36
+                sum_r = pygame.Rect(x, py, w, sum_h)
+                self._r((215, 210, 240), sum_r, radius=6)
+                e_txt = f"Evocation ×{ac['evocation']} (+{ac['evocation']*10}% KPS)"
+                t_txt = f"Transmutation ×{ac['transmutation']} (+{ac['transmutation']*20}% Crystals)"
+                en_txt = f"Enchantment ×{ac['enchantment']} (-{min(50, ac['enchantment']*5)}% costs)"
+                self._t(F_XS, f"{e_txt}  ·  {t_txt}  ·  {en_txt}", (50, 20, 120), x + 8, py + 12)
+                py += sum_h + 5
+
+        elif zid == 7:
+            ad = zg._ancestral_discoveries
+            total_ad = sum(ad.values())
+            inf_h = 48
+            inf_r = pygame.Rect(x, py, w, inf_h)
+            self._r((55, 35, 15), inf_r, radius=6)
+            self._t(F_MD, "Ancestral Wisdom", (220, 170, 90), x + 10, py + 6)
+            if total_ad:
+                top = sorted(ad.items(), key=lambda kv: -kv[1])[:3]
+                top_txt = "  ·  ".join(f"{k} ×{v}" for k, v in top)
+                self._t(F_XS, f"Remembered: {top_txt}  →  +5% KPS per discovery",
+                        (230, 190, 120), x + 10, py + 26)
+            else:
+                self._t(F_XS, "Prestige to unlock ancestral building bonuses.",
+                        (200, 165, 100), x + 10, py + 26)
+            py += inf_h + 5
+
+        elif zid == 8 and not getattr(zg, '_pending_patron_choice', False):
+            dp = zg._divine_patron_counts
+            if any(dp.values()):
+                sum_h = 36
+                sum_r = pygame.Rect(x, py, w, sum_h)
+                self._r((240, 235, 200), sum_r, radius=6)
+                a_txt = f"Apollo ×{dp['apollo']} (+{dp['apollo']*12}% KPS)"
+                at_txt = f"Athena ×{dp['athena']} (+{dp['athena']*20}% Stars)"
+                h_txt = f"Hermes ×{dp['hermes']} (-{min(50, dp['hermes']*5)}% costs)"
+                self._t(F_XS, f"{a_txt}  ·  {at_txt}  ·  {h_txt}", (100, 80, 10), x + 8, py + 12)
+                py += sum_h + 5
+
+        elif zid == 9:
             sin_pct  = zg.mechanic_value * 100
             earn_now = zg.l1_on_prestige
             legacy   = zg.mechanic_value * 40
@@ -2980,6 +3106,22 @@ class App:
                             zid, school = obj
                             if zid in self.world.zones:
                                 if self.world.zones[zid].do_prestige_with_thought(school):
+                                    self.world.save()
+                                    audio.play("prestige")
+                                else:
+                                    audio.play("error")
+                        elif kind == "zone_arcane":
+                            zid, tradition = obj
+                            if zid in self.world.zones:
+                                if self.world.zones[zid].do_prestige_with_arcane(tradition):
+                                    self.world.save()
+                                    audio.play("prestige")
+                                else:
+                                    audio.play("error")
+                        elif kind == "zone_patron":
+                            zid, patron = obj
+                            if zid in self.world.zones:
+                                if self.world.zones[zid].do_prestige_with_patron(patron):
                                     self.world.save()
                                     audio.play("prestige")
                                 else:

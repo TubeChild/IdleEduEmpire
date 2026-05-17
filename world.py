@@ -66,6 +66,26 @@ class ZoneGame:
         # Zone 9: sin carried into the next run after prestige
         self._sin_legacy: float = 0.0
 
+        # Zone 2: buildings discovered in previous runs (bname → count of runs)
+        self._remembered_buildings: dict = {}
+
+        # Zone 3: automation level carried into next run
+        self._automation_legacy: float = 0.0
+
+        # Zone 5: orbital momentum carried into next run
+        self._orbital_momentum: float = 0.0
+
+        # Zone 6: Arcane Tradition (permanent per-prestige choices)
+        self._arcane_tradition_counts: dict = {"evocation": 0, "transmutation": 0, "enchantment": 0}
+        self._pending_arcane_choice: bool = False
+
+        # Zone 7: ancestral wisdom accumulated across all runs (bname → discovery count)
+        self._ancestral_discoveries: dict = {}
+
+        # Zone 8: Divine Patron (permanent per-prestige choices)
+        self._divine_patron_counts: dict = {"apollo": 0, "athena": 0, "hermes": 0}
+        self._pending_patron_choice: bool = False
+
         # Events (simplified)
         self.pending_event: dict | None = None
         self.active_boost:  dict | None = None
@@ -119,9 +139,19 @@ class ZoneGame:
     def l1_on_prestige(self) -> int:
         req  = self.prestige_layers[0].get("prestige_kp", 2_000_000)
         base = max(1, math.floor(math.sqrt(self.total_kp / max(1, req))))
-        if self.zone_id == 4:
+        if self.zone_id == 3:
+            base = max(1, round(base * (1.0 + self.mechanic_value * 1.5)))
+        elif self.zone_id == 4:
             aris = self._thought_school_counts.get("aristotelian", 0)
             base = max(1, round(base * (1.0 + aris * 0.25)))
+        elif self.zone_id == 5:
+            base = max(1, round(base * (1.0 + self.mechanic_value * 1.0)))
+        elif self.zone_id == 6:
+            transmutation = self._arcane_tradition_counts.get("transmutation", 0)
+            base = max(1, round(base * (1.0 + transmutation * 0.20)))
+        elif self.zone_id == 8:
+            athena = self._divine_patron_counts.get("athena", 0)
+            base = max(1, round(base * (1.0 + athena * 0.20)))
         elif self.zone_id == 9:
             base = max(1, round(base * (1.0 + self.mechanic_value * 2.0)))
         return base
@@ -158,7 +188,10 @@ class ZoneGame:
     def building_kps(self, bname: str) -> float:
         bd  = next(b for b in self.buildings if b["name"] == bname)
         cnt = self.building_counts[bname]
-        return bd["base_kps"] * cnt * self._upgrade_mult(bname) * self._star_mult(bname)
+        base = bd["base_kps"] * cnt * self._upgrade_mult(bname) * self._star_mult(bname)
+        if self.zone_id == 7:
+            base *= 1.0 + self._ancestral_discoveries.get(bname, 0) * 0.05
+        return base
 
     def _global_mult(self) -> float:
         l1b = self.prestige_layers[0]["global_bonus"]
@@ -171,6 +204,12 @@ class ZoneGame:
         if self.zone_id == 4:
             platonic = self._thought_school_counts.get("platonic", 0)
             zone_bonus = 1.0 + platonic * 0.12
+        elif self.zone_id == 6:
+            evocation = self._arcane_tradition_counts.get("evocation", 0)
+            zone_bonus = 1.0 + evocation * 0.10
+        elif self.zone_id == 8:
+            apollo = self._divine_patron_counts.get("apollo", 0)
+            zone_bonus = 1.0 + apollo * 0.12
         return prestige_bonus * self._mechanic_mult() * zone_bonus
 
     def _mechanic_mult(self) -> float:
@@ -200,9 +239,18 @@ class ZoneGame:
     def _cost_at(self, bname: str, n: int) -> float:
         bd   = next(b for b in self.buildings if b["name"] == bname)
         cost = bd["base_cost"] * (1.15 ** n)
-        if self.zone_id == 4:
+        if self.zone_id == 2:
+            remembered = self._remembered_buildings.get(bname, 0)
+            cost *= max(0.40, 1.0 - remembered * 0.15)
+        elif self.zone_id == 4:
             stoic = self._thought_school_counts.get("stoic", 0)
             cost *= max(0.50, 1.0 - stoic * 0.05)
+        elif self.zone_id == 6:
+            enchantment = self._arcane_tradition_counts.get("enchantment", 0)
+            cost *= max(0.50, 1.0 - enchantment * 0.05)
+        elif self.zone_id == 8:
+            hermes = self._divine_patron_counts.get("hermes", 0)
+            cost *= max(0.50, 1.0 - hermes * 0.05)
         return max(1.0, cost)
 
     def building_cost(self, bname: str) -> float:
@@ -283,23 +331,53 @@ class ZoneGame:
     def do_prestige(self):
         if not self.prestige_eligible:
             return
-        # Zone 4: pause for School of Thought choice before completing prestige
+        # Zones needing a choice: pause and let UI handle completion
         if self.zone_id == 4:
             self._pending_thought_choice = True
             return
-        # Zone 9: capture sin level before reset so it carries over
+        if self.zone_id == 6:
+            self._pending_arcane_choice = True
+            return
+        if self.zone_id == 8:
+            self._pending_patron_choice = True
+            return
+        # Carry-over zones: capture mechanic state before reset
         if self.zone_id == 9:
             self._sin_legacy = self.mechanic_value * 0.4
+        elif self.zone_id == 3:
+            self._automation_legacy = self.mechanic_value * 0.4
+        elif self.zone_id == 5:
+            self._orbital_momentum = self.mechanic_value * 0.3
+        elif self.zone_id == 2:
+            for bname in self._discoveries:
+                self._remembered_buildings[bname] = self._remembered_buildings.get(bname, 0) + 1
+        elif self.zone_id == 7:
+            for bname in self._discoveries:
+                self._ancestral_discoveries[bname] = self._ancestral_discoveries.get(bname, 0) + 1
         earned = self.l1_on_prestige
-        self.l1            += earned
+        self.l1             += earned
         self.prestige_count += 1
         self.kp                 = 0.0
         self.total_kp           = 0.0
         self.building_counts    = {b["name"]: 0 for b in self.buildings}
         self.upgrades_purchased = set()
-        # Zone 9: restore sin legacy after reset
+        self._discoveries       = set()
+        # Restore carry-over mechanic values after reset
         if self.zone_id == 9:
             self.mechanic_value = self._sin_legacy
+        elif self.zone_id == 3:
+            self.mechanic_value = self._automation_legacy
+        elif self.zone_id == 5:
+            self.mechanic_value = self._orbital_momentum
+
+    def _complete_prestige_reset(self, earned: int):
+        self.l1             += earned
+        self.prestige_count += 1
+        self.kp                 = 0.0
+        self.total_kp           = 0.0
+        self.building_counts    = {b["name"]: 0 for b in self.buildings}
+        self.upgrades_purchased = set()
+        self._discoveries       = set()
 
     def do_prestige_with_thought(self, school: str) -> bool:
         """Complete zone 4 prestige after the player has chosen a School of Thought."""
@@ -309,13 +387,32 @@ class ZoneGame:
             return False
         self._thought_school_counts[school] += 1
         self._pending_thought_choice = False
-        earned = self.l1_on_prestige   # Aristotelian count now includes new choice
-        self.l1            += earned
-        self.prestige_count += 1
-        self.kp                 = 0.0
-        self.total_kp           = 0.0
-        self.building_counts    = {b["name"]: 0 for b in self.buildings}
-        self.upgrades_purchased = set()
+        earned = self.l1_on_prestige
+        self._complete_prestige_reset(earned)
+        return True
+
+    def do_prestige_with_arcane(self, tradition: str) -> bool:
+        """Complete zone 6 prestige after the player has chosen an Arcane Tradition."""
+        if not self._pending_arcane_choice or self.zone_id != 6:
+            return False
+        if tradition not in self._arcane_tradition_counts:
+            return False
+        self._arcane_tradition_counts[tradition] += 1
+        self._pending_arcane_choice = False
+        earned = self.l1_on_prestige
+        self._complete_prestige_reset(earned)
+        return True
+
+    def do_prestige_with_patron(self, patron: str) -> bool:
+        """Complete zone 8 prestige after the player has chosen a Divine Patron."""
+        if not self._pending_patron_choice or self.zone_id != 8:
+            return False
+        if patron not in self._divine_patron_counts:
+            return False
+        self._divine_patron_counts[patron] += 1
+        self._pending_patron_choice = False
+        earned = self.l1_on_prestige
+        self._complete_prestige_reset(earned)
         return True
 
     def convert_to_l2(self) -> bool:
@@ -484,8 +581,15 @@ class ZoneGame:
             "mechanic_value": self.mechanic_value,
             "mechanic_active_cd": self.mechanic_active_cd,
             "discoveries": list(self._discoveries),
-            "thought_school_counts": self._thought_school_counts,
-            "sin_legacy": self._sin_legacy,
+            # Zone-specific carry-over / choice state
+            "thought_school_counts":  self._thought_school_counts,
+            "sin_legacy":             self._sin_legacy,
+            "remembered_buildings":   self._remembered_buildings,
+            "automation_legacy":      self._automation_legacy,
+            "orbital_momentum":       self._orbital_momentum,
+            "arcane_tradition_counts": self._arcane_tradition_counts,
+            "ancestral_discoveries":  self._ancestral_discoveries,
+            "divine_patron_counts":   self._divine_patron_counts,
         }
 
     def load_data(self, d: dict):
@@ -513,7 +617,23 @@ class ZoneGame:
             "aristotelian": saved_thoughts.get("aristotelian", 0),
             "stoic":        saved_thoughts.get("stoic", 0),
         }
-        self._sin_legacy = d.get("sin_legacy", 0.0)
+        self._sin_legacy        = d.get("sin_legacy", 0.0)
+        self._remembered_buildings = d.get("remembered_buildings", {})
+        self._automation_legacy = d.get("automation_legacy", 0.0)
+        self._orbital_momentum  = d.get("orbital_momentum", 0.0)
+        saved_arcane = d.get("arcane_tradition_counts", {})
+        self._arcane_tradition_counts = {
+            "evocation":    saved_arcane.get("evocation", 0),
+            "transmutation": saved_arcane.get("transmutation", 0),
+            "enchantment":  saved_arcane.get("enchantment", 0),
+        }
+        self._ancestral_discoveries = d.get("ancestral_discoveries", {})
+        saved_patrons = d.get("divine_patron_counts", {})
+        self._divine_patron_counts = {
+            "apollo":  saved_patrons.get("apollo", 0),
+            "athena":  saved_patrons.get("athena", 0),
+            "hermes":  saved_patrons.get("hermes", 0),
+        }
 
 
 # ── WorldManager ──────────────────────────────────────────────────────────────
