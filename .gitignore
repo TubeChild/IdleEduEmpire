@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 *.pyo
 save.json
+world.json
 crash.log
 build/
 dist/
