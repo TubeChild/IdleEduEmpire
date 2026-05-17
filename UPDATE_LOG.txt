@@ -1350,3 +1350,73 @@ main.py — Tooltip / onboarding improvements:
   • All 4 Focus abilities: hover tooltips (Study Surge, KPS Burst, Lucky Hour, Recall)
 
 ====================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 15 — HERO PASSIVE LOOP, ZONE PRESTIGE
+              DIFFERENTIATION, GIT IDENTITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HERO PASSIVE BONUSES (game.py)
+────────────────────────────────
+The created hero now grants six permanent passive bonuses
+while it exists, derived from stat scores (0–50 each) set
+at creation time:
+
+  Intelligence  → +0.5% global KPS per point  (max +25%)
+  Agility       → +0.5% click power per point  (max +25%)
+  Resilience    → -0.2% building costs per point (max -10%)
+  Tech Power    → +0.5% all-building KPS per point (max +25%)
+  Reputation    → +0.5 extra Diplomas per prestige per point
+                  (max +25 Diplomas/prestige)
+  Transcendence → +0.4% global KPS per point  (max +20%)
+
+Bonuses are wired into the core formulas:
+  _global_mult()        — Intelligence + Transcendence
+  click_power           — Agility
+  _building_cost_at()   — Resilience (stacks with diploma discounts)
+  _building_mult()      — Tech Power (additive, all buildings)
+  diplomas_on_prestige  — Reputation (additive to base)
+
+The Zone 10 hero display panel (now 175px) shows all six
+active bonus values below the stat bars.
+
+
+ZONE 4 — SCHOOL OF THOUGHT PRESTIGE (world.py + main.py)
+──────────────────────────────────────────────────────────
+Ancient Academy prestige pauses to present a permanent choice.
+When eligible, the Prestige tab shows three coloured buttons:
+
+  Platonic (purple)     — +12% zone KPS per choice, stackable
+  Aristotelian (green)  — +25% more Scrolls per prestige per choice
+                          (applies to the current prestige immediately)
+  Stoic (blue)          — -5% building costs per choice (cap 50%)
+
+Choices are recorded in _thought_school_counts and persist in
+the world save. A summary bar shows accumulated totals.
+do_prestige_with_thought(school) completes the prestige once
+the player has chosen.
+
+
+ZONE 9 — DARK LEGACY PRESTIGE (world.py + main.py)
+────────────────────────────────────────────────────
+Zone 9 (Underworld) prestige now has a risk/reward identity:
+
+  Soul Marks earned = base × (1 + sin_level × 2.0)
+    — at   0% sin → ×1 base  (safe, clean restart)
+    — at 100% sin → ×3 base  (maximum reward, maximum risk)
+
+  Dark Legacy: 40% of sin at prestige time carries over
+  into the next run as a starting sin level, meaning you
+  start already corrupted and face punishment sooner.
+
+A "Dark Legacy" info panel in the Prestige tab shows:
+  "Sin X% → earn Y Soul Marks  ·  Z% sin carries into next run"
+
+
+GIT IDENTITY
+────────────
+Global git config set:
+  user.name  = Niklas Persson
+  user.email = niklas90persson@icloud.com
+
+====================================================
