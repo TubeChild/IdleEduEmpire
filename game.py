@@ -345,6 +345,11 @@ class Game:
             and (not target or sc.get("target", "") == target)
         )
 
+    def _hero_stat(self, key: str) -> int:
+        if self.hero is None:
+            return 0
+        return self.hero["stats"].get(key, 0)
+
     # ── Season ───────────────────────────────────────────────────────────────
 
     @property
@@ -475,7 +480,8 @@ class Game:
         honor_mult = self._honor_prod("click_mult")
         endow_mult = self._endow_prod("click_mult")
         alumni_mult = self._alumni_prod("click_mult")
-        total_click = base * upg_mult * skill_mult * dipl_mult * honor_mult * endow_mult * alumni_mult * self._event_click_mult() * self.combo_mult * self._focus_click_mult() * self._season_click_mult()
+        hero_agility_mult = 1.0 + self._hero_stat("agility") * 0.005
+        total_click = base * upg_mult * skill_mult * dipl_mult * honor_mult * endow_mult * alumni_mult * self._event_click_mult() * self.combo_mult * self._focus_click_mult() * self._season_click_mult() * hero_agility_mult
         return total_click * self._cw_click_mult
 
     def _building_mult(self, bname: str) -> float:
@@ -492,7 +498,8 @@ class Game:
         scholar_bonus = self._scholar_sum("building_bonus", bname)
         faculty_bonus = self.faculty_bonuses.get(bname, 0.0)
         star_mult     = self._building_star_mult(bname)
-        return upg_mult * (1.0 + skill_bonus + syn_bonus + scholar_bonus + faculty_bonus) * star_mult
+        hero_tech_bonus = self._hero_stat("tech_power") * 0.005
+        return upg_mult * (1.0 + skill_bonus + syn_bonus + scholar_bonus + faculty_bonus + hero_tech_bonus) * star_mult
 
     def _global_mult(self) -> float:
         diploma_mult        = 1.0 + math.log1p(self.diplomas) * 1.5
@@ -514,11 +521,14 @@ class Game:
         strike_mult = 0.25 if self._staff_strike_active else 1.0
         quiz_perm_mult  = 1.0 + self.quiz_perm_kps_bonus
         million_mult    = 1.15 if self.one_in_million else 1.0
+        # Hero passive: Intelligence → global KPS, Transcendence → all-zone wisdom
+        hero_int_mult   = 1.0 + self._hero_stat("intelligence") * 0.005
+        hero_trans_mult = 1.0 + self._hero_stat("transcendence") * 0.004
         return (diploma_mult * honor_mult * endow_mult * alumni_direct_mult
                 * (1.0 + pct_bonus + honor_kps_bonus + endow_kps_bonus + scholar_bonus)
                 * skill_mult * dipl_mult * honor_upg_mult * endow_upg_mult
                 * alumni_upg_mult * research_grant_mult * strike_mult * self.zone_bonus_mult
-                * quiz_perm_mult * million_mult)
+                * quiz_perm_mult * million_mult * hero_int_mult * hero_trans_mult)
 
     def _event_kps_mult(self) -> float:
         if self.active_boost and self.active_boost["type"] == "kps_boost":
@@ -549,7 +559,8 @@ class Game:
         discount = min(0.90, self._dipl_sum("cost_discount")
                             + self._honor_sum("cost_discount")
                             + self._endow_sum("cost_discount")
-                            + self._alumni_sum("cost_discount"))
+                            + self._alumni_sum("cost_discount")
+                            + self._hero_stat("resilience") * 0.002)
         cost = bd.base_cost * (1.15 ** n) * (1.0 - discount)
         if self.sandbox_mode:
             cost /= 1000.0
@@ -1213,7 +1224,7 @@ class Game:
     def diplomas_on_prestige(self) -> int:
         # Log-based: scales with KP magnitude, can't trigger runaway feedback
         # ~8 at 2M KP, ~48 at 1B, ~80 at 1T, ~112 at 1Qa, hard cap ~200
-        base  = max(1, math.floor(math.log10(max(10.0, self.total_kp / 100_000)) * 8)) + self._cw_diploma_bonus + self.quiz_perm_diploma_bonus
+        base  = max(1, math.floor(math.log10(max(10.0, self.total_kp / 100_000)) * 8)) + self._cw_diploma_bonus + self.quiz_perm_diploma_bonus + round(self._hero_stat("reputation") * 0.5)
         bonus = self._skill_sum("prestige_bonus")
         return max(1, math.floor(base * (1 + bonus) * self._season_diploma_mult()))
 

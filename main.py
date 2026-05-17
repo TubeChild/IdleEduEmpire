@@ -1766,19 +1766,19 @@ class App:
             else:
                 # Hero display panel
                 hero = g.hero
-                hpanel = pygame.Rect(x, hero_y, w, 120)
+                hpanel = pygame.Rect(x, hero_y, w, 178)
                 self._r((30, 25, 58), hpanel, radius=8)
                 dom = hero.get("dominant_path", "Foundation")
                 dom_col = PATH_FG.get(dom, (200, 180, 255))
                 self._t(F_LG, f"⚔  {hero['name']}", (220, 200, 255), x+10, hero_y+6)
-                self._t(F_XS, f"Dominant Path: {dom}", dom_col, x+10, hero_y+28)
+                self._t(F_XS, f"Dominant Path: {dom}", dom_col, x+10, hero_y+26)
                 stats = hero.get("stats", {})
                 stat_labels = [(v[1], stats.get(v[0], 0))
                                for v in HERO_PATH_STATS.values()]
                 col_w2 = w // 3
                 for si, (label, score) in enumerate(stat_labels):
                     sx = x + (si % 3) * col_w2 + 6
-                    sy = hero_y + 46 + (si // 3) * 32
+                    sy = hero_y + 42 + (si // 3) * 28
                     self._t(F_XS, label, (160, 150, 200), sx, sy)
                     bar_r = pygame.Rect(sx, sy + 14, col_w2 - 12, 6)
                     pygame.draw.rect(self.screen, (60, 50, 80), bar_r, border_radius=3)
@@ -1786,6 +1786,26 @@ class App:
                                      pygame.Rect(sx, sy+14, int((col_w2-12)*score/50), 6),
                                      border_radius=3)
                     self._t(F_XS, str(score), (200, 190, 255), sx + col_w2 - 22, sy)
+                # Passive bonus summary
+                ints  = stats.get("intelligence", 0)
+                agi   = stats.get("agility", 0)
+                res   = stats.get("resilience", 0)
+                tech  = stats.get("tech_power", 0)
+                rep   = stats.get("reputation", 0)
+                trans = stats.get("transcendence", 0)
+                pygame.draw.line(self.screen, (60, 50, 90),
+                                 (x+10, hero_y+100), (x+w-10, hero_y+100))
+                self._t(F_XS, "Passive bonuses:", (130, 115, 170), x+10, hero_y+104)
+                self._t(F_XS,
+                        f"+{ints*0.5:.1f}% KPS (Int)  "
+                        f"+{agi*0.5:.1f}% click (Agi)  "
+                        f"-{res*0.2:.1f}% costs (Res)",
+                        (180, 170, 220), x+10, hero_y+118)
+                self._t(F_XS,
+                        f"+{tech*0.5:.1f}% bldgs (Tech)  "
+                        f"+{rep*0.5:.1f} dip/prestige (Rep)  "
+                        f"+{trans*0.4:.1f}% KPS (Trans)",
+                        (180, 170, 220), x+10, hero_y+134)
 
         # Study Zone button
         study_y = h + y0 - 52
@@ -1891,25 +1911,76 @@ class App:
         py = y0 + 4
         l1  = pl[0]
         can_p = zg.prestige_eligible
-        pane_r = pygame.Rect(x, py, w, panel_h)
-        self._r((230, 225, 215), pane_r, radius=6, border=1, bc=(180,175,165))
-        self._t(F_MD, f"Zone Prestige  →  {l1['name']}", PRESTIGE, x+10, py+6)
-        self._t(F_SM, f"Reset zone (2M KP) → earn {l1['name']}. {l1['desc']}",
-                (80,80,80), x+10, py+26)
-        if can_p:
-            earn = zg.l1_on_prestige
-            self._t(F_XS, f"Ready! You'll earn {earn} {l1['name']}.", (50,140,50), x+10, py+48)
-        else:
-            req = l1.get("prestige_kp", 2_000_000)
-            pct = min(1.0, zg.total_kp / max(1, req))
-            pygame.draw.rect(self.screen, (175,168,155), (x+10, py+50, 200, 5), border_radius=2)
-            pygame.draw.rect(self.screen, PRESTIGE, (x+10, py+50, int(200*pct), 5), border_radius=2)
-        pbtn = pygame.Rect(x + w - 150, py + (panel_h-34)//2, 142, 34)
-        self._r(PRESTIGE if can_p else GRAY, pbtn, radius=6)
-        self._tc(F_SM, f"Prestige  ({zg.l1} {l1['abbr']})", WHITE, pbtn)
-        self._buy_items.append((pbtn, zid, "zone_prestige"))
 
-        py += panel_h + 5
+        # Zone 4: pending School of Thought choice replaces the prestige button
+        if zid == 4 and getattr(zg, '_pending_thought_choice', False):
+            schools = [
+                ("platonic",     "Platonic",     "+12% zone KPS per choice",   (88, 44, 152)),
+                ("aristotelian", "Aristotelian", "+25% Scrolls per prestige",  (38, 110, 58)),
+                ("stoic",        "Stoic",         "-5% building costs per choice (cap 50%)", (50, 80, 148)),
+            ]
+            choice_h = 52 + len(schools) * 44
+            pane_r = pygame.Rect(x, py, w, choice_h)
+            self._r((245, 238, 200), pane_r, radius=6, border=2, bc=(160, 130, 50))
+            self._t(F_MD, "Choose Your School of Thought", (110, 70, 10), x+10, py+8)
+            self._t(F_XS, "Your choice shapes this prestige permanently.", (120, 90, 30), x+10, py+28)
+            for si, (key, name, desc, col) in enumerate(schools):
+                by = py + 48 + si * 44
+                count = zg._thought_school_counts.get(key, 0)
+                btn_r = pygame.Rect(x + 6, by, w - 12, 38)
+                self._r(col, btn_r, radius=6)
+                self._t(F_MD, f"{name}  (chosen ×{count})", WHITE, x + 16, by + 5)
+                self._t(F_XS, desc, (210, 200, 255) if col[0] < 80 else (200, 240, 200),
+                        x + 16, by + 22)
+                self._buy_items.append((btn_r, (zid, key), "zone_thought"))
+            py += choice_h + 5
+        else:
+            pane_r = pygame.Rect(x, py, w, panel_h)
+            self._r((230, 225, 215), pane_r, radius=6, border=1, bc=(180,175,165))
+            self._t(F_MD, f"Zone Prestige  →  {l1['name']}", PRESTIGE, x+10, py+6)
+            self._t(F_SM, f"Reset zone (2M KP) → earn {l1['name']}. {l1['desc']}",
+                    (80,80,80), x+10, py+26)
+            if can_p:
+                earn = zg.l1_on_prestige
+                self._t(F_XS, f"Ready! You'll earn {earn} {l1['name']}.", (50,140,50), x+10, py+48)
+            else:
+                req = l1.get("prestige_kp", 2_000_000)
+                pct = min(1.0, zg.total_kp / max(1, req))
+                pygame.draw.rect(self.screen, (175,168,155), (x+10, py+50, 200, 5), border_radius=2)
+                pygame.draw.rect(self.screen, PRESTIGE, (x+10, py+50, int(200*pct), 5), border_radius=2)
+            pbtn = pygame.Rect(x + w - 150, py + (panel_h-34)//2, 142, 34)
+            self._r(PRESTIGE if can_p else GRAY, pbtn, radius=6)
+            self._tc(F_SM, f"Prestige  ({zg.l1} {l1['abbr']})", WHITE, pbtn)
+            self._buy_items.append((pbtn, zid, "zone_prestige"))
+            py += panel_h + 5
+
+        # Zone 9: Dark Legacy info — show sin-at-prestige consequence
+        if zid == 9:
+            sin_pct  = zg.mechanic_value * 100
+            earn_now = zg.l1_on_prestige
+            legacy   = zg.mechanic_value * 40
+            sin_h    = 48
+            sin_r    = pygame.Rect(x, py, w, sin_h)
+            self._r((55, 18, 28), sin_r, radius=6)
+            self._t(F_MD, "Dark Legacy", (255, 90, 90), x + 10, py + 6)
+            self._t(F_XS,
+                    f"Sin {sin_pct:.0f}% → earn {earn_now} Soul Marks · "
+                    f"{legacy:.0f}% sin carries into next run",
+                    (200, 140, 140), x + 10, py + 26)
+            py += sin_h + 5
+
+        # Zone 4: current School bonuses summary
+        if zid == 4 and not getattr(zg, '_pending_thought_choice', False):
+            tc = zg._thought_school_counts
+            if any(tc.values()):
+                sum_h = 36
+                sum_r = pygame.Rect(x, py, w, sum_h)
+                self._r((240, 230, 200), sum_r, radius=6)
+                p_txt = f"Platonic ×{tc['platonic']} (+{tc['platonic']*12}% KPS)"
+                a_txt = f"Aristotelian ×{tc['aristotelian']} (+{tc['aristotelian']*25}% Scrolls)"
+                s_txt = f"Stoic ×{tc['stoic']} (-{min(50, tc['stoic']*5)}% costs)"
+                self._t(F_XS, f"{p_txt}  ·  {a_txt}  ·  {s_txt}", (90, 60, 10), x + 8, py + 12)
+                py += sum_h + 5
 
         # ── L2/L3/L4 conversions ──────────────────────────────────────────────
         conv_data = [
@@ -2902,6 +2973,14 @@ class App:
                                 zg = self.world.zones[zid]
                                 if zg.prestige_eligible:
                                     zg.do_prestige()
+                                    audio.play("prestige")
+                                else:
+                                    audio.play("error")
+                        elif kind == "zone_thought":
+                            zid, school = obj
+                            if zid in self.world.zones:
+                                if self.world.zones[zid].do_prestige_with_thought(school):
+                                    self.world.save()
                                     audio.play("prestige")
                                 else:
                                     audio.play("error")

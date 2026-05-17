@@ -59,6 +59,13 @@ class ZoneGame:
         self.mechanic_boost_mult   = 1.0   # running boost from active mechanic
         self._sin_punishment_timer = 0.0   # zone 9 punishment timer
 
+        # Zone 4: School of Thought (permanent per-prestige choices)
+        self._thought_school_counts: dict = {"platonic": 0, "aristotelian": 0, "stoic": 0}
+        self._pending_thought_choice: bool = False
+
+        # Zone 9: sin carried into the next run after prestige
+        self._sin_legacy: float = 0.0
+
         # Events (simplified)
         self.pending_event: dict | None = None
         self.active_boost:  dict | None = None
@@ -110,8 +117,14 @@ class ZoneGame:
 
     @property
     def l1_on_prestige(self) -> int:
-        req = self.prestige_layers[0].get("prestige_kp", 2_000_000)
-        return max(1, math.floor(math.sqrt(self.total_kp / max(1, req))))
+        req  = self.prestige_layers[0].get("prestige_kp", 2_000_000)
+        base = max(1, math.floor(math.sqrt(self.total_kp / max(1, req))))
+        if self.zone_id == 4:
+            aris = self._thought_school_counts.get("aristotelian", 0)
+            base = max(1, round(base * (1.0 + aris * 0.25)))
+        elif self.zone_id == 9:
+            base = max(1, round(base * (1.0 + self.mechanic_value * 2.0)))
+        return base
 
     @property
     def l2_rate(self) -> int:
@@ -154,7 +167,11 @@ class ZoneGame:
         l4b = self.prestige_layers[3]["global_bonus"]
         prestige_bonus = (1.0 + self.l1 * l1b) * (1.0 + self.l2 * l2b) * \
                          (1.0 + self.l3 * l3b) * (1.0 + self.l4 * l4b)
-        return prestige_bonus * self._mechanic_mult()
+        zone_bonus = 1.0
+        if self.zone_id == 4:
+            platonic = self._thought_school_counts.get("platonic", 0)
+            zone_bonus = 1.0 + platonic * 0.12
+        return prestige_bonus * self._mechanic_mult() * zone_bonus
 
     def _mechanic_mult(self) -> float:
         m   = self.zone_def["mechanic"]
@@ -182,7 +199,11 @@ class ZoneGame:
 
     def _cost_at(self, bname: str, n: int) -> float:
         bd   = next(b for b in self.buildings if b["name"] == bname)
-        return max(1.0, bd["base_cost"] * (1.15 ** n))
+        cost = bd["base_cost"] * (1.15 ** n)
+        if self.zone_id == 4:
+            stoic = self._thought_school_counts.get("stoic", 0)
+            cost *= max(0.50, 1.0 - stoic * 0.05)
+        return max(1.0, cost)
 
     def building_cost(self, bname: str) -> float:
         return self._cost_at(bname, self.building_counts[bname])
@@ -262,6 +283,13 @@ class ZoneGame:
     def do_prestige(self):
         if not self.prestige_eligible:
             return
+        # Zone 4: pause for School of Thought choice before completing prestige
+        if self.zone_id == 4:
+            self._pending_thought_choice = True
+            return
+        # Zone 9: capture sin level before reset so it carries over
+        if self.zone_id == 9:
+            self._sin_legacy = self.mechanic_value * 0.4
         earned = self.l1_on_prestige
         self.l1            += earned
         self.prestige_count += 1
@@ -269,6 +297,26 @@ class ZoneGame:
         self.total_kp           = 0.0
         self.building_counts    = {b["name"]: 0 for b in self.buildings}
         self.upgrades_purchased = set()
+        # Zone 9: restore sin legacy after reset
+        if self.zone_id == 9:
+            self.mechanic_value = self._sin_legacy
+
+    def do_prestige_with_thought(self, school: str) -> bool:
+        """Complete zone 4 prestige after the player has chosen a School of Thought."""
+        if not self._pending_thought_choice or self.zone_id != 4:
+            return False
+        if school not in self._thought_school_counts:
+            return False
+        self._thought_school_counts[school] += 1
+        self._pending_thought_choice = False
+        earned = self.l1_on_prestige   # Aristotelian count now includes new choice
+        self.l1            += earned
+        self.prestige_count += 1
+        self.kp                 = 0.0
+        self.total_kp           = 0.0
+        self.building_counts    = {b["name"]: 0 for b in self.buildings}
+        self.upgrades_purchased = set()
+        return True
 
     def convert_to_l2(self) -> bool:
         if self.l1 < self.l2_rate:
@@ -436,6 +484,8 @@ class ZoneGame:
             "mechanic_value": self.mechanic_value,
             "mechanic_active_cd": self.mechanic_active_cd,
             "discoveries": list(self._discoveries),
+            "thought_school_counts": self._thought_school_counts,
+            "sin_legacy": self._sin_legacy,
         }
 
     def load_data(self, d: dict):
@@ -457,6 +507,13 @@ class ZoneGame:
         self.mechanic_value     = d.get("mechanic_value", 0.0)
         self.mechanic_active_cd = d.get("mechanic_active_cd", 0.0)
         self._discoveries       = set(d.get("discoveries", []))
+        saved_thoughts = d.get("thought_school_counts", {})
+        self._thought_school_counts = {
+            "platonic":     saved_thoughts.get("platonic", 0),
+            "aristotelian": saved_thoughts.get("aristotelian", 0),
+            "stoic":        saved_thoughts.get("stoic", 0),
+        }
+        self._sin_legacy = d.get("sin_legacy", 0.0)
 
 
 # ── WorldManager ──────────────────────────────────────────────────────────────
