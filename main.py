@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.18.0"
+VERSION    = "0.19.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -1219,7 +1219,7 @@ class App:
         bonus_y = alum_y + 52 + 3
         path = "Diplomas  →  Honors  →  Endowments  →  Alumni Points"
         self._t(F_XS, path, (130, 100, 50), x+10, bonus_y)
-        self._t(F_XS, "Honor +3% KPS  ·  Endow +10% KPS  ·  Alumni: up to ×315 KPS",
+        self._t(F_XS, "Honor +8% KPS  ·  Endow +10% KPS  ·  Alumni: up to ×315 KPS",
                 (100,100,100), x+10, bonus_y + 13)
 
         # ── Sub-tab bar ────────────────────────────────────────────────────────

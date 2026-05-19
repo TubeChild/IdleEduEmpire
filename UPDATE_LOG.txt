@@ -1715,4 +1715,44 @@ NEW ACHIEVEMENTS (data.py):
     Veteran Hero           — hero reaches Level 10             A+ 5 merit
     Legendary Hero         — hero reaches Level 20             S  8 merit
 
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 21 — BALANCE AUDIT  v0.19.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ZONE PRESTIGE BONUS REBALANCE (zones_data.py)
+──────────────────────────────────────────────
+All 9 zone prestige layer bonuses raised substantially.
+The old values made L2/L3/L4 conversions mathematically
+harmful — you always lost more additive L1 bonus than you
+gained multiplicatively. Fixed with:
+
+  L1 (per currency):  0.02 →  0.03  (+50%)
+  L2 (per currency):  0.04 →  0.25  (+525%)
+  L3 (per currency):  0.12 →  1.00  (+733%)
+  L4 (per currency):  0.30 →  3.00  (+900%)
+
+Break-even analysis (L1 → L2 conversion):
+  Old:  mathematically always worse, never convert
+  New:  worthwhile once you have ~50 L1s accumulated
+        (1+35*0.03)*(1+0.25) ≈ 2.5625 vs 2.5 at 50 L1s)
+
+L3/L4 similarly reach break-even at 6+ L2s and 4+ L3s
+respectively, creating a meaningful conversion economy.
+
+All zone prestige desc strings updated to reflect new %.
+(e.g. "+2% KPS per Cert" → "+3% KPS per Cert", etc.)
+
+HONOR MULTIPLIER REBALANCE (game.py)
+──────────────────────────────────────
+  honor_mult: 1.03^N → 1.08^N
+  Old: 10 honors = ×1.34 — barely noticeable
+  New: 10 honors = ×2.16 — meaningful incentive to hold
+
+Honors still serve as shop currency for permanent upgrades.
+After all upgrades are purchased, excess honors now provide
+a genuinely impactful KPS multiplier.
+
+UI string updated: "Honor +3% KPS" → "Honor +8% KPS"
+
 ====================================================

@@ -509,7 +509,7 @@ class Game:
 
     def _global_mult(self) -> float:
         diploma_mult        = 1.0 + math.log1p(self.diplomas) * 1.5
-        honor_mult          = _safe_pow(1.03, self.honors)
+        honor_mult          = _safe_pow(1.08, self.honors)
         endow_mult          = _safe_pow(1.10, self.endowments)
         # Each alumni point provides a direct +15% KPS — visible regardless of upgrades
         alumni_direct_mult  = 1.0 + self.alumni_points * 0.15
