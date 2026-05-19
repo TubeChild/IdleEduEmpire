@@ -350,6 +350,10 @@ class Game:
             return 0
         return self.hero["stats"].get(key, 0)
 
+    @staticmethod
+    def _hero_xp_needed(level: int) -> int:
+        return round(200 * (1.7 ** (level - 1)))
+
     # ── Season ───────────────────────────────────────────────────────────────
 
     @property
@@ -823,6 +827,8 @@ class Game:
             if self._quiz_fail_timer <= 0:
                 self._quiz_fail_msg = ""
 
+        self.update_hero(dt)
+
     def resolve_strike(self) -> bool:
         """Pay 5 merit to end the strike early."""
         if not self._staff_strike_active or self.merit_points < 5:
@@ -1247,6 +1253,36 @@ class Game:
 
     # ── Hero Creation ─────────────────────────────────────────────────────────
 
+    def update_hero(self, dt: float):
+        if self.hero is None:
+            return
+        self.hero.setdefault("xp", 0.0)
+        self.hero.setdefault("level", 1)
+        self.hero.setdefault("stat_points", 0)
+        self.hero["xp"] += self.kps() * 0.0002 * dt
+        while True:
+            lvl = self.hero["level"]
+            needed = self._hero_xp_needed(lvl)
+            if self.hero["xp"] < needed:
+                break
+            self.hero["xp"] -= needed
+            self.hero["level"] += 1
+            self.hero["stat_points"] += 1
+            if self.hero["level"] % 5 == 0:
+                self._queue_news(
+                    f"{self.hero['name']} reached Level {self.hero['level']}! "
+                    f"({self.hero['stat_points']} stat point(s) to spend)"
+                )
+
+    def train_hero_stat(self, stat_key: str) -> bool:
+        if self.hero is None or self.hero.get("stat_points", 0) <= 0:
+            return False
+        if stat_key not in self.hero.get("stats", {}):
+            return False
+        self.hero["stats"][stat_key] += 1
+        self.hero["stat_points"] -= 1
+        return True
+
     def can_create_hero(self) -> bool:
         return self.hero is None and self.diplomas >= HERO_CREATION_COST
 
@@ -1271,6 +1307,9 @@ class Game:
             "name":           f"Hero of {self.school_name}",
             "dominant_path":  dominant_path,
             "stats":          stats,
+            "xp":             0.0,
+            "level":          1,
+            "stat_points":    0,
         }
         # Grant first Hero Academy in Zone 10
         if world_manager is not None:

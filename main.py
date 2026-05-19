@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.14.0"
+VERSION    = "0.15.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -1765,28 +1765,42 @@ class App:
                     self._buy_items.append((hbtn, None, "create_hero"))
             else:
                 # Hero display panel
-                hero = g.hero
-                hpanel = pygame.Rect(x, hero_y, w, 178)
+                hero     = g.hero
+                level    = hero.get("level", 1)
+                sp       = hero.get("stat_points", 0)
+                xp       = hero.get("xp", 0.0)
+                xp_need  = g._hero_xp_needed(level)
+                hpanel = pygame.Rect(x, hero_y, w, 210)
                 self._r((30, 25, 58), hpanel, radius=8)
                 dom = hero.get("dominant_path", "Foundation")
                 dom_col = PATH_FG.get(dom, (200, 180, 255))
+                # Name + level
                 self._t(F_LG, f"⚔  {hero['name']}", (220, 200, 255), x+10, hero_y+6)
-                self._t(F_XS, f"Dominant Path: {dom}", dom_col, x+10, hero_y+26)
-                stats = hero.get("stats", {})
-                stat_labels = [(v[1], stats.get(v[0], 0))
-                               for v in HERO_PATH_STATS.values()]
+                self._t(F_MD, f"Lv.{level}", (255, 215, 60), x + w - 56, hero_y+8)
+                self._t(F_XS, f"Dominant Path: {dom}", dom_col, x+10, hero_y+27)
+                # Stat bars + train buttons (2 rows × 3 cols)
+                stats  = hero.get("stats", {})
+                sp_available = sp > 0
                 col_w2 = w // 3
-                for si, (label, score) in enumerate(stat_labels):
+                for si, (_, (stat_key, label)) in enumerate(HERO_PATH_STATS.items()):
+                    score = stats.get(stat_key, 0)
                     sx = x + (si % 3) * col_w2 + 6
-                    sy = hero_y + 42 + (si // 3) * 28
+                    sy = hero_y + 44 + (si // 3) * 30
                     self._t(F_XS, label, (160, 150, 200), sx, sy)
-                    bar_r = pygame.Rect(sx, sy + 14, col_w2 - 12, 6)
+                    bar_w = col_w2 - 34
+                    bar_r = pygame.Rect(sx, sy + 14, bar_w, 6)
                     pygame.draw.rect(self.screen, (60, 50, 80), bar_r, border_radius=3)
+                    fill = int(bar_w * min(1.0, score / 100))
                     pygame.draw.rect(self.screen, dom_col,
-                                     pygame.Rect(sx, sy+14, int((col_w2-12)*score/50), 6),
-                                     border_radius=3)
-                    self._t(F_XS, str(score), (200, 190, 255), sx + col_w2 - 22, sy)
-                # Passive bonus summary
+                                     pygame.Rect(sx, sy+14, fill, 6), border_radius=3)
+                    self._t(F_XS, str(score), (200, 190, 255), sx + bar_w + 2, sy)
+                    # +1 train button
+                    tbtn = pygame.Rect(sx + col_w2 - 26, sy + 4, 20, 18)
+                    self._r((60, 170, 60) if sp_available else (45, 40, 60), tbtn, radius=4)
+                    self._tc(F_XS, "+", WHITE, tbtn)
+                    if sp_available:
+                        self._buy_items.append((tbtn, stat_key, "hero_train"))
+                # Divider + passive bonuses
                 ints  = stats.get("intelligence", 0)
                 agi   = stats.get("agility", 0)
                 res   = stats.get("resilience", 0)
@@ -1794,18 +1808,33 @@ class App:
                 rep   = stats.get("reputation", 0)
                 trans = stats.get("transcendence", 0)
                 pygame.draw.line(self.screen, (60, 50, 90),
-                                 (x+10, hero_y+100), (x+w-10, hero_y+100))
-                self._t(F_XS, "Passive bonuses:", (130, 115, 170), x+10, hero_y+104)
+                                 (x+10, hero_y+108), (x+w-10, hero_y+108))
+                self._t(F_XS, "Passive bonuses:", (130, 115, 170), x+10, hero_y+112)
                 self._t(F_XS,
                         f"+{ints*0.5:.1f}% KPS (Int)  "
                         f"+{agi*0.5:.1f}% click (Agi)  "
                         f"-{res*0.2:.1f}% costs (Res)",
-                        (180, 170, 220), x+10, hero_y+118)
+                        (180, 170, 220), x+10, hero_y+126)
                 self._t(F_XS,
                         f"+{tech*0.5:.1f}% bldgs (Tech)  "
                         f"+{rep*0.5:.1f} dip/prestige (Rep)  "
                         f"+{trans*0.4:.1f}% KPS (Trans)",
-                        (180, 170, 220), x+10, hero_y+134)
+                        (180, 170, 220), x+10, hero_y+140)
+                # XP bar + stat points
+                pygame.draw.line(self.screen, (60, 50, 90),
+                                 (x+10, hero_y+156), (x+w-10, hero_y+156))
+                xp_pct = min(1.0, xp / max(1, xp_need))
+                pygame.draw.rect(self.screen, (40, 35, 65),
+                                 (x+10, hero_y+162, w-20, 8), border_radius=4)
+                pygame.draw.rect(self.screen, (255, 200, 50),
+                                 (x+10, hero_y+162, int((w-20)*xp_pct), 8), border_radius=4)
+                self._t(F_XS,
+                        f"XP  {fmt(xp)} / {fmt(xp_need)}  →  Level {level+1}",
+                        (200, 180, 100), x+10, hero_y+174)
+                sp_col = (100, 220, 100) if sp > 0 else (140, 130, 160)
+                self._t(F_XS,
+                        f"Stat Points: {sp}  — earn 1 per level-up, spend with + buttons",
+                        sp_col, x+10, hero_y+190)
 
         # Study Zone button
         study_y = h + y0 - 52
@@ -3178,6 +3207,12 @@ class App:
                         elif kind == "create_hero":
                             if self.game.create_hero(world_manager=self.world):
                                 audio.play("skill")
+                            else:
+                                audio.play("error")
+                        elif kind == "hero_train":
+                            stat_key = obj
+                            if self.game.train_hero_stat(stat_key):
+                                audio.play("upgrade")
                             else:
                                 audio.play("error")
                         elif kind == "toggle_fullscreen":
