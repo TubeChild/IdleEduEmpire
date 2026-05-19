@@ -1554,6 +1554,48 @@ Click handler: kind="hero_train", obj=stat_key
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 20 — NEW PLAYER ONBOARDING  v0.18.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TUTORIAL CARD SEQUENCE (5 steps)
+──────────────────────────────────
+A styled card appears in the left sidebar goals panel,
+guiding new players through their first ~5 minutes.
+
+Step 0 — "Welcome!" (no clicks yet)
+  Click the STUDY button to earn your first KP.
+  → advances when total_clicks >= 1
+
+Step 1 — "Buy a Classroom" (clicked, no buildings)
+  Go to Buildings tab, buy a Classroom for KP/s.
+  → advances when any building is owned
+
+Step 2 — "Power Up!" (has building)
+  Upgrades multiply buildings permanently.
+  → advances when any upgrade bought OR total_kp > 200K
+
+Step 3 — "Time to Graduate" (has upgrades or high KP)
+  Prestige at 2M KP to earn Diplomas that survive resets.
+  → advances when prestige_count >= 1
+
+Step 4 — "You've Got It!" (after first prestige)
+  Explore Legacy, Worlds, Curriculum.
+  → auto-dismisses after 12 seconds
+
+UI:
+  Dark blue card (22, 65, 110) with gold title
+  "skip" button (top-right) → sets tutorial_step = 99
+  "Got it →" button (bottom-right) → advances one step
+
+STATE (game.py + save/load):
+  tutorial_step: int  (0–4 active, 99 = complete)
+  Defaults to 99 for existing saves with any KP earned —
+  returning players never see it.
+
+AUTO-ADVANCE: _check_tutorial_advance(dt) called every tick
+  from App game loop. Step 4 auto-completes after 12s.
+
+
   SESSION 19 — ZONE STORY CHAPTERS  v0.17.0
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

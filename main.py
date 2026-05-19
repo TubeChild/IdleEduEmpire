@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.17.0"
+VERSION    = "0.18.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -216,6 +216,8 @@ class App:
         self._hm_show_tab = ""
         self._hm_x        = float(W + 10)
         self._hm_timer    = 0.0
+
+        self._tutorial_auto_timer = 0.0
 
         self.buy_mult: int | str = 1
         self.b_filter: str = "all"   # "all" | "affordable" | "owned"
@@ -511,6 +513,33 @@ class App:
                  for b in BUILDINGS if g.building_counts[b.name] > 0]
         n_own_rows = (len(owned) + 1) // 2
         G_LH, O_LH, T_LH = 17, 13, 14
+
+        # Tutorial card (replaces tip text when active)
+        _TUT_STEPS = [
+            ("Welcome!",         "Click the STUDY button above to earn your first Knowledge Points."),
+            ("Buy a Classroom",  "Go to the Buildings tab and buy a Classroom — it earns KP/s automatically!"),
+            ("Power Up!",        "Upgrades multiply buildings permanently. Check the Upgrades tab when you can!"),
+            ("Time to Graduate", "Earn 2M KP then hit Prestige — Diplomas survive all resets and boost KPS forever."),
+            ("You've Got It!",   "Explore Legacy, Worlds, and Curriculum for permanent progression. Tutorial complete!"),
+        ]
+        tut_active = g.tutorial_step < 99
+        tut_text_lines: list = []
+        tut_title = ""
+        TUT_H = 0
+        if tut_active:
+            tip = ""   # suppress old tip
+            step = min(g.tutorial_step, 4)
+            tut_title, tut_txt = _TUT_STEPS[step]
+            words, cur = tut_txt.split(), ""
+            for w in words:
+                test = (cur + " " + w).strip()
+                if F_XS.size(test)[0] <= LEFT_W - 36:
+                    cur = test
+                else:
+                    tut_text_lines.append(cur); cur = w
+            if cur: tut_text_lines.append(cur)
+            TUT_H = 20 + len(tut_text_lines) * 13 + 22
+
         tip_lines = []
         if tip:
             words, cur = tip.split(), ""
@@ -521,9 +550,10 @@ class App:
                 else:
                     tip_lines.append(cur); cur = w
             if cur: tip_lines.append(cur)
+
         own_data_rows = n_own_rows if self._owned_expanded else 0
         panel_h = (14 + len(goals) * G_LH
-                   + (6 + len(tip_lines) * T_LH if tip_lines else 0)
+                   + (6 + TUT_H if tut_active else (6 + len(tip_lines) * T_LH if tip_lines else 0))
                    + (14 + own_data_rows * O_LH if owned else 0) + 10)
         y0 = max(_fp_ui_bottom + 4, H - TICKER_H - 8 - panel_h)
         panel_r = pygame.Rect(5, y0, LEFT_W - 10,
@@ -538,7 +568,25 @@ class App:
             self._t(F_XS, f"• {goal}", DARK, 12, cy)
             cy += G_LH
 
-        if tip_lines:
+        if tut_active:
+            cy += 3
+            pygame.draw.line(self.screen, (185, 178, 165), (12, cy), (LEFT_W - 12, cy), 1)
+            cy += 4
+            card_r = pygame.Rect(8, cy, LEFT_W - 16, TUT_H)
+            self._r((22, 65, 110), card_r, radius=6)
+            self._t(F_SM, tut_title, (255, 215, 60), 14, cy + 4)
+            skip_r = pygame.Rect(card_r.right - 42, cy + 4, 40, 13)
+            self._r((45, 45, 65), skip_r, radius=3)
+            self._tc(F_XS, "skip", (160, 160, 190), skip_r)
+            self._buy_items.append((skip_r, None, "tutorial_skip"))
+            for i, tl in enumerate(tut_text_lines):
+                self._t(F_XS, tl, (185, 215, 240), 14, cy + 20 + i * 13)
+            got_r = pygame.Rect(LEFT_W - 94, cy + TUT_H - 20, 86, 17)
+            self._r((35, 145, 85), got_r, radius=4)
+            self._tc(F_XS, "Got it  →", WHITE, got_r)
+            self._buy_items.append((got_r, None, "tutorial_advance"))
+            cy += TUT_H + 4
+        elif tip_lines:
             cy += 3
             pygame.draw.line(self.screen, (185, 178, 165), (12, cy), (LEFT_W - 12, cy), 1)
             cy += 4
@@ -643,6 +691,24 @@ class App:
                             [(cx, cy-148), (cx+30, cy-136), (cx, cy-124)])
 
     # ── Goals panel ───────────────────────────────────────────────────────────
+
+    def _check_tutorial_advance(self, dt: float):
+        g = self.game
+        s = g.tutorial_step
+        if s >= 99:
+            return
+        if s == 0 and g.total_clicks >= 1:
+            g.tutorial_step = 1
+        elif s == 1 and sum(g.building_counts.values()) > 0:
+            g.tutorial_step = 2
+        elif s == 2 and (g.upgrades_purchased or g.total_kp > 200_000):
+            g.tutorial_step = 3
+        elif s == 3 and g.prestige_count >= 1:
+            g.tutorial_step = 4
+        elif s == 4:
+            self._tutorial_auto_timer += dt
+            if self._tutorial_auto_timer >= 12.0:
+                g.tutorial_step = 99
 
     def _get_tutorial_tip(self) -> str:
         g = self.game
@@ -3217,6 +3283,11 @@ class App:
                                 audio.play("upgrade")
                             else:
                                 audio.play("error")
+                        elif kind == "tutorial_advance":
+                            self.game.tutorial_step = min(99, self.game.tutorial_step + 1)
+                            self._tutorial_auto_timer = 0.0
+                        elif kind == "tutorial_skip":
+                            self.game.tutorial_step = 99
                         elif kind == "toggle_fullscreen":
                             self._fullscreen = not self._fullscreen
                             flags = pygame.SCALED
@@ -3306,6 +3377,7 @@ class App:
             self.game._cw_click_mult    = self.world.zone1_click_mult()
             self.game._cw_diploma_bonus = self.world.zone1_diploma_bonus()
             self.game.update(dt)
+            self._check_tutorial_advance(dt)
             self.world.update(dt, self.game)
             self.game._zone_building_counts = self.world.all_zone_building_counts()
             # Populate zone stats for achievement checks

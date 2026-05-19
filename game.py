@@ -220,6 +220,7 @@ class Game:
         # School identity
         self.school_name    = "Edu Empire Academy"
         self.show_headmaster = True
+        self.tutorial_step   = 0   # 0-4 = active steps, 99 = complete
 
         # Hero (Zone 10)
         self.hero: Optional[dict] = None   # None until created
@@ -1400,6 +1401,7 @@ class Game:
             "milestones_hit":           list(self.milestones_hit),
             "school_name":              self.school_name,
             "show_headmaster":          self.show_headmaster,
+            "tutorial_step":            self.tutorial_step,
             "offline_cap_hours":        self.offline_cap_hours,
             "focus_points":             self.focus_points,
             "inspectors_done":          list(self._inspectors_done),
@@ -1469,6 +1471,9 @@ class Game:
             self.milestones_hit             = set(d.get("milestones_hit", []))
             self.school_name                = d.get("school_name", "Edu Empire Academy")
             self.show_headmaster            = d.get("show_headmaster", True)
+            # Default to 99 (done) for existing saves that already have progress
+            _tut_default = 99 if d.get("all_time_kp", 0) > 100 else 0
+            self.tutorial_step              = d.get("tutorial_step", _tut_default)
             self.offline_cap_hours          = d.get("offline_cap_hours", 8.0)
             self.focus_points               = d.get("focus_points", 0.0)
             self._inspectors_done           = set(d.get("inspectors_done", []))
