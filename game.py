@@ -1161,6 +1161,12 @@ class Game:
                 hit = self.game_time >= 365 * DAY_CYCLE
             elif c == "star_hit":
                 hit = any(v >= ch.get("value", 1) for v in self.star_milestones_hit.values())
+            elif c == "zone_prestige":
+                tgt = ch.get("target", "")
+                if tgt:
+                    hit = self._zone_stats.get(f"z{tgt}_prestige", 0) >= ch.get("value", 1)
+                else:
+                    hit = self._zone_stats.get("total_prestige", 0) >= ch.get("value", 1)
             else:
                 hit = False
             if hit:

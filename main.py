@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.16.0"
+VERSION    = "0.17.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -2371,16 +2371,18 @@ class App:
         if not ch:
             g.story_queue.pop(0)
             return []
-        pw, ph = 560, 310
+        lines = ch["text"].split("\n")
+        text_h = sum(22 if l else 10 for l in lines)
+        pw = 560
+        ph = max(310, 56 + text_h + 62)
         px = (W - pw) // 2
-        py = (H - ph) // 2
+        py = max(8, (H - ph) // 2)
         dim = pygame.Surface((W, H), pygame.SRCALPHA)
         dim.fill((0, 0, 0, 160))
         self.screen.blit(dim, (0, 0))
         self._r((248, 244, 232), pygame.Rect(px, py, pw, ph), radius=10, border=2, bc=(100,90,70))
         self._r((60, 50, 35), pygame.Rect(px, py, pw, 44), radius=10)
         self._t(F_LG, ch["title"], GOLD, px+16, py+10)
-        lines = ch["text"].split("\n")
         ty = py + 56
         for line in lines:
             self._t(F_MD if line else F_SM, line, DARK, px+16, ty)

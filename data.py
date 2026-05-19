@@ -758,6 +758,117 @@ STORY: list[dict] = [
          "They just know this is where they want to be."
      ),
      "check": "star_hit", "value": 1},
+
+    # ── Zone story chapters ───────────────────────────────────────────────────
+
+    {"id": "zch_open", "title": "Beyond the Horizon",
+     "text": (
+         "There are other worlds.\n"
+         "Other eras. Other rules. Other kinds of knowledge.\n\n"
+         "You've built something remarkable here —\n"
+         "and now the universe is inviting you to do it again,\n"
+         "somewhere stranger, somewhere harder.\n\n"
+         "The first zone beyond your own is open.\n"
+         "What you learn there will change everything back home."
+     ),
+     "check": "zone_prestige", "target": "", "value": 1},
+
+    {"id": "zch2", "title": "The First Excavation",
+     "text": (
+         "You brush away centuries of dust.\n"
+         "Beneath the rubble — a classroom.\n"
+         "Not so different from your own: stone benches,\n"
+         "markings on a wall that once held a student's first words.\n\n"
+         "Whoever taught here is long gone.\n"
+         "But the knowledge they planted survived —\n"
+         "in rock, in ruin, in the roots of everything that came after.\n"
+         "Some things, it turns out, are built to last."
+     ),
+     "check": "zone_prestige", "target": "2", "value": 1},
+
+    {"id": "zch3", "title": "The Age of Steam",
+     "text": (
+         "The first engine turns. The first gear locks into place.\n"
+         "Your students are no longer copying from books —\n"
+         "they're building the machines that will write new ones.\n\n"
+         "Someone asks if education and industry can coexist.\n"
+         "You watch a student explain thermodynamics to an engineer\n"
+         "and decide the question has already answered itself."
+     ),
+     "check": "zone_prestige", "target": "3", "value": 1},
+
+    {"id": "zch4", "title": "The Philosopher's Choice",
+     "text": (
+         "Three masters stand before you.\n"
+         "Each offers a different path through the same truth.\n\n"
+         "Plato says reality is an idea.\n"
+         "Aristotle says it lives in the thing itself.\n"
+         "The Stoic says it doesn't matter — only your response does.\n\n"
+         "You have chosen. The school will bear that mark forever.\n"
+         "Next time, perhaps, you'll choose differently."
+     ),
+     "check": "zone_prestige", "target": "4", "value": 1},
+
+    {"id": "zch5", "title": "Signal Sent",
+     "text": (
+         "The first transmission leaves the atmosphere.\n"
+         "A string of data, launched into silence —\n"
+         "everything your school has learned,\n"
+         "crossing the dark at the speed of light.\n\n"
+         "You don't know if anyone will answer.\n"
+         "But you built a school that believed in asking the question.\n"
+         "That, you decide, is enough."
+     ),
+     "check": "zone_prestige", "target": "5", "value": 1},
+
+    {"id": "zch6", "title": "Words of Power",
+     "text": (
+         "The first incantation completes.\n"
+         "A student who last week could barely light a match\n"
+         "now holds a flame in the palm of their hand.\n\n"
+         "Magic and scholarship share a secret:\n"
+         "neither rewards shortcuts.\n"
+         "Both demand that you understand the why\n"
+         "before the how will ever answer you."
+     ),
+     "check": "zone_prestige", "target": "6", "value": 1},
+
+    {"id": "zch7", "title": "Bones of Knowledge",
+     "text": (
+         "There are no books here. No blackboards. No classrooms.\n"
+         "Only marks on cave walls — hands, animals, counting lines.\n\n"
+         "They were teaching each other.\n"
+         "Long before language had a word for 'school',\n"
+         "one person showed another how to survive.\n\n"
+         "You press your hand against the stone.\n"
+         "They would recognise what you've built."
+     ),
+     "check": "zone_prestige", "target": "7", "value": 1},
+
+    {"id": "zch8", "title": "The Gods Take Notice",
+     "text": (
+         "Olympus has been quiet since the age of heroes faded.\n"
+         "But something you've built has drawn their attention again.\n\n"
+         "A patron steps forward — offering gifts in exchange for devotion.\n"
+         "The deal is ancient and simple:\n"
+         "honour the divine in your work, and the divine will honour you.\n\n"
+         "Knowledge was always sacred to them.\n"
+         "Perhaps it was never supposed to be otherwise."
+     ),
+     "check": "zone_prestige", "target": "8", "value": 1},
+
+    {"id": "zch9", "title": "Descent",
+     "text": (
+         "There is no light here. Only weight.\n"
+         "The weight of every wrong answer, every failed student,\n"
+         "every lesson you should have taught but didn't.\n\n"
+         "The Underworld doesn't punish the ignorant.\n"
+         "It makes the cost of ignorance visible.\n\n"
+         "You carry your sin like lantern fuel.\n"
+         "It is terrible. It is necessary.\n"
+         "And somehow — it is making you better."
+     ),
+     "check": "zone_prestige", "target": "9", "value": 1},
 ]
 
 # ── Random Events (14 total, with rarity weighting) ──────────────────────────

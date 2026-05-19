@@ -1554,6 +1554,52 @@ Click handler: kind="hero_train", obj=stat_key
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 19 — ZONE STORY CHAPTERS  v0.17.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+10 new story chapters added to the existing popup system.
+Each fires the first time the player prestiges in that zone.
+Story popup box now auto-sizes to fit longer chapters.
+
+NEW CHAPTERS (data.py  STORY list):
+
+  "Beyond the Horizon"   — first total zone prestige (any zone)
+                           Introduces the multi-zone concept.
+
+  "The First Excavation" — Zone 2, first prestige
+                           Discovering ancient classrooms in the ruins.
+
+  "The Age of Steam"     — Zone 3, first prestige
+                           Students become machine-builders.
+
+  "The Philosopher's Choice" — Zone 4, first prestige
+                           Standing before three masters.
+
+  "Signal Sent"          — Zone 5, first prestige
+                           First transmission leaves the atmosphere.
+
+  "Words of Power"       — Zone 6, first prestige
+                           Magic and scholarship share a secret.
+
+  "Bones of Knowledge"   — Zone 7, first prestige
+                           Cave paintings — the first lesson ever taught.
+
+  "The Gods Take Notice" — Zone 8, first prestige
+                           Olympus offers a divine patron.
+
+  "Descent"              — Zone 9, first prestige
+                           Sin as lantern fuel in the Underworld.
+
+NEW CHECK TYPE (_check_story in game.py):
+  "zone_prestige": target="" → total_prestige; target="N" → z{N}_prestige
+  Reads from self._zone_stats (populated by App each tick).
+
+POPUP FIX (main.py):
+  Story popup height is now dynamic: max(310, 56 + text_h + 62)
+  Prevents text overflowing the OK button on longer chapters.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   SESSION 18 — ZONE-SPECIFIC ACHIEVEMENTS  v0.16.0
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
