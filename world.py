@@ -2,13 +2,26 @@
 import json
 import math
 import os
+import sys
 import random
 import time
 
 from zones_data import ZONE_DEFS, ZONE_BY_ID
 from data import CW_SHOP
 
-WORLD_SAVE = os.path.join(os.path.dirname(__file__), "world.json")
+
+def _save_dir() -> str:
+    name = "IdleEduEmpire"
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA", os.path.expanduser("~"))
+    else:
+        base = os.environ.get("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))
+    d = os.path.join(base, name)
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+WORLD_SAVE = os.path.join(_save_dir(), "world.json")
 
 _STAR_THRESHOLDS  = [1_000, 10_000, 100_000, 1_000_000]
 _STAR_LEVEL_MULTS = [1.25, 1.50, 2.00, 3.00]

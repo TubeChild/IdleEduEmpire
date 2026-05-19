@@ -1,14 +1,20 @@
-name: Build
+name: Build and Release
 
+# Builds on every push to main (smoke-test CI).
+# On version tags (v*) also creates a GitHub Release and pushes to itch.io.
 on:
   push:
     branches: [main]
-  workflow_dispatch:   # lets you trigger a build manually from the GitHub UI
+    tags: ['v*']
+  workflow_dispatch:
 
 jobs:
 
+  # ── Linux build ────────────────────────────────────────────────────────
   build-linux:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -17,7 +23,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install pygame pyinstaller
+        run: pip install pygame pyinstaller Pillow
 
       - name: Get version
         id: ver
@@ -29,14 +35,17 @@ jobs:
         run: pyinstaller IdleEduEmpire.spec --clean -y
 
       - name: Zip
-        run: cd dist && zip -r ../IdleEduEmpire-v${{ steps.ver.outputs.version }}-linux.zip IdleEduEmpire/
+        run: |
+          cd dist
+          zip -r ../IdleEduEmpire-v${{ steps.ver.outputs.version }}-linux.zip IdleEduEmpire/
 
-      - name: Upload
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: IdleEduEmpire-linux
+          name: linux-zip
           path: IdleEduEmpire-v${{ steps.ver.outputs.version }}-linux.zip
+          retention-days: 14
 
+  # ── Windows build ──────────────────────────────────────────────────────
   build-windows:
     runs-on: windows-latest
     steps:
@@ -47,7 +56,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install pygame pyinstaller
+        run: pip install pygame pyinstaller Pillow
 
       - name: Get version
         id: ver
@@ -60,10 +69,60 @@ jobs:
         run: pyinstaller IdleEduEmpire.spec --clean -y
 
       - name: Zip
-        run: Compress-Archive -Path dist\IdleEduEmpire -DestinationPath IdleEduEmpire-v${{ steps.ver.outputs.version }}-windows.zip
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          Compress-Archive -Path dist\IdleEduEmpire -DestinationPath "IdleEduEmpire-v$v-windows.zip"
 
-      - name: Upload
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: IdleEduEmpire-windows
+          name: windows-zip
           path: IdleEduEmpire-v${{ steps.ver.outputs.version }}-windows.zip
+          retention-days: 14
+
+  # ── Release (tags only) ────────────────────────────────────────────────
+  release:
+    needs: [build-linux, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-zip'
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ needs.build-linux.outputs.version }}"
+          gh release create "${{ github.ref_name }}" \
+            --title "Idle Edu Empire v${VERSION}" \
+            --notes "Download the zip for your platform, extract, and run **IdleEduEmpire** (Linux) or **IdleEduEmpire.exe** (Windows). Saves are stored in your user data folder and persist across updates." \
+            "IdleEduEmpire-v${VERSION}-linux.zip" \
+            "IdleEduEmpire-v${VERSION}-windows.zip"
+
+      # ── itch.io upload ─────────────────────────────────────────────────
+      # Requires two GitHub secrets to be set:
+      #   BUTLER_API_KEY  — from https://itch.io/user/settings/api-keys
+      #   ITCH_USER       — your itch.io username (e.g. "nick90")
+      # And your game page slug on itch.io must be "idle-edu-empire".
+      # To change the slug, edit the butler push lines below.
+      - name: Push to itch.io
+        if: ${{ secrets.BUTLER_API_KEY != '' && secrets.ITCH_USER != '' }}
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          VERSION: ${{ needs.build-linux.outputs.version }}
+        run: |
+          curl -L -o butler.zip "https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default"
+          unzip -q butler.zip
+          chmod +x butler
+          ./butler push "IdleEduEmpire-v${VERSION}-linux.zip" \
+            "${ITCH_USER}/idle-edu-empire:linux" --userversion "${VERSION}"
+          ./butler push "IdleEduEmpire-v${VERSION}-windows.zip" \
+            "${ITCH_USER}/idle-edu-empire:windows" --userversion "${VERSION}"

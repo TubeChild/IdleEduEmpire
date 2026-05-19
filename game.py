@@ -2,6 +2,7 @@ import datetime
 import json
 import math
 import os
+import sys
 import random
 import time
 from typing import Dict, Optional, Set
@@ -14,7 +15,19 @@ from data import (BUILDINGS, UPGRADES, SKILLS, ACHIEVEMENTS, EVENTS, STORY,
                   BUILDING_SACRIFICE, QUIZ_QUESTIONS, QUIZ_REWARDS,
                   HERO_CREATION_COST, HERO_PATH_STATS)
 
-SAVE_FILE    = os.path.join(os.path.dirname(__file__), "save.json")
+
+def _save_dir() -> str:
+    name = "IdleEduEmpire"
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA", os.path.expanduser("~"))
+    else:
+        base = os.environ.get("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))
+    d = os.path.join(base, name)
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+SAVE_FILE = os.path.join(_save_dir(), "save.json")
 COMBO_MAX    = 10
 COMBO_WINDOW = 2.0
 
