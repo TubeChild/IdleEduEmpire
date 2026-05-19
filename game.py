@@ -75,6 +75,7 @@ class Game:
     def __init__(self):
         self.building_counts: Dict[str, int] = {b.name: 0 for b in BUILDINGS}
         self._zone_building_counts: Dict[str, int] = {}   # populated by App from WorldManager
+        self._zone_stats: dict = {}                        # populated by App from WorldManager
         self.upgrades_purchased: Set[str]    = set()
         self.skills_purchased:   Set[str]    = set()
         self.achievements_unlocked: Set[str] = set()
@@ -1210,6 +1211,25 @@ class Game:
                 case "max_single_bld":  hit = max(self.building_counts.values(), default=0) >= a.check_value
                 case "quiz_tier":       hit = a.check_target in self.quiz_tiers_earned
                 case "quiz_million":    hit = self.one_in_million
+                case "zone_prestige":
+                    if a.check_target:
+                        hit = self._zone_stats.get(f"z{a.check_target}_prestige", 0) >= a.check_value
+                    else:
+                        hit = self._zone_stats.get("total_prestige", 0) >= a.check_value
+                case "zones_with_prestige":
+                    hit = self._zone_stats.get("zones_with_prestige", 0) >= a.check_value
+                case "cw_earned":
+                    hit = self._zone_stats.get("cw_earned", 0) >= a.check_value
+                case "zone_all_choices":
+                    hit = self._zone_stats.get(f"z{a.check_target}_all_choices", False)
+                case "z7_discoveries":
+                    hit = self._zone_stats.get("z7_discoveries", 0) >= a.check_value
+                case "zone_sin":
+                    hit = self._zone_stats.get("z9_sin", 0.0) >= a.check_value
+                case "hero_exists":
+                    hit = self.hero is not None
+                case "hero_level":
+                    hit = (self.hero.get("level", 0) if self.hero else 0) >= a.check_value
                 case _:                 hit = False
             if hit:
                 self.achievements_unlocked.add(a.id)

@@ -422,6 +422,45 @@ ACHIEVEMENTS: list[AchievementDef] = [
     AchievementDef("quiz_legendary", "Nobel Candidate",   "Earn a Legendary reward from the quiz",           "A+", "quiz_tier",    "legendary",  0, 10),
     AchievementDef("quiz_mythic",    "Valedictorian",     "Earn the Mythic reward from the quiz",            "S",  "quiz_tier",    "mythic",     0, 25),
     AchievementDef("quiz_million",   "One in a Million",  "Like Bosson sang — all stats permanently +15%!",  "S+", "quiz_million", "",           0, 50),
+
+    # ── Zone achievements ────────────────────────────────────────────────────
+    # Cross-zone
+    AchievementDef("zone_first",    "World Traveller",      "Prestige in any zone for the first time",          "A",  "zone_prestige",     "",   1,    3),
+    AchievementDef("zone_total_10", "Zone Master",          "Earn 10 total zone prestiges",                     "S",  "zone_prestige",     "",   10,   6),
+    AchievementDef("zones_5",       "Dimensional Scholar",  "Prestige in 5 or more different zones",            "S",  "zones_with_prestige","",  5,    8),
+    AchievementDef("cw_10",         "Cosmic Collector",     "Earn 10 Cosmic Wisdom",                            "A",  "cw_earned",         "",   10,   4),
+    AchievementDef("cw_50",         "Celestial Scholar",    "Earn 50 Cosmic Wisdom",                            "S",  "cw_earned",         "",   50,   8),
+    # Zone 2 — Ancient Ruins
+    AchievementDef("z2_first",      "Unearthed",            "First prestige in the Ancient Ruins",              "A",  "zone_prestige",     "2",  1,    3),
+    AchievementDef("z2_three",      "Ruin Runner",          "Prestige the Ancient Ruins 3 times",               "A+", "zone_prestige",     "2",  3,    5),
+    # Zone 3 — Industrial Revolution
+    AchievementDef("z3_first",      "Steam Power",          "First prestige in the Industrial Revolution",      "A",  "zone_prestige",     "3",  1,    3),
+    AchievementDef("z3_five",       "Industry Veteran",     "Prestige the Industrial Revolution 5 times",       "A+", "zone_prestige",     "3",  5,    5),
+    # Zone 4 — Ancient Academy
+    AchievementDef("z4_first",      "The Philosopher",      "Choose your first School of Thought",              "A",  "zone_prestige",     "4",  1,    3),
+    AchievementDef("z4_all",        "Open Mind",            "Choose all three Schools of Thought at least once","S",  "zone_all_choices",  "4",  1,    8),
+    # Zone 5 — Space Age
+    AchievementDef("z5_first",      "Ground Control",       "First prestige in the Space Age",                  "A",  "zone_prestige",     "5",  1,    3),
+    AchievementDef("z5_five",       "Star Pioneer",         "Prestige the Space Age 5 times",                   "A+", "zone_prestige",     "5",  5,    5),
+    # Zone 6 — Arcane Academy
+    AchievementDef("z6_first",      "First Spell",          "First prestige in the Arcane Academy",             "A",  "zone_prestige",     "6",  1,    3),
+    AchievementDef("z6_all",        "Arcane Pluralist",     "Embrace all three Arcane Traditions at least once","S",  "zone_all_choices",  "6",  1,    8),
+    # Zone 7 — Prehistoric
+    AchievementDef("z7_first",      "First Fossil",         "First prestige in the Prehistoric zone",           "A",  "zone_prestige",     "7",  1,    3),
+    AchievementDef("z7_disc",       "Ancient Collector",    "Accumulate 20 ancestral building discoveries",     "A+", "z7_discoveries",    "",   20,   5),
+    # Zone 8 — Mythological
+    AchievementDef("z8_first",      "Godchild",             "First prestige in the Mythological zone",          "A",  "zone_prestige",     "8",  1,    3),
+    AchievementDef("z8_all",        "Favourite of Olympus", "Receive the blessing of all three Divine Patrons", "S",  "zone_all_choices",  "8",  1,    8),
+    # Zone 9 — Underworld
+    AchievementDef("z9_sin",        "Corrupted",            "Reach 80% sin level in the Underworld",            "A",  "zone_sin",          "",   0.8,  4),
+    AchievementDef("z9_first",      "Dark Initiate",        "First prestige in the Underworld",                 "A",  "zone_prestige",     "9",  1,    3),
+    AchievementDef("z9_five",       "Lord of Darkness",     "Prestige the Underworld 5 times",                  "A+", "zone_prestige",     "9",  5,    5),
+
+    # ── Hero achievements ────────────────────────────────────────────────────
+    AchievementDef("hero_exists",   "Hero Awakens",         "Create your Hero",                                 "A",  "hero_exists",       "",   1,    3),
+    AchievementDef("hero_lv5",      "Battle Ready",         "Hero reaches Level 5",                             "A",  "hero_level",        "",   5,    3),
+    AchievementDef("hero_lv10",     "Veteran Hero",         "Hero reaches Level 10",                            "A+", "hero_level",        "",   10,   5),
+    AchievementDef("hero_lv20",     "Legendary Hero",       "Hero reaches Level 20",                            "S",  "hero_level",        "",   20,   8),
 ]
 
 # ── Building Synergies ────────────────────────────────────────────────────────

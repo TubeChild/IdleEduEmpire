@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.15.0"
+VERSION    = "0.16.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -3306,6 +3306,24 @@ class App:
             self.game.update(dt)
             self.world.update(dt, self.game)
             self.game._zone_building_counts = self.world.all_zone_building_counts()
+            # Populate zone stats for achievement checks
+            _ws: dict = {}
+            for _zid, _zg in self.world.zones.items():
+                _ws[f"z{_zid}_prestige"] = _zg.prestige_count
+                _ws[f"z{_zid}_l1"]       = _zg.l1
+                _ws[f"z{_zid}_l2"]       = _zg.l2
+            _ws["total_prestige"]    = sum(_zg.prestige_count for _zg in self.world.zones.values())
+            _ws["zones_with_prestige"] = sum(1 for _zg in self.world.zones.values() if _zg.prestige_count > 0)
+            _ws["cw_earned"]         = self.world.total_cw_earned
+            _ws["z7_discoveries"]    = sum(self.world.zones[7]._ancestral_discoveries.values())
+            _ws["z9_sin"]            = self.world.zones[9].mechanic_value
+            _z4 = self.world.zones[4]
+            _ws["z4_all_choices"] = all(v > 0 for v in _z4._thought_school_counts.values())
+            _z6 = self.world.zones[6]
+            _ws["z6_all_choices"] = all(v > 0 for v in _z6._arcane_tradition_counts.values())
+            _z8 = self.world.zones[8]
+            _ws["z8_all_choices"] = all(v > 0 for v in _z8._divine_patron_counts.values())
+            self.game._zone_stats = _ws
             _spr_zone = self.worlds_sel_zone if self.tab == "Worlds" else 1
             self.sprites.update(dt, self.game.kps(), self.tab, zone_id=_spr_zone)
             self.campus.update(dt)

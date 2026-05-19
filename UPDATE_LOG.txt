@@ -1552,4 +1552,79 @@ Click handler: kind="hero_train", obj=stat_key
   → calls game.train_hero_stat(stat_key)
   → plays "upgrade" sound on success
 
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SESSION 18 — ZONE-SPECIFIC ACHIEVEMENTS  v0.16.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+28 new achievements added across zones 2–9 and the hero
+loop. All fire the existing toast + news ticker on unlock.
+
+NEW CHECK TYPES (game.py _check_achievements):
+  zone_prestige       — check_target="" → total zone prestiges;
+                        check_target="N" → zone N prestige count
+  zones_with_prestige — distinct zones with prestige_count >= 1
+  cw_earned           — total Cosmic Wisdom ever earned
+  zone_all_choices    — check_target="4"/"6"/"8" → all three
+                        choices made in that zone's choice system
+  z7_discoveries      — total ancestral building discoveries (zone 7)
+  zone_sin            — zone 9 mechanic_value (0.0–1.0)
+  hero_exists         — hero has been created
+  hero_level          — hero level >= check_value
+
+ZONE STATS FEED (main.py App game loop):
+  _zone_stats dict populated each tick from WorldManager:
+    z{N}_prestige, z{N}_l1, z{N}_l2 per zone
+    total_prestige, zones_with_prestige, cw_earned
+    z7_discoveries, z9_sin
+    z4_all_choices, z6_all_choices, z8_all_choices
+
+NEW ACHIEVEMENTS (data.py):
+
+  Cross-zone (5):
+    World Traveller        — first total zone prestige         A  3 merit
+    Zone Master            — 10 total zone prestiges           S  6 merit
+    Dimensional Scholar    — prestige in 5 different zones     S  8 merit
+    Cosmic Collector       — earn 10 Cosmic Wisdom             A  4 merit
+    Celestial Scholar      — earn 50 Cosmic Wisdom             S  8 merit
+
+  Zone 2 — Ancient Ruins (2):
+    Unearthed              — first prestige                    A  3 merit
+    Ruin Runner            — prestige 3 times                  A+ 5 merit
+
+  Zone 3 — Industrial Revolution (2):
+    Steam Power            — first prestige                    A  3 merit
+    Industry Veteran       — prestige 5 times                  A+ 5 merit
+
+  Zone 4 — Ancient Academy (2):
+    The Philosopher        — choose first School of Thought    A  3 merit
+    Open Mind              — choose all 3 Schools              S  8 merit
+
+  Zone 5 — Space Age (2):
+    Ground Control         — first prestige                    A  3 merit
+    Star Pioneer           — prestige 5 times                  A+ 5 merit
+
+  Zone 6 — Arcane Academy (2):
+    First Spell            — first prestige                    A  3 merit
+    Arcane Pluralist       — choose all 3 Traditions           S  8 merit
+
+  Zone 7 — Prehistoric (2):
+    First Fossil           — first prestige                    A  3 merit
+    Ancient Collector      — 20 ancestral discoveries          A+ 5 merit
+
+  Zone 8 — Mythological (2):
+    Godchild               — first prestige                    A  3 merit
+    Favourite of Olympus   — choose all 3 Patrons              S  8 merit
+
+  Zone 9 — Underworld (3):
+    Corrupted              — reach 80% sin level               A  4 merit
+    Dark Initiate          — first prestige                    A  3 merit
+    Lord of Darkness       — prestige 5 times                  A+ 5 merit
+
+  Hero (4):
+    Hero Awakens           — create the hero                   A  3 merit
+    Battle Ready           — hero reaches Level 5              A  3 merit
+    Veteran Hero           — hero reaches Level 10             A+ 5 merit
+    Legendary Hero         — hero reaches Level 20             S  8 merit
+
 ====================================================
