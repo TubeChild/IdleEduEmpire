@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.19.1"
+VERSION    = "0.19.2"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -223,6 +223,9 @@ class App:
         self.b_filter: str = "all"   # "all" | "affordable" | "owned"
         self.lg_scroll_s = 0
         self.lg_scroll_a = 0
+        self.st_scroll   = 0
+        self.left_scroll = 0
+        self._scroll_max: dict = {}
 
         self._mouse_held      = False
         self._hold_acc        = 0.0
@@ -470,7 +473,7 @@ class App:
         fp_cap  = g._focus_cap()
         fp_frac = g.focus_points / max(1, fp_cap)
         self._t(F_XS, f"⚡ Focus  {int(g.focus_points)} / {int(fp_cap)}",
-                (180, 210, 255), 12, _fy)
+                (30, 80, 170), 12, _fy)
         bar_rect = pygame.Rect(12, _fy + 14, LEFT_W - 24, 8)
         pygame.draw.rect(self.screen, (50, 60, 90), bar_rect, border_radius=4)
         pygame.draw.rect(self.screen, (100, 170, 255),
@@ -556,12 +559,14 @@ class App:
                    + (6 + TUT_H if tut_active else (6 + len(tip_lines) * T_LH if tip_lines else 0))
                    + (14 + own_data_rows * O_LH if owned else 0) + 10)
         y0 = max(_fp_ui_bottom + 4, H - TICKER_H - 8 - panel_h)
-        panel_r = pygame.Rect(5, y0, LEFT_W - 10,
-                              min(panel_h, H - TICKER_H - 4 - y0))
+        panel_vis_h = min(panel_h, H - TICKER_H - 4 - y0)
+        panel_r = pygame.Rect(5, y0, LEFT_W - 10, panel_vis_h)
+        self._scroll_max["left"] = max(0, panel_h - panel_vis_h)
+        self.left_scroll = min(self.left_scroll, self._scroll_max["left"])
         self._r((215, 208, 194), panel_r, radius=6)
         self._clip(panel_r)
 
-        cy = y0 + 6
+        cy = y0 + 6 - self.left_scroll
         self._t(F_XS, "Goals:", (60, 60, 60), 12, cy)
         cy += 13
         for goal in goals:
@@ -862,6 +867,7 @@ class App:
 
         # Scrollable building list
         ly0, lh = y0 + BROW, h - BROW
+        self._scroll_max["Buildings"] = max(0, len(BUILDINGS) * step - lh)
         self._clip(pygame.Rect(x, ly0, w, lh))
 
         for i, b in enumerate(BUILDINGS):
@@ -916,7 +922,7 @@ class App:
                 kps_val = g.building_kps(b.name)
                 fac = g.faculty_bonuses.get(b.name, 0.0)
                 fac_tag = f"  [+{fac*100:.0f}% faculty]" if fac > 0 else ""
-                self._t(F_SM, f"Producing: {fmt(kps_val)} KP/s{fac_tag}", (48, 126, 55), x+14, iy+52)
+                self._t(F_SM, f"Producing: {fmt(kps_val)} KP/s{fac_tag}", (48, 126, 55), x+14, iy+44)
             btn = pygame.Rect(x + w - 168, iy + (self.ITEM_H-36)//2, 160, 36)
             self._r(GREEN if ok else GRAY, btn, radius=6)
             self._tc(F_SM, btn_label, WHITE, btn)
@@ -930,9 +936,9 @@ class App:
                 need = n_buy * sac[1]
                 met = sac_have >= need
                 badge_col = (38, 120, 45) if met else (165, 38, 38)
-                badge_r = pygame.Rect(x+10, iy+56, 234, 16)
+                badge_r = pygame.Rect(x+10, iy+60, 234, 16)
                 pygame.draw.rect(self.screen, badge_col, badge_r, border_radius=3)
-                self._t(F_XS, f"⚡ Needs {need} {sac[0]}  (have {sac_have})", WHITE, x+14, iy+58)
+                self._t(F_XS, f"⚡ Needs {need} {sac[0]}  (have {sac_have})", WHITE, x+14, iy+62)
             if card.collidepoint(pygame.mouse.get_pos()) and cnt > 0:
                 upg_names = [u.name for u in UPGRADES if u.target == b.name and u.name in g.upgrades_purchased]
                 syn_parts = [
@@ -998,6 +1004,8 @@ class App:
             if y0 <= iy < y0 + h:
                 self._t(F_SM, f"  ✓  {u.name}", (100,160,100), x+14, iy)
             row2 += 1
+        content_h = row * step + 32 + row2 * 22
+        self._scroll_max["Upgrades"] = max(0, content_h - h)
         self._unclip()
 
     def _draw_curriculum(self):
@@ -1028,7 +1036,7 @@ class App:
             for s in groups[path]:
                 iy = y_cur
                 y_cur += step
-                if iy + self.ITEM_H < y0 or iy > y0 + h:
+                if iy + self.ITEM_H < y0 or iy > y0 + h + self.sk_scroll:
                     continue
                 card  = pygame.Rect(x, iy, w, self.ITEM_H)
                 owned = s.id in g.skills_purchased
@@ -1057,6 +1065,7 @@ class App:
                 elif owned:
                     self._t(F_MD, "✓", (55,155,55), x + w - 40, iy + 26)
 
+        self._scroll_max["Curriculum"] = max(0, (y_cur - (y0 + 34 - self.sk_scroll)) - h)
         self._unclip()
 
     def _draw_reportcard(self):
@@ -1094,8 +1103,12 @@ class App:
                                  border_radius=2)
 
         ach_y0 = dm_card_y + dm_h + 6   # achievements start below daily missions
+        ach_vis_h = h - (ach_y0 - y0)
+        n_ach_rows = (len(ACHIEVEMENTS) + 1) // 2
+        _ach_ch, _ach_gap = 78, 6
+        self._scroll_max["ReportCard"] = max(0, n_ach_rows * (_ach_ch + _ach_gap) - ach_vis_h)
 
-        self._clip(pygame.Rect(x, ach_y0, w, h - (ach_y0 - y0)))
+        self._clip(pygame.Rect(x, ach_y0, w, ach_vis_h))
         cw, ch = (w - 12) // 2, 78
         gap    = 6
         for i, a in enumerate(ACHIEVEMENTS):
@@ -1126,6 +1139,7 @@ class App:
     def _draw_prestige_shop(self):
         g = self.game
         x, y0, w, h = self._right_area()
+        self._scroll_max["Prestige"] = max(0, 54 + len(DIPLOMA_UPGRADES) * (self.ITEM_H + self.ITEM_G) - h)
         self._clip(pygame.Rect(x, y0, w, h))
         self._t(F_LG, f"Prestige  —  Diplomas: {g.diplomas}", PRESTIGE, x+10, y0+4)
         self._t(F_SM, "Spend Diplomas on permanent upgrades that survive every reset.",
@@ -1278,6 +1292,8 @@ class App:
             scroll     = self.lg_scroll_e
 
         clip_h = h - (shop_y - y0)
+        _lg_n = len(shop_items) + (1 if self.lg_subtab == "Alumni" and g.alumni_all_purchased else 0)
+        self._scroll_max[f"Legacy_{self.lg_subtab}"] = max(0, _lg_n * (self.ITEM_H + self.ITEM_G) - clip_h)
         self._clip(pygame.Rect(x, shop_y, w, clip_h))
         step = self.ITEM_H + self.ITEM_G
         for i, du in enumerate(shop_items):
@@ -1360,13 +1376,13 @@ class App:
             self._buy_items.append((exit_sb, None, "toggle_sandbox"))
             return
 
+        # ── Fixed header (title + school name — never scrolls) ────────────────
+        HEADER_H = 68
         self._t(F_LG, "Settings & Statistics", DARK, x+10, y0+4)
-
-        # School name input
         self._t(F_SM, "School Name:", (80, 80, 80), x+20, y0+38)
         input_rect = pygame.Rect(x+135, y0+32, w-155, 28)
         self._name_input_rect = input_rect
-        active = self._name_input_active
+        active  = self._name_input_active
         display = self._name_input_text if active else self.game.school_name
         self._r(WHITE if active else (230, 226, 216), input_rect, radius=4,
                 border=2, bc=ACCENT if active else (150, 145, 135))
@@ -1378,6 +1394,12 @@ class App:
         if active and (pygame.time.get_ticks() // 500) % 2 == 0:
             cx = input_rect.x + 4 + txt_surf.get_width() + 1
             pygame.draw.line(self.screen, DARK, (cx, input_rect.y+4), (cx, input_rect.bottom-4), 1)
+
+        # ── Scrollable content ────────────────────────────────────────────────
+        s    = self.st_scroll
+        cy   = y0 + HEADER_H - s    # running y cursor (scrolled)
+        vis_h = h - HEADER_H
+        self._clip(pygame.Rect(x, y0 + HEADER_H, w, vis_h))
 
         stats = [
             ("KP this run",     fmt(g.total_kp)),
@@ -1396,25 +1418,22 @@ class App:
             ("Skills",          f"{len(g.skills_purchased)}/{len(SKILLS)}"),
             ("Session time",    fmt_time(g.session_seconds)),
         ]
-        # Two-column layout: rows × 2 cols
         col_w  = (w - 20) // 2
         row_h  = 30
-        ys     = y0 + 72
         n_rows = (len(stats) + 1) // 2
         for i, (label, val) in enumerate(stats):
-            col    = i % 2
-            row    = i // 2
-            rx     = x + 10 + col * col_w
-            ry2    = ys + row * row_h
+            col = i % 2
+            row = i // 2
+            rx  = x + 10 + col * col_w
+            ry2 = cy + row * row_h
             self._r((238, 233, 222), pygame.Rect(rx, ry2, col_w - 4, 26), radius=5)
             self._t(F_XS, label, (80, 80, 80), rx + 8, ry2 + 7)
             self._t(F_XS, val,   DARK,          rx + 130, ry2 + 7)
+        cy += n_rows * row_h + 16
 
-        # ── Campus Theme picker ──────────────────────────────────────────────────
-        theme_y = ys + n_rows * row_h + 16  # below stats grid
-        self._t(F_SM, "Campus Theme", (80, 80, 80), x + 10, theme_y)
-        theme_y += 22
-
+        # ── Campus Theme picker ───────────────────────────────────────────────
+        self._t(F_SM, "Campus Theme", (80, 80, 80), x + 10, cy)
+        cy += 22
         btn_w = (w - 24) // len(COSMETIC_THEMES)
         for ti, th in enumerate(COSMETIC_THEMES):
             tx = x + 10 + ti * (btn_w + 4)
@@ -1422,43 +1441,33 @@ class App:
             always_ok = th.get("always_unlocked", False)
             cw_req    = th.get("cw_req")
             unlocked  = always_ok or (cw_req and self.world.cosmetic_unlocked(th["id"]))
-
             if is_active:
-                tbg = ACCENT
-                tc2 = WHITE
+                tbg, tc2 = ACCENT, WHITE
             elif unlocked:
-                tbg = (200, 195, 185)
-                tc2 = DARK
+                tbg, tc2 = (200, 195, 185), DARK
             else:
-                tbg = (160, 155, 148)
-                tc2 = (100, 95, 90)
-
-            tbtn = pygame.Rect(tx, theme_y, btn_w - 2, 36)
+                tbg, tc2 = (160, 155, 148), (100, 95, 90)
+            tbtn = pygame.Rect(tx, cy, btn_w - 2, 36)
             self._r(tbg, tbtn, radius=6)
             self._tc(F_XS, th["name"], tc2, tbtn)
             if not unlocked and cw_req:
                 cw_cost = next((it["cost"] for it in CW_SHOP if it["id"] == cw_req), "?")
-                self._t(F_XS, f"🔒 {cw_cost}CW", (120, 115, 108),
-                        tx + 2, theme_y + 36)
+                self._t(F_XS, f"🔒 {cw_cost}CW", (120, 115, 108), tx + 2, cy + 36)
             if unlocked:
                 self._buy_items.append((tbtn, th["id"], "set_theme"))
+        cy += 52   # buttons (36) + gap (16)
 
-        since = time.time() - g.last_save_time
-        ys_end = ys + n_rows * row_h + 4
-        self._t(F_SM, f"Auto-saved {int(since)}s ago", (120,120,120), x+10, ys_end + 76)
-
-        # KPS history sparkline
-        sp_y = ys_end + 20
+        # ── KPS history sparkline ─────────────────────────────────────────────
         sp_h = 52
         sp_w = w - 20
-        self._r((230, 226, 216), pygame.Rect(x+10, sp_y, sp_w, sp_h), radius=5)
-        self._t(F_XS, "KP/s history (last 2 hrs)", (100,100,100), x+16, sp_y+4)
+        self._r((230, 226, 216), pygame.Rect(x+10, cy, sp_w, sp_h), radius=5)
+        self._t(F_XS, "KP/s history (last 2 hrs)", (100,100,100), x+16, cy+4)
         samples = g._kps_samples
         if len(samples) >= 2:
             import math as _m
-            max_v = max(s[1] for s in samples) or 1.0
+            max_v = max(sv[1] for sv in samples) or 1.0
             gx0, gx1 = x+16, x+10+sp_w-6
-            gy0, gy1 = sp_y+sp_h-6, sp_y+16
+            gy0, gy1 = cy+sp_h-6, cy+16
             pts = []
             for i, (_, kv) in enumerate(samples):
                 px = int(gx0 + (gx1-gx0) * i / max(1, len(samples)-1))
@@ -1466,51 +1475,61 @@ class App:
                 pts.append((px, py2))
             if len(pts) >= 2:
                 pygame.draw.lines(self.screen, ACCENT, False, pts, 2)
-            self._t(F_XS, fmt(max_v)+"/s", ACCENT, gx1-36, sp_y+6)
+            self._t(F_XS, fmt(max_v)+"/s", ACCENT, gx1-36, cy+6)
         else:
             self._tc(F_XS, "Collecting data...", (150,150,150),
-                     pygame.Rect(x+10, sp_y, sp_w, sp_h))
+                     pygame.Rect(x+10, cy, sp_w, sp_h))
+        cy += sp_h + 8
 
-        ry = sp_y + sp_h + 8
-        # Reset button
+        since = time.time() - g.last_save_time
+        self._t(F_SM, f"Auto-saved {int(since)}s ago", (120,120,120), x+10, cy)
+        cy += 24
+
+        # ── Buttons ───────────────────────────────────────────────────────────
         if self._reset_confirm:
-            self._r((200, 60, 60), pygame.Rect(x+10, ry, 220, 42), radius=8)
-            self._t(F_MD, "Click again to RESET", WHITE, x+18, ry+10)
-            self._buy_items.append((pygame.Rect(x+10, ry, 220, 42), None, "reset_confirm"))
+            self._r((200, 60, 60), pygame.Rect(x+10, cy, 220, 42), radius=8)
+            self._t(F_MD, "Click again to RESET", WHITE, x+18, cy+10)
+            self._buy_items.append((pygame.Rect(x+10, cy, 220, 42), None, "reset_confirm"))
         else:
-            self._r((180, 70, 70), pygame.Rect(x+10, ry, 200, 42), radius=8)
-            self._t(F_MD, "Reset Save", WHITE, x+22, ry+10)
-            self._buy_items.append((pygame.Rect(x+10, ry, 200, 42), None, "reset_ask"))
+            self._r((180, 70, 70), pygame.Rect(x+10, cy, 200, 42), radius=8)
+            self._t(F_MD, "Reset Save", WHITE, x+22, cy+10)
+            self._buy_items.append((pygame.Rect(x+10, cy, 200, 42), None, "reset_ask"))
+        cy += 52
 
-        # Mute toggle
         muted   = audio.is_muted()
-        mu_rect = pygame.Rect(x + 10, ry + 54, 180, 38)
+        mu_rect = pygame.Rect(x + 10, cy, 180, 38)
         self._r((140, 55, 55) if muted else (55, 140, 75), mu_rect, radius=8)
         self._t(F_MD, "Unmute Audio" if muted else "Mute Audio", WHITE, mu_rect.x+14, mu_rect.y+9)
         self._buy_items.append((mu_rect, None, "toggle_mute"))
+        cy += 48
 
-        # Headmaster tips toggle
         hm_on   = g.show_headmaster
-        hm_rect = pygame.Rect(x + 10, ry + 104, 260, 38)
+        hm_rect = pygame.Rect(x + 10, cy, 260, 38)
         self._r(ACCENT if hm_on else (140, 135, 125), hm_rect, radius=8)
         self._t(F_MD, f"Principal Tips:  {'ON' if hm_on else 'OFF'}", WHITE,
                 hm_rect.x+14, hm_rect.y+9)
         self._buy_items.append((hm_rect, None, "toggle_headmaster"))
+        cy += 48
 
-        # Sandbox toggle
-        sb_rect = pygame.Rect(x + 10, ry + 154, 260, 38)
+        sb_rect = pygame.Rect(x + 10, cy, 260, 38)
         self._r((100, 80, 60), sb_rect, radius=8)
         self._t(F_MD, "Enter Sandbox Mode (explore)", WHITE, sb_rect.x+12, sb_rect.y+9)
         self._buy_items.append((sb_rect, None, "toggle_sandbox"))
-        self._t(F_XS, "Costs ÷1000 · all buildings visible · no saves", (150,140,130), x+10, ry+198)
+        self._t(F_XS, "Costs ÷1000 · all buildings visible · no saves", (150,140,130), x+10, cy+40)
+        cy += 56
 
-        # Fullscreen toggle
-        fs_rect = pygame.Rect(x + 10, ry + 204, 260, 38)
+        fs_rect  = pygame.Rect(x + 10, cy, 260, 38)
         fs_label = "Exit Fullscreen" if self._fullscreen else "Enter Fullscreen"
         fs_col   = (38, 100, 160) if self._fullscreen else (50, 120, 80)
         self._r(fs_col, fs_rect, radius=8)
         self._t(F_MD, fs_label, WHITE, fs_rect.x+12, fs_rect.y+9)
         self._buy_items.append((fs_rect, None, "toggle_fullscreen"))
+        cy += 48
+
+        self._unclip()
+        # Total scrollable content height vs visible window
+        content_h = cy - (y0 + HEADER_H - s)
+        self._scroll_max["Settings"] = max(0, content_h - vis_h)
 
     # ── Worlds tab ───────────────────────────────────────────────────────────
 
@@ -1913,6 +1932,7 @@ class App:
         ITEM_H = 80
         ITEM_G = 4
         step   = ITEM_H + ITEM_G
+        self._scroll_max["Worlds_B"] = max(0, len(zg.buildings) * step - h)
         self._clip(pygame.Rect(x, y0, w, h))
         for i, b in enumerate(zg.buildings):
             iy  = y0 + i * step - self.worlds_b_scroll
@@ -1961,6 +1981,9 @@ class App:
         ITEM_H = 80
         ITEM_G = 4
         step   = ITEM_H + ITEM_G
+        n_unp = sum(1 for u in zg.upgrades if u["id"] not in zg.upgrades_purchased)
+        n_p   = len(zg.upgrades) - n_unp
+        self._scroll_max["Worlds_U"] = max(0, n_unp * step + 32 + n_p * 22 - h)
         self._clip(pygame.Rect(x, y0, w, h))
         row = 0
         for u in zg.upgrades:
@@ -2917,26 +2940,41 @@ class App:
 
     def _scroll(self, direction: int):
         delta = -45 if direction < 0 else 45
+        mx, my = pygame.mouse.get_pos()
+        sm = self._scroll_max
+
+        # Left panel scroll when mouse is over it
+        if mx < LEFT_W and my > TOP_H:
+            self.left_scroll = max(0, min(sm.get("left", 0), self.left_scroll + delta))
+            return
+
         match self.tab:
-            case "Buildings":   self.b_scroll   = max(0, self.b_scroll   + delta)
-            case "Upgrades":    self.u_scroll   = max(0, self.u_scroll   + delta)
-            case "Curriculum":  self.sk_scroll  = max(0, self.sk_scroll  + delta)
-            case "Report Card": self.ac_scroll  = max(0, self.ac_scroll  + delta)
+            case "Buildings":
+                self.b_scroll   = max(0, min(sm.get("Buildings", 99999),   self.b_scroll   + delta))
+            case "Upgrades":
+                self.u_scroll   = max(0, min(sm.get("Upgrades", 99999),    self.u_scroll   + delta))
+            case "Curriculum":
+                self.sk_scroll  = max(0, min(sm.get("Curriculum", 99999),  self.sk_scroll  + delta))
+            case "Report Card":
+                self.ac_scroll  = max(0, min(sm.get("ReportCard", 99999),  self.ac_scroll  + delta))
             case "Legacy":
                 if self.lg_subtab == "Honors":
-                    self.lg_scroll_h = max(0, self.lg_scroll_h + delta)
+                    self.lg_scroll_h = max(0, min(sm.get("Legacy_Honors", 99999),      self.lg_scroll_h + delta))
                 elif self.lg_subtab == "Scholars":
-                    self.lg_scroll_s = max(0, self.lg_scroll_s + delta)
+                    self.lg_scroll_s = max(0, min(sm.get("Legacy_Scholars", 99999),    self.lg_scroll_s + delta))
                 elif self.lg_subtab == "Alumni":
-                    self.lg_scroll_a = max(0, self.lg_scroll_a + delta)
+                    self.lg_scroll_a = max(0, min(sm.get("Legacy_Alumni", 99999),      self.lg_scroll_a + delta))
                 else:
-                    self.lg_scroll_e = max(0, self.lg_scroll_e + delta)
-            case "Prestige":    self.ps_scroll      = max(0, self.ps_scroll      + delta)
+                    self.lg_scroll_e = max(0, min(sm.get("Legacy_Endowments", 99999),  self.lg_scroll_e + delta))
+            case "Prestige":
+                self.ps_scroll      = max(0, min(sm.get("Prestige", 99999),     self.ps_scroll      + delta))
+            case "Settings":
+                self.st_scroll      = max(0, min(sm.get("Settings", 99999),     self.st_scroll      + delta))
             case "Worlds":
                 if self.worlds_subtab == "Buildings":
-                    self.worlds_b_scroll = max(0, self.worlds_b_scroll + delta)
+                    self.worlds_b_scroll = max(0, min(sm.get("Worlds_B", 99999), self.worlds_b_scroll + delta))
                 elif self.worlds_subtab == "Upgrades":
-                    self.worlds_u_scroll = max(0, self.worlds_u_scroll + delta)
+                    self.worlds_u_scroll = max(0, min(sm.get("Worlds_U", 99999), self.worlds_u_scroll + delta))
 
     # ── Events ────────────────────────────────────────────────────────────────
 
@@ -3046,9 +3084,11 @@ class App:
                     if self._grad_btn and self._grad_btn.collidepoint(mx, my):
                         self.popup = {"type": "prestige_confirm"}
 
-                    if self._event_btn and self._event_btn.collidepoint(mx, my):
-                        g.collect_event()
-                        audio.play("collect")
+                    if self._event_btn:
+                        if self._event_btn.collidepoint(mx, my):
+                            g.collect_event()
+                            audio.play("collect")
+                        continue   # banner visible: block all other panel clicks
 
                     for btn, obj, kind in self._buy_items:
                         if not btn.collidepoint(mx, my):

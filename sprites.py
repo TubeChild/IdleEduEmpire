@@ -905,8 +905,8 @@ class TrojanHorse:
         # 4 stick legs
         for lx_off, ly_off in ((-18, 0), (-6, 2), (6, 2), (18, 0)):
             pygame.draw.line(surf, E, (x + lx_off, y + 10), (x + lx_off, y + 22), 3)
-        # Wheels underneath
-        for wx in (x - 18, x + 14):
+        # 4 wheels underneath (one per leg)
+        for wx in (x - 18, x - 6, x + 6, x + 18):
             pygame.draw.circle(surf, E, (wx, y + 24), 5, 2)
             pygame.draw.line(surf, E, (wx - 5, y + 24), (wx + 5, y + 24), 1)
             pygame.draw.line(surf, E, (wx, y + 19), (wx, y + 29), 1)
