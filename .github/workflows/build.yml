@@ -100,6 +100,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ needs.build-linux.outputs.version }}"
+          gh release delete "${{ github.ref_name }}" --yes 2>/dev/null || true
           gh release create "${{ github.ref_name }}" \
             --title "Idle Edu Empire v${VERSION}" \
             --notes "Download the zip for your platform, extract, and run **IdleEduEmpire** (Linux) or **IdleEduEmpire.exe** (Windows). Saves are stored in your user data folder and persist across updates." \
@@ -107,11 +108,9 @@ jobs:
             "IdleEduEmpire-v${VERSION}-windows.zip"
 
       # ── itch.io upload ─────────────────────────────────────────────────
-      # Requires two GitHub secrets to be set:
-      #   BUTLER_API_KEY  — from https://itch.io/user/settings/api-keys
-      #   ITCH_USER       — your itch.io username (e.g. "nick90")
-      # And your game page slug on itch.io must be "idle-edu-empire".
-      # To change the slug, edit the butler push lines below.
+      # Requires two GitHub secrets:
+      #   BUTLER_API_KEY  — from itch.io account settings → API keys
+      #   ITCH_USER       — your itch.io username
       - name: Push to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
@@ -125,9 +124,10 @@ jobs:
           BUTLER_URL=$(curl -s https://api.github.com/repos/itchio/butler/releases/latest \
             | python3 -c "import sys,json; assets=json.load(sys.stdin)['assets']; print(next(a['browser_download_url'] for a in assets if 'linux-amd64.zip' in a['name']))")
           curl -L -o butler.zip "$BUTLER_URL"
-          unzip -q butler.zip
-          chmod +x butler
-          ./butler push "IdleEduEmpire-v${VERSION}-linux.zip" \
+          unzip -q butler.zip -d butler-bin
+          BUTLER=$(find butler-bin -type f | head -1)
+          chmod +x "$BUTLER"
+          "$BUTLER" push "IdleEduEmpire-v${VERSION}-linux.zip" \
             "${ITCH_USER}/idle-edu-empire:linux" --userversion "${VERSION}"
-          ./butler push "IdleEduEmpire-v${VERSION}-windows.zip" \
+          "$BUTLER" push "IdleEduEmpire-v${VERSION}-windows.zip" \
             "${ITCH_USER}/idle-edu-empire:windows" --userversion "${VERSION}"
