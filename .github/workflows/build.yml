@@ -127,6 +127,7 @@ jobs:
           unzip -q butler.zip -d butler-bin
           BUTLER=$(find butler-bin -type f | head -1)
           chmod +x "$BUTLER"
+          export APPIMAGE_EXTRACT_AND_RUN=1
           "$BUTLER" push "IdleEduEmpire-v${VERSION}-linux.zip" \
             "${ITCH_USER}/idle-edu-empire:linux" --userversion "${VERSION}"
           "$BUTLER" push "IdleEduEmpire-v${VERSION}-windows.zip" \
