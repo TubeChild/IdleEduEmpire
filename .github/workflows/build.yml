@@ -122,7 +122,9 @@ jobs:
             echo "Skipping itch.io upload: secrets not configured"
             exit 0
           fi
-          curl -L -o butler.zip "https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default"
+          BUTLER_URL=$(curl -s https://api.github.com/repos/itchio/butler/releases/latest \
+            | python3 -c "import sys,json; assets=json.load(sys.stdin)['assets']; print(next(a['browser_download_url'] for a in assets if 'linux-amd64.zip' in a['name']))")
+          curl -L -o butler.zip "$BUTLER_URL"
           unzip -q butler.zip
           chmod +x butler
           ./butler push "IdleEduEmpire-v${VERSION}-linux.zip" \
