@@ -21,7 +21,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.19.2"
+VERSION    = "0.19.3"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -3439,7 +3439,8 @@ class App:
             _ws["z8_all_choices"] = all(v > 0 for v in _z8._divine_patron_counts.values())
             self.game._zone_stats = _ws
             _spr_zone = self.worlds_sel_zone if self.tab == "Worlds" else 1
-            self.sprites.update(dt, self.game.kps(), self.tab, zone_id=_spr_zone)
+            self.sprites.update(dt, self.game.kps(), self.tab,
+                                zone_id=_spr_zone, season=self.game.season)
             self.campus.update(dt)
             self.campus._time = self.game.game_time  # keep campus calendar in sync
 

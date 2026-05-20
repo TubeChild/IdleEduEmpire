@@ -1100,6 +1100,420 @@ class CrucifiedFigure:
         pygame.draw.line(surf, _SKIN, (x, y + 32), (x + 3, y + 44), 2)
 
 
+# ── Seasonal sprite classes ───────────────────────────────────────────────────
+
+class Snowflake:
+    """Falling snowflake for Winter."""
+
+    def __init__(self):
+        self._reset(initial=True)
+
+    def _reset(self, initial: bool = False):
+        self.x  = float(random.randint(0, LEFT_W))
+        self.y  = float(random.randint(TOP_H, TOP_H + 80) if initial else TOP_H - 4)
+        self.vy = random.uniform(18, 42)
+        self.vx = random.uniform(-10, 10)
+        self.t  = random.uniform(0, math.tau)
+        self.sz = random.randint(2, 4)
+
+    def update(self, dt: float):
+        self.t  += dt * 1.8
+        self.y  += self.vy * dt
+        self.x  += self.vx * dt + math.sin(self.t) * 12 * dt
+        if self.y > H - TICKER_H or self.x < -6 or self.x > LEFT_W + 6:
+            self._reset()
+
+    def draw(self, surf: pygame.Surface):
+        pygame.draw.circle(surf, (218, 232, 252), (int(self.x), int(self.y)), self.sz)
+
+
+class HockeyPlayer(WalkingPerson):
+    """Ice-hockey player with stick and helmet."""
+
+    _JERSEYS = [(190, 20, 20), (20, 40, 190), (20, 135, 55), (160, 135, 20)]
+
+    def __init__(self, y: int):
+        super().__init__(y)
+        self.shirt = random.choice(self._JERSEYS)
+        self.speed = random.uniform(30, 55)
+
+    def draw(self, surf: pygame.Surface):
+        super().draw(surf)
+        x, y = int(self.x), int(self.y)
+        pygame.draw.arc(surf, (45, 48, 58),
+                        pygame.Rect(x - 6, y - 19, 12, 8), 0, math.pi, 4)
+        sx = x + self.dir * 6
+        pygame.draw.line(surf, (118, 78, 38), (sx, y - 4), (sx + self.dir * 10, y + 7), 2)
+        bx = sx + self.dir * 10
+        pygame.draw.line(surf, (118, 78, 38), (bx - 4, y + 7), (bx + 4, y + 7), 2)
+
+
+class HockeyPuck:
+    """Black rubber puck sliding on ice."""
+
+    def __init__(self, ground_y: int):
+        self._gy = float(ground_y)
+        self.x   = float(random.randint(30, LEFT_W - 30))
+        self.vx  = random.uniform(-75, 75)
+
+    def update(self, dt: float):
+        self.x += self.vx * dt
+        if self.x < 16:
+            self.x, self.vx = 16.0, abs(self.vx)
+        elif self.x > LEFT_W - 16:
+            self.x, self.vx = float(LEFT_W - 16), -abs(self.vx)
+
+    def draw(self, surf: pygame.Surface):
+        pygame.draw.ellipse(surf, (28, 28, 28),
+                            (int(self.x) - 5, int(self._gy) - 2, 10, 4))
+
+
+class ChristmasTree:
+    """Static pixel-art Christmas tree with blinking coloured lights."""
+
+    _LIGHTS = [(255, 40, 40), (40, 215, 40), (255, 195, 0), (40, 140, 255), (255, 80, 200)]
+
+    def __init__(self, x: int, ground_y: int):
+        self.x = x
+        self.y = ground_y
+        self.t = random.uniform(0, math.tau)
+        rng    = random
+        self._bulbs = [
+            (lx, ly, rng.choice(self._LIGHTS), rng.uniform(0, math.tau))
+            for lx, ly in [(-8,-14),(-2,-10),(6,-9),(-4,-22),(3,-19),
+                            (-1,-30),(5,-27),(-6,-18),(7,-16)]
+        ]
+
+    def update(self, dt: float):
+        self.t += dt
+
+    def draw(self, surf: pygame.Surface):
+        x, y = self.x, self.y
+        pygame.draw.rect(surf, (95, 58, 18), (x - 4, y - 12, 8, 12))
+        for w, dy in ((36, -12), (26, -24), (16, -36)):
+            pts = [(x, y + dy - 12), (x - w // 2, y + dy), (x + w // 2, y + dy)]
+            pygame.draw.polygon(surf, (22, 108, 26), pts)
+            pygame.draw.polygon(surf, (14, 78, 20), pts, 1)
+        sy = y - 50
+        for i in range(5):
+            a1 = math.radians(i * 72 - 90)
+            a2 = math.radians(i * 72 + 36 - 90)
+            pygame.draw.polygon(surf, (255, 218, 0), [
+                (x + math.cos(a1) * 5, sy + math.sin(a1) * 5),
+                (x + math.cos(a2) * 2, sy + math.sin(a2) * 2),
+                (x + math.cos(a1 + math.tau / 5) * 5,
+                 sy + math.sin(a1 + math.tau / 5) * 5),
+            ])
+        for lx, ly, col, phase in self._bulbs:
+            if (math.sin(self.t * 2.8 + phase) + 1) / 2 > 0.4:
+                pygame.draw.circle(surf, col, (x + lx, y + ly), 2)
+
+
+class SantaSleigh:
+    """Periodic Santa + reindeer + sleigh flying right→left across the sky."""
+
+    def __init__(self):
+        self._timer = random.uniform(80, 160)
+        self.active = False
+        self.x      = float(LEFT_W + 220)
+        self.y      = float(TOP_H + 38)
+
+    def update(self, dt: float):
+        if not self.active:
+            self._timer -= dt
+            if self._timer <= 0:
+                self.active = True
+                self.x      = float(LEFT_W + 220)
+                self.y      = float(random.randint(TOP_H + 18, TOP_H + 68))
+            return
+        self.x -= 44.0 * dt
+        if self.x < -260:
+            self.active = False
+            self._timer = random.uniform(80, 180)
+
+    def draw(self, surf: pygame.Surface):
+        if not self.active:
+            return
+        x, y = int(self.x), int(self.y)
+        pygame.draw.line(surf, (88, 52, 24), (x - 4, y + 6), (x - 145, y + 4), 1)
+        for i in range(5):
+            rx = x - 40 - i * 25
+            ry = y + (2 if i % 2 == 0 else -2)
+            pygame.draw.ellipse(surf, (108, 62, 28), (rx, ry, 18, 8))
+            pygame.draw.circle(surf, (108, 62, 28), (rx + 20, ry + 2), 4)
+            for bxo, tips in ((-2, [(-2,-8),(-4,-12)]), (2, [(2,-8),(4,-12)])):
+                base = (rx + 20 + bxo, ry - 2)
+                pygame.draw.line(surf, (78, 46, 16), base,
+                                 (rx + 20 + tips[0][0], ry + tips[0][1]), 1)
+                pygame.draw.line(surf, (78, 46, 16),
+                                 (rx + 20 + tips[0][0], ry + tips[0][1]),
+                                 (rx + 20 + tips[1][0], ry + tips[1][1]), 1)
+            pygame.draw.line(surf, (78, 46, 16), (rx + 4, ry + 8), (rx + 2, ry + 14), 1)
+            pygame.draw.line(surf, (78, 46, 16), (rx + 13, ry + 8), (rx + 12, ry + 14), 1)
+            if i == 0:
+                pygame.draw.circle(surf, (255, 48, 48), (rx + 24, ry + 2), 2)
+        pygame.draw.polygon(surf, (175, 18, 18),
+                            [(x, y), (x+30, y), (x+34, y+14), (x-4, y+14)])
+        pygame.draw.rect(surf, (182, 20, 20),   (x+4,  y-10, 12, 12))
+        pygame.draw.circle(surf, _SKIN,          (x+10, y-14), 5)
+        pygame.draw.rect(surf, (242, 242, 242), (x+3,  y-13, 13,  3))
+        pygame.draw.rect(surf, (182, 20, 20),   (x+7,  y-22,  9,  9))
+        pygame.draw.circle(surf, (242, 242, 242), (x+8, y-22), 3)
+
+
+class SoccerPlayer(WalkingPerson):
+    """Football/soccer player with coloured jersey."""
+
+    _JERSEYS = [
+        (198, 38, 38), (38, 68, 198), (28, 158, 58),
+        (178, 158, 18), (138, 38, 138),
+    ]
+
+    def __init__(self, y: int):
+        super().__init__(y)
+        self.shirt = random.choice(self._JERSEYS)
+        self.speed = random.uniform(22, 42)
+
+
+class SoccerGoal:
+    """Static football goal (white posts + net)."""
+
+    def __init__(self, x: int, ground_y: int, facing_right: bool = True):
+        self.x = x
+        self.y = ground_y
+        self.d = 1 if facing_right else -1
+
+    def update(self, dt: float):
+        pass
+
+    def draw(self, surf: pygame.Surface):
+        x, y, d = self.x, self.y, self.d
+        c_post = (208, 208, 208)
+        c_net  = (165, 165, 165)
+        pygame.draw.line(surf, c_post, (x,       y - 22), (x,       y), 3)
+        pygame.draw.line(surf, c_post, (x+d*22,  y - 22), (x+d*22,  y), 3)
+        pygame.draw.line(surf, c_post, (x,       y - 22), (x+d*22,  y - 22), 3)
+        for i in range(1, 5):
+            pygame.draw.line(surf, c_net, (x+d*i*4, y-22), (x+d*i*4+d*2, y), 1)
+        for j in (8, 15):
+            pygame.draw.line(surf, c_net, (x, y-j), (x+d*22, y-j), 1)
+
+
+class SoccerBall:
+    """Bouncing football."""
+
+    def __init__(self, ground_y: int):
+        self._gy = float(ground_y - 5)
+        self.x   = float(random.randint(40, LEFT_W - 40))
+        self.y   = self._gy
+        self.vx  = random.uniform(-85, 85)
+        self.vy  = 0.0
+        self.t   = 0.0
+
+    def update(self, dt: float):
+        self.t  += dt * 5.0
+        self.vy += 280 * dt
+        self.y  += self.vy * dt
+        self.x  += self.vx * dt
+        if self.y >= self._gy:
+            self.y  = self._gy
+            self.vy = -abs(self.vy) * 0.55
+            if abs(self.vy) < 15:
+                self.vy = -random.uniform(28, 75)
+                self.vx = random.uniform(-85, 85)
+        if self.x < 26:
+            self.x, self.vx = 26.0, abs(self.vx) * 0.8
+        elif self.x > LEFT_W - 26:
+            self.x, self.vx = float(LEFT_W - 26), -abs(self.vx) * 0.8
+
+    def draw(self, surf: pygame.Surface):
+        x, y = int(self.x), int(self.y)
+        pygame.draw.circle(surf, (242, 242, 242), (x, y), 5)
+        pygame.draw.circle(surf, (22,  22,  22),  (x, y), 5, 1)
+        for i in range(5):
+            a = self.t + math.tau * i / 5
+            pygame.draw.circle(surf, (22, 22, 22),
+                               (x + int(math.cos(a) * 2), y + int(math.sin(a) * 2)), 1)
+
+
+class HalloweenStudent(WalkingPerson):
+    """Student in Halloween costume: ghost / vampire / witch."""
+
+    def __init__(self, y: int, variant: int = 0):
+        super().__init__(y)
+        self.variant = variant % 3
+
+    def draw(self, surf: pygame.Surface):
+        x, y  = int(self.x), int(self.y)
+        walk  = math.sin(self.t)
+        leg   = int(walk * 5)
+
+        if self.variant == 0:
+            ghost = pygame.Surface((24, 28), pygame.SRCALPHA)
+            pygame.draw.ellipse(ghost, (228, 228, 236, 210), (0, 0, 24, 24))
+            for wx in (3, 9, 15, 21):
+                pygame.draw.circle(ghost, (232, 225, 198, 155), (wx, 24), 3)
+            pygame.draw.circle(ghost, (18, 18, 18, 255), (8,  10), 2)
+            pygame.draw.circle(ghost, (18, 18, 18, 255), (16, 10), 2)
+            surf.blit(ghost, (x - 12, y - 22 + int(math.sin(self.t * 1.2) * 3)))
+
+        elif self.variant == 1:
+            pygame.draw.line(surf, (22, 22, 72), (x-2,y+2), (x-3+leg,y+10), 2)
+            pygame.draw.line(surf, (22, 22, 72), (x+2,y+2), (x+3-leg,y+10), 2)
+            pygame.draw.rect(surf, (28, 28, 82), (x-4, y-7, 8, 9))
+            pygame.draw.polygon(surf, (68, 8, 8),
+                                [(x-4*self.dir,y-7),(x-14*self.dir,y-2),(x-12*self.dir,y+2)])
+            pygame.draw.circle(surf, (212, 198, 202), (x, y-13), 5)
+            pygame.draw.arc(surf, (28, 28, 80),
+                            pygame.Rect(x-5, y-18, 10, 8), 0, math.pi, 3)
+            pygame.draw.line(surf, (238, 238, 238), (x-2, y-8), (x-2, y-5), 1)
+            pygame.draw.line(surf, (238, 238, 238), (x+2, y-8), (x+2, y-5), 1)
+
+        else:
+            pygame.draw.line(surf, (32, 18, 52), (x-2,y+2), (x-3+leg,y+10), 2)
+            pygame.draw.line(surf, (32, 18, 52), (x+2,y+2), (x+3-leg,y+10), 2)
+            pygame.draw.rect(surf, (38, 20, 58), (x-4, y-7, 8, 9))
+            pygame.draw.circle(surf, _SKIN, (x, y-13), 5)
+            pygame.draw.rect(surf, (20, 10, 30), (x-7, y-18, 14, 3))
+            pygame.draw.polygon(surf, (20, 10, 30), [(x, y-30),(x-5,y-18),(x+5,y-18)])
+            bx = x + self.dir * 14
+            pygame.draw.line(surf, (98, 60, 20), (x+self.dir*4, y-4), (bx, y+4), 2)
+            pygame.draw.ellipse(surf, (128, 82, 28), (bx-3, y+2, 7, 6))
+
+
+class LeafPile:
+    """Static pile of autumn leaves on the ground."""
+
+    _COLS = [(172, 96, 20), (196, 80, 16), (155, 115, 26), (215, 85, 26)]
+
+    def __init__(self, x: int, ground_y: int):
+        self.x = x
+        self.y = ground_y
+        rng    = random
+        self._leaves = [
+            (rng.randint(-13, 13), rng.randint(-5, 5), rng.choice(self._COLS))
+            for _ in range(10)
+        ]
+
+    def update(self, dt: float):
+        pass
+
+    def draw(self, surf: pygame.Surface):
+        for lx, ly, col in self._leaves:
+            pygame.draw.ellipse(surf, col, (self.x+lx-5, self.y+ly-3, 10, 6))
+
+
+class FallingLeaf:
+    """Leaf particle that drifts down and resets."""
+
+    _COLS = [(172, 96, 20), (196, 80, 16), (155, 115, 26), (215, 85, 26), (225, 58, 10)]
+
+    def __init__(self):
+        self._reset(initial=True)
+
+    def _reset(self, initial: bool = False):
+        self.x   = float(random.randint(0, LEFT_W))
+        self.y   = float(random.randint(TOP_H, TOP_H + 80) if initial else TOP_H - 4)
+        self.vy  = random.uniform(18, 38)
+        self.vx  = random.uniform(-18, 18)
+        self.t   = random.uniform(0, math.tau)
+        self.col = random.choice(self._COLS)
+        self.sz  = random.randint(3, 6)
+
+    def update(self, dt: float):
+        self.t  += dt * 3.0
+        self.y  += self.vy * dt
+        self.x  += self.vx * dt + math.sin(self.t) * 16 * dt
+        if self.y > H - TICKER_H or self.x < -8 or self.x > LEFT_W + 8:
+            self._reset()
+
+    def draw(self, surf: pygame.Surface):
+        x, y = int(self.x), int(self.y)
+        s = self.sz
+        angle = self.t % math.pi
+        ca, sa = math.cos(angle), math.sin(angle)
+        pts = [
+            (x + int(ca*s - sa*(s//2)), y + int(sa*s + ca*(s//2))),
+            (x + int(ca*s + sa*(s//2)), y + int(sa*s - ca*(s//2))),
+            (x - int(ca*s - sa*(s//2)), y - int(sa*s + ca*(s//2))),
+            (x - int(ca*s + sa*(s//2)), y - int(sa*s - ca*(s//2))),
+        ]
+        pygame.draw.polygon(surf, self.col, pts)
+
+
+class KubbPlayer(WalkingPerson):
+    """Kubb player — mostly stationary, periodically throws a baton."""
+
+    def __init__(self, x: int, ground_y: int, dir_: int = 1):
+        super().__init__(ground_y)
+        self.x     = float(x)
+        self.dir   = dir_
+        self.speed = 0.0
+        self._throw_t   = 0.0
+        self._throw_dur = 0.0
+
+    def throw(self, duration: float = 1.4):
+        self._throw_t   = 0.0
+        self._throw_dur = duration
+
+    def update(self, dt: float):
+        self.t += dt * 3
+        if self._throw_dur > 0:
+            self._throw_t += dt
+            if self._throw_t >= self._throw_dur:
+                self._throw_dur = 0.0
+
+    def draw(self, surf: pygame.Surface):
+        x, y = int(self.x), int(self.y)
+        walk = math.sin(self.t)
+        leg  = int(walk * 5)
+        pygame.draw.circle(surf, _SKIN,  (x, y-13), 5)
+        pygame.draw.arc(surf, _HAIR, pygame.Rect(x-5, y-18, 10, 8), 0, math.pi, 3)
+        pygame.draw.rect(surf, self.shirt, (x-4, y-7, 8, 9))
+        arm = int(walk * 4)
+        pygame.draw.line(surf, _SKIN, (x-4, y-6), (x-8, y-2+arm), 2)
+        pygame.draw.line(surf, _SKIN, (x+4, y-6), (x+8, y-2-arm), 2)
+        pygame.draw.line(surf, _PANTS, (x-2, y+2), (x-3+leg, y+10), 2)
+        pygame.draw.line(surf, _PANTS, (x+2, y+2), (x+3-leg, y+10), 2)
+        pygame.draw.circle(surf, _SHOES, (x-3+leg, y+11), 2)
+        pygame.draw.circle(surf, _SHOES, (x+3-leg, y+11), 2)
+        if self._throw_dur > 0:
+            p  = self._throw_t / self._throw_dur
+            ag = math.pi / 2 - p * math.pi
+            bx = x + self.dir*8 + int(math.cos(ag) * 18 * self.dir)
+            by = y - 4          + int(math.sin(-ag) * 18)
+            pygame.draw.line(surf, (135, 88, 38), (x+self.dir*8, y-4), (bx, by), 3)
+        else:
+            pygame.draw.line(surf, (135, 88, 38),
+                             (x+self.dir*8, y-6), (x+self.dir*8, y-20), 3)
+
+
+class KubbPin:
+    """Wooden Kubb pin or king."""
+
+    def __init__(self, x: int, ground_y: int, is_king: bool = False):
+        self.x        = x
+        self.ground_y = ground_y
+        self.is_king  = is_king
+
+    def update(self, dt: float):
+        pass
+
+    def draw(self, surf: pygame.Surface):
+        x, y = self.x, self.ground_y
+        col  = (183, 138, 43)
+        edge = (163, 118, 33)
+        if self.is_king:
+            pygame.draw.rect(surf, col,  (x-5, y-22, 10, 22))
+            pygame.draw.rect(surf, edge, (x-5, y-22, 10, 22), 1)
+            for cx in (x-5, x-1, x+3):
+                pygame.draw.rect(surf, col,  (cx, y-26, 3, 5))
+                pygame.draw.rect(surf, edge, (cx, y-26, 3, 5), 1)
+        else:
+            pygame.draw.rect(surf, col,  (x-4, y-14, 8, 14))
+            pygame.draw.rect(surf, edge, (x-4, y-14, 8, 14), 1)
+
+
 class SpriteManager:
     """Coordinates all animated sprites."""
 
@@ -1151,6 +1565,31 @@ class SpriteManager:
         self.flying_demons: list = [FlyingDemon(i) for i in range(3)]
         self.ground_demons: list = [GroundDemon(TOP_H + y, i) for i, y in enumerate([250, 290, 320])]
         self.crucified: list = [CrucifiedFigure(x, TOP_H + 235) for x in [55, 170, 285]]
+        # Seasonal sprites (zone 1)
+        self._season = "Spring"
+        _gy = 378
+        self.snowflakes: list       = [Snowflake()        for _ in range(12)]
+        self.hockey_players: list   = [HockeyPlayer(_gy)  for _ in range(3)]
+        self.hockey_puck            = HockeyPuck(_gy)
+        self.christmas_tree         = ChristmasTree(36, _gy)
+        self.santa_sleigh           = SantaSleigh()
+        self.soccer_players: list   = [SoccerPlayer(_gy)  for _ in range(3)]
+        self.soccer_goals: list     = [SoccerGoal(10, _gy, True),
+                                        SoccerGoal(LEFT_W - 10, _gy, False)]
+        self.soccer_ball            = SoccerBall(_gy)
+        self.halloween_students: list = [HalloweenStudent(_gy, i) for i in range(3)]
+        self.leaf_piles: list       = [LeafPile(x, _gy) for x in (62, 152, 262)]
+        self.falling_leaves: list   = [FallingLeaf()      for _ in range(8)]
+        self.kubb_players: list     = [
+            KubbPlayer(22,  _gy, dir_= 1), KubbPlayer(46,  _gy, dir_= 1),
+            KubbPlayer(LEFT_W-22, _gy, dir_=-1), KubbPlayer(LEFT_W-46, _gy, dir_=-1),
+        ]
+        self.kubb_pins: list        = [
+            KubbPin( 75, _gy), KubbPin(108, _gy), KubbPin(141, _gy),
+            KubbPin(LEFT_W-75, _gy), KubbPin(LEFT_W-108, _gy), KubbPin(LEFT_W-141, _gy),
+            KubbPin(LEFT_W // 2, _gy, is_king=True),
+        ]
+        self._kubb_throw_timer = random.uniform(3, 8)
         self._spawn_decos("Buildings")
 
     def _spawn_decos(self, tab: str):
@@ -1166,8 +1605,9 @@ class SpriteManager:
                 self.decos.append(FloatingDeco(sx, sy, kind, scale=4))
                 idx += 1
 
-    def update(self, dt: float, kps: float, tab: str, zone_id: int = 1):
+    def update(self, dt: float, kps: float, tab: str, zone_id: int = 1, season: str = "Spring"):
         self._view_zone = zone_id
+        self._season    = season
 
         if tab != self._tab:
             self._tab = tab
@@ -1184,6 +1624,33 @@ class SpriteManager:
         for d in self.decos:
             d.update(dt)
         self._gear.update(dt)
+
+        # Zone 1 seasonal sprites
+        if zone_id == 1:
+            if season == "Winter":
+                for sf in self.snowflakes:
+                    sf.update(dt)
+                for hp in self.hockey_players:
+                    hp.update(dt)
+                self.hockey_puck.update(dt)
+                self.christmas_tree.update(dt)
+                self.santa_sleigh.update(dt)
+            elif season == "Summer":
+                for sp in self.soccer_players:
+                    sp.update(dt)
+                self.soccer_ball.update(dt)
+            elif season == "Autumn":
+                for hs in self.halloween_students:
+                    hs.update(dt)
+                for fl in self.falling_leaves:
+                    fl.update(dt)
+            elif season == "Spring":
+                for kp in self.kubb_players:
+                    kp.update(dt)
+                self._kubb_throw_timer -= dt
+                if self._kubb_throw_timer <= 0:
+                    self._kubb_throw_timer = random.uniform(3, 8)
+                    random.choice(self.kubb_players).throw(duration=1.4)
 
         # Zone 3: flying cars and spaceship battles
         if zone_id == 3:
@@ -1278,15 +1745,43 @@ class SpriteManager:
         surf.set_clip(pygame.Rect(0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
 
         if zone == 1:
-            # Zone 1: full normal behaviour
-            for s in self.students:
-                s.draw(surf)
-            self.teacher.draw(surf)
-            self.bus.draw(surf)
-            for b in self.birds:
-                b.draw(surf)
+            season = self._season
             for c in self.clouds:
                 c.draw(surf)
+            if season == "Winter":
+                for sf in self.snowflakes:
+                    sf.draw(surf)
+                self.santa_sleigh.draw(surf)
+                self.christmas_tree.draw(surf)
+                for hp in self.hockey_players:
+                    hp.draw(surf)
+                self.hockey_puck.draw(surf)
+            elif season == "Summer":
+                for b in self.birds:
+                    b.draw(surf)
+                for goal in self.soccer_goals:
+                    goal.draw(surf)
+                for sp in self.soccer_players:
+                    sp.draw(surf)
+                self.soccer_ball.draw(surf)
+            elif season == "Autumn":
+                for b in self.birds:
+                    b.draw(surf)
+                for pile in self.leaf_piles:
+                    pile.draw(surf)
+                for fl in self.falling_leaves:
+                    fl.draw(surf)
+                for hs in self.halloween_students:
+                    hs.draw(surf)
+            else:  # Spring
+                for b in self.birds:
+                    b.draw(surf)
+                for pin in self.kubb_pins:
+                    pin.draw(surf)
+                for kp in self.kubb_players:
+                    kp.draw(surf)
+            self.teacher.draw(surf)
+            self.bus.draw(surf)
 
         elif zone == 7:
             # Zone 7: pterodactyls instead of birds
