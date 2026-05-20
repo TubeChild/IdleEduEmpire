@@ -108,27 +108,22 @@ jobs:
             "IdleEduEmpire-v${VERSION}-windows.zip"
 
       # ── itch.io upload ─────────────────────────────────────────────────
-      # Requires two GitHub secrets:
-      #   BUTLER_API_KEY  — from itch.io account settings → API keys
-      #   ITCH_USER       — your itch.io username
-      - name: Push to itch.io
+      - name: Push Linux to itch.io
+        uses: josephbmanley/butler-publish-itchio-action@master
         env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: linux
+          ITCH_GAME: idle-edu-empire
           ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: IdleEduEmpire-v${{ needs.build-linux.outputs.version }}-linux.zip
           VERSION: ${{ needs.build-linux.outputs.version }}
-        run: |
-          if [ -z "$BUTLER_API_KEY" ] || [ -z "$ITCH_USER" ]; then
-            echo "Skipping itch.io upload: secrets not configured"
-            exit 0
-          fi
-          BUTLER_URL=$(curl -s https://api.github.com/repos/itchio/butler/releases/latest \
-            | python3 -c "import sys,json; assets=json.load(sys.stdin)['assets']; print(next(a['browser_download_url'] for a in assets if 'linux-amd64.zip' in a['name']))")
-          curl -L -o butler.zip "$BUTLER_URL"
-          unzip -q butler.zip -d butler-bin
-          BUTLER=$(find butler-bin -type f | head -1)
-          chmod +x "$BUTLER"
-          export APPIMAGE_EXTRACT_AND_RUN=1
-          "$BUTLER" push "IdleEduEmpire-v${VERSION}-linux.zip" \
-            "${ITCH_USER}/idle-edu-empire:linux" --userversion "${VERSION}"
-          "$BUTLER" push "IdleEduEmpire-v${VERSION}-windows.zip" \
-            "${ITCH_USER}/idle-edu-empire:windows" --userversion "${VERSION}"
+
+      - name: Push Windows to itch.io
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: windows
+          ITCH_GAME: idle-edu-empire
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: IdleEduEmpire-v${{ needs.build-linux.outputs.version }}-windows.zip
+          VERSION: ${{ needs.build-linux.outputs.version }}
