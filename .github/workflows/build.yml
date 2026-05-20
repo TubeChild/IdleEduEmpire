@@ -113,12 +113,15 @@ jobs:
       # And your game page slug on itch.io must be "idle-edu-empire".
       # To change the slug, edit the butler push lines below.
       - name: Push to itch.io
-        if: ${{ secrets.BUTLER_API_KEY != '' && secrets.ITCH_USER != '' }}
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           VERSION: ${{ needs.build-linux.outputs.version }}
         run: |
+          if [ -z "$BUTLER_API_KEY" ] || [ -z "$ITCH_USER" ]; then
+            echo "Skipping itch.io upload: secrets not configured"
+            exit 0
+          fi
           curl -L -o butler.zip "https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default"
           unzip -q butler.zip
           chmod +x butler
