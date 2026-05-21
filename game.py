@@ -46,6 +46,8 @@ _SEASON_MONTHS = {1:'Winter',2:'Winter',3:'Spring',4:'Spring',5:'Spring',
                   6:'Summer',7:'Summer',8:'Summer',9:'Autumn',
                   10:'Autumn',11:'Autumn',12:'Winter'}
 
+DAY_CYCLE = 60.0   # real seconds per in-game day (must match campus.py)
+
 MILESTONES = [
     1e2, 5e2, 1e3, 5e3, 1e4, 5e4, 1e5, 5e5,
     1e6, 5e6, 1e7, 5e7, 1e8, 5e8, 1e9, 5e9,
@@ -373,7 +375,6 @@ class Game:
 
     @property
     def season(self) -> str:
-        DAY_CYCLE = 60.0
         total_days = int(self.game_time / DAY_CYCLE)
         doy  = total_days % 365
         month = 12
@@ -884,13 +885,12 @@ class Game:
         per_type = {"math": [], "spelling": [], "history": []}
         for q in QUIZ_QUESTIONS:
             per_type[q["type"]].append(q)
-        import random as _r
         selected = []
         for t in ("math", "spelling", "history"):
             pool = per_type[t]
             if pool:
-                selected.append(_r.choice(pool))
-        _r.shuffle(selected)
+                selected.append(random.choice(pool))
+        random.shuffle(selected)
         self._quiz_questions      = selected
         self._quiz_idx            = 0
         self._quiz_correct        = 0
@@ -918,9 +918,8 @@ class Game:
         return correct
 
     def _complete_quiz(self) -> None:
-        import random as _r
         # Roll 1-in-a-million for the special achievement
-        if not self.one_in_million and _r.randint(1, 1_000_000) == 1:
+        if not self.one_in_million and random.randint(1, 1_000_000) == 1:
             self.one_in_million = True
             self.milestone_queue.append("ONE IN A MILLION! All stats permanently +15%!")
 
@@ -932,7 +931,7 @@ class Game:
         remaining_weights = list(weights)
         for _ in range(min(3, len(remaining_tiers))):
             total = sum(remaining_weights)
-            r     = _r.uniform(0, total)
+            r     = random.uniform(0, total)
             cumul = 0.0
             for i, w in enumerate(remaining_weights):
                 cumul += w
@@ -971,9 +970,8 @@ class Game:
     def _free_prestige(self) -> None:
         """Prestige without losing any buildings, KP, or upgrades."""
         n = self.diplomas_on_prestige
-        self.diplomas              += n
-        self.total_diplomas_earned  = getattr(self, "total_diplomas_earned", 0) + n
-        self.prestige_count        += 1
+        self.diplomas       += n
+        self.prestige_count += 1
         self.milestone_queue.append(f"Mythic Quiz Reward! +{n} Diplomas — no progress lost!")
 
     # ── Purchases ─────────────────────────────────────────────────────────────
@@ -1171,7 +1169,6 @@ class Game:
             elif c == "scholars_count":
                 hit = len(self.scholars_purchased) >= ch.get("value", 1)
             elif c == "full_year":
-                DAY_CYCLE = 60.0
                 hit = self.game_time >= 365 * DAY_CYCLE
             elif c == "star_hit":
                 hit = any(v >= ch.get("value", 1) for v in self.star_milestones_hit.values())

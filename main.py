@@ -1,3 +1,5 @@
+import math
+import random
 import pygame
 import sys
 import time
@@ -1464,7 +1466,6 @@ class App:
         self._t(F_XS, "KP/s history (last 2 hrs)", (100,100,100), x+16, cy+4)
         samples = g._kps_samples
         if len(samples) >= 2:
-            import math as _m
             max_v = max(sv[1] for sv in samples) or 1.0
             gx0, gx1 = x+16, x+10+sp_w-6
             gy0, gy1 = cy+sp_h-6, cy+16
@@ -2255,7 +2256,6 @@ class App:
     # ── Inspection overlay ────────────────────────────────────────────────────
 
     def _draw_inspection_overlay(self):
-        import math as _m
         g = self.game
         if not g._inspection_active:
             return
@@ -2270,7 +2270,7 @@ class App:
         cy = y0 + h // 2
 
         # Pulsing title
-        pulse = int(200 + 55 * abs(_m.sin(pygame.time.get_ticks() / 300)))
+        pulse = int(200 + 55 * abs(math.sin(pygame.time.get_ticks() / 300)))
         title_col = (pulse, int(pulse * 0.4), 40)
         title_surf = F_LG.render("SCHOOL INSPECTION!", True, title_col)
         self.screen.blit(title_surf, (cx - title_surf.get_width() // 2, cy - 110))
@@ -2299,7 +2299,7 @@ class App:
 
         # Big CLICK button
         click_btn = pygame.Rect(cx - 70, cy + 24, 140, 52)
-        btn_pulse  = int(160 + 80 * abs(_m.sin(pygame.time.get_ticks() / 200)))
+        btn_pulse  = int(160 + 80 * abs(math.sin(pygame.time.get_ticks() / 200)))
         self._r((btn_pulse, 50, 50), click_btn, radius=10)
         self._tc(F_LG, "CLICK!", WHITE, click_btn)
         self._buy_items.append((click_btn, None, "inspection_click"))
@@ -2307,7 +2307,6 @@ class App:
     # ── Quiz overlay ──────────────────────────────────────────────────────────
 
     def _draw_quiz_overlay(self):
-        import math as _m
         g = self.game
         if not g._quiz_active and not g._quiz_showing_reward:
             return
@@ -2402,12 +2401,11 @@ class App:
     # ── Milestone flash ───────────────────────────────────────────────────────
 
     def _draw_milestone_flash(self, dt: float):
-        import math as _m
         mf = self.milestone_flash
         if not mf:
             return
         alpha = int(255 * (mf["timer"] / 2.5))
-        scale = 1.0 + 0.1 * _m.sin(mf["timer"] * 6)
+        scale = 1.0 + 0.1 * math.sin(mf["timer"] * 6)
         dim = pygame.Surface((W, H), pygame.SRCALPHA)
         dim.fill((0, 0, 0, max(0, min(120, alpha // 2))))
         self.screen.blit(dim, (0, 0))
@@ -2426,12 +2424,11 @@ class App:
             self.milestone_flash = None
 
     def _draw_event_banner(self):
-        import math as _m
         ev = self.game.pending_event
         if not ev:
             self._event_btn = None
             return
-        pulse = int(215 + 40 * _m.sin(pygame.time.get_ticks() / 250))
+        pulse = int(215 + 40 * math.sin(pygame.time.get_ticks() / 250))
         bw = W - LEFT_W - 10
         bh = 52
         bx = LEFT_W + 5
@@ -3446,13 +3443,12 @@ class App:
 
             # Auto-click gain floats — drain queue and spawn near study button
             if self.game._auto_click_gains and self._study_btn:
-                import random as _rnd
                 bx = self._study_btn.centerx
                 by = self._study_btn.top
                 for _gain in self.game._auto_click_gains:
                     self.floats.append(Float(
-                        bx + _rnd.randint(-40, 40),
-                        by + _rnd.randint(-30, 0),
+                        bx + random.randint(-40, 40),
+                        by + random.randint(-30, 0),
                         f"+{fmt(_gain)} KP",
                         color=(150, 230, 150)  # green tint for auto-clicks
                     ))

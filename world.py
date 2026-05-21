@@ -27,14 +27,6 @@ _STAR_THRESHOLDS  = [1_000, 10_000, 100_000, 1_000_000]
 _STAR_LEVEL_MULTS = [1.25, 1.50, 2.00, 3.00]
 
 
-def _fmt(n: float) -> str:
-    if n >= 1e15: return f"{n/1e15:.2f}Qa"
-    if n >= 1e12: return f"{n/1e12:.2f}T"
-    if n >= 1e9:  return f"{n/1e9:.2f}B"
-    if n >= 1e6:  return f"{n/1e6:.2f}M"
-    if n >= 1e3:  return f"{n/1e3:.2f}K"
-    return f"{n:.1f}"
-
 
 class ZoneGame:
     """One zone instance (zones 2-9). Runs same KP economy as Zone 1 but zone-themed."""

@@ -1668,7 +1668,7 @@ class SpriteManager:
             for p in self.pterodactyls:
                 p.update(dt)
 
-        # Zone 8: wing sprites
+        # Zone 8: floating wing sprites + angels + halo walkers
         if zone_id == 8:
             self._wing_acc += dt * 1.8
             while self._wing_acc >= 1.0:
@@ -1679,8 +1679,12 @@ class SpriteManager:
             self.wing_sprites = [w for w in self.wing_sprites if w.alive]
             if len(self.wing_sprites) > 20:
                 self.wing_sprites = self.wing_sprites[-20:]
+            for fa in self.flying_angels:
+                fa.update(dt)
+            for hw in self.halo_walkers:
+                hw.update(dt)
 
-        # Zone 9: lava particles
+        # Zone 9: lava particles + demons
         if zone_id == 9:
             self._lava_acc += dt * 4.0
             while self._lava_acc >= 1.0:
@@ -1691,6 +1695,10 @@ class SpriteManager:
             self.lava_particles = [lp for lp in self.lava_particles if lp.alive]
             if len(self.lava_particles) > 40:
                 self.lava_particles = self.lava_particles[-40:]
+            for fd in self.flying_demons:
+                fd.update(dt)
+            for gd in self.ground_demons:
+                gd.update(dt)
 
         # Zone 10: flying heroes and ground fighters
         if zone_id == 10:
@@ -1709,20 +1717,6 @@ class SpriteManager:
             for aw in self.ancient_warriors:
                 aw.update(dt)
             self.trojan_horse.update(dt)
-
-        # Zone 8: angels + halo walkers
-        if zone_id == 8:
-            for fa in self.flying_angels:
-                fa.update(dt)
-            for hw in self.halo_walkers:
-                hw.update(dt)
-
-        # Zone 9: demons (lava already handled above)
-        if zone_id == 9:
-            for fd in self.flying_demons:
-                fd.update(dt)
-            for gd in self.ground_demons:
-                gd.update(dt)
 
         if kps > 0.5:
             rate = min(kps / 25.0, 5.0)

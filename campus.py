@@ -827,21 +827,17 @@ class CampusView:
             # Arch over gate
             arch_cx=gate_cx; arch_cy=gate_y-pillar_h
             arch_rx=gap+pillar_w//2+4; arch_ry=24
-            try:
-                import math as _m
-                for a_deg in range(0,181,6):
-                    a=_m.radians(a_deg)
-                    ax=int(arch_cx+arch_rx*_m.cos(_m.pi-a))
-                    ay=int(arch_cy-arch_ry*_m.sin(a))
-                    pygame.draw.circle(surf,gold,(ax,ay),3)
-                # Inner arch highlight
-                for a_deg in range(10,171,8):
-                    a=_m.radians(a_deg)
-                    ax=int(arch_cx+(arch_rx-3)*_m.cos(_m.pi-a))
-                    ay=int(arch_cy-(arch_ry-3)*_m.sin(a))
-                    pygame.draw.circle(surf,light_gold,(ax,ay),1)
-            except Exception:
-                pass
+            for a_deg in range(0,181,6):
+                a=math.radians(a_deg)
+                ax=int(arch_cx+arch_rx*math.cos(math.pi-a))
+                ay=int(arch_cy-arch_ry*math.sin(a))
+                pygame.draw.circle(surf,gold,(ax,ay),3)
+            # Inner arch highlight
+            for a_deg in range(10,171,8):
+                a=math.radians(a_deg)
+                ax=int(arch_cx+(arch_rx-3)*math.cos(math.pi-a))
+                ay=int(arch_cy-(arch_ry-3)*math.sin(a))
+                pygame.draw.circle(surf,light_gold,(ax,ay),1)
             # Gate cross-bar
             pygame.draw.rect(surf,gold,(lp,gate_y-pillar_h//2,rp-lp+pillar_w,5))
             # Shimmering gate fill (open gate glow)
