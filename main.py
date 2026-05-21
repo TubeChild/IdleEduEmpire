@@ -23,7 +23,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.19.3"
+VERSION    = "0.19.4"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -3085,7 +3085,7 @@ class App:
                         if self._event_btn.collidepoint(mx, my):
                             g.collect_event()
                             audio.play("collect")
-                        continue   # banner visible: block all other panel clicks
+                            continue  # click was on the banner — stop here
 
                     for btn, obj, kind in self._buy_items:
                         if not btn.collidepoint(mx, my):

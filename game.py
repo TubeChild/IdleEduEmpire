@@ -1110,6 +1110,7 @@ class Game:
         elif ev["type"] == "inspection_challenge":
             if not self._inspection_active:
                 self.start_inspection()
+            self.event_timer = random.uniform(90, 150)
             return
         self.pending_event = ev
         self.event_timer   = random.uniform(90, 150)
