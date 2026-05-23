@@ -514,8 +514,8 @@ class ZoneGame:
 
     # ── Update ────────────────────────────────────────────────────────────────
 
-    def update(self, dt: float):
-        gained = self.kps() * dt
+    def update(self, dt: float, ext_mult: float = 1.0):
+        gained = self.kps() * dt * ext_mult
         self.kp          += gained
         self.total_kp    += gained
         self.all_time_kp += gained
@@ -689,10 +689,11 @@ class WorldManager:
     def update(self, dt: float, zone1_game) -> int:
         """Update all unlocked zones. Returns CW earned this tick."""
         cw_gained = 0
+        echo_mult = self.zone_echo_mult()
         for zid, zg in self.zones.items():
             if not self.is_unlocked(zid, zone1_game):
                 continue
-            zg.update(dt)
+            zg.update(dt, ext_mult=echo_mult)
             # Award CW for prestige progress
             prev_p = self._prev_prestiges.get(zid, zg.prestige_count)
             if zg.prestige_count > prev_p:
@@ -769,6 +770,51 @@ class WorldManager:
         if req_item is None:
             return False
         return req_item["id"] in self.cw_purchased
+
+    def spirit_teacher_active(self, tid: str) -> bool:
+        return f"st_{tid}" in self.cw_purchased
+
+    def zone1_bonus_mult(self) -> float:
+        """Combined Zone 1 KPS multiplier: zone synergy × shared curriculum."""
+        return self.cross_zone_mult() * self.cw_interzone_mult()
+
+    def cw_interzone_mult(self) -> float:
+        """Shared Curriculum: each unlocked zone adds a % to Zone 1 KPS."""
+        if "cw_shared_2" in self.cw_purchased:
+            pct = 0.06
+        elif "cw_shared_1" in self.cw_purchased:
+            pct = 0.03
+        else:
+            return 1.0
+        return 1.0 + pct * len(self.zones)
+
+    def zone_echo_mult(self) -> float:
+        """Zone Echo: other zones gain +5% KPS."""
+        return 1.05 if "cw_echo" in self.cw_purchased else 1.0
+
+    def cw_honor_rate_mult(self) -> float:
+        return 0.80 if "cw_honor_eff" in self.cw_purchased else 1.0
+
+    def cw_endow_rate_mult(self) -> float:
+        return 0.75 if "cw_endow_eff" in self.cw_purchased else 1.0
+
+    def cw_alumni_cost_mult(self) -> float:
+        return 0.67 if "cw_alumni_eff" in self.cw_purchased else 1.0
+
+    def cw_event_timer_mult(self) -> float:
+        """Combined event timer multiplier (< 1 = faster spawns)."""
+        mult = 1.0
+        if "cw_event_freq" in self.cw_purchased:
+            mult *= 0.75
+        if "st_freire" in self.cw_purchased:
+            mult *= 0.80
+        return mult
+
+    def cw_rare_weight_mult(self) -> float:
+        return 2.0 if "cw_rare_boost" in self.cw_purchased else 1.0
+
+    def cw_event_reward_mult(self) -> float:
+        return 1.40 if "st_freire" in self.cw_purchased else 1.0
 
     # ── Save / load ───────────────────────────────────────────────────────────
 

@@ -157,9 +157,26 @@ class Game:
         self.cosmetic_theme = "classic"
 
         # Cross-zone bonuses (set from main.py each frame based on CW purchases)
-        self.zone_bonus_mult   = 1.0   # from WorldManager.cross_zone_mult()
-        self._cw_click_mult    = 1.0   # from WorldManager.zone1_click_mult()
-        self._cw_diploma_bonus = 0     # from WorldManager.zone1_diploma_bonus() (int)
+        self.zone_bonus_mult    = 1.0   # from WorldManager.zone1_bonus_mult()
+        self._cw_click_mult     = 1.0   # from WorldManager.zone1_click_mult()
+        self._cw_diploma_bonus  = 0     # from WorldManager.zone1_diploma_bonus() (int)
+        # Spirit Teacher flags (set from main.py each frame)
+        self._cw_vygotsky       = False  # combo window ×1.5, combo mult ×1.5
+        self._cw_dewey          = False  # click → 5s +15% KPS burst
+        self._cw_ellen_key      = False  # building KPS +20%
+        self._cw_montessori     = False  # offline efficiency ×1.5
+        self._cw_sun_tzu        = False  # diplomas on prestige +30%
+        self._cw_socrates       = False  # quiz rewards ×2
+        self._cw_piaget         = False  # prestige_count × +5% KPS
+        # Other new CW bonuses (set from main.py each frame)
+        self._cw_honor_rate     = 1.0   # honor_rate cost multiplier
+        self._cw_endow_rate     = 1.0   # endow cost multiplier
+        self._cw_alumni_cost    = 1.0   # alumni conversion cost multiplier
+        self._cw_event_timer    = 1.0   # event timer multiplier
+        self._cw_rare_weight    = 1.0   # rare event weight multiplier
+        self._cw_event_reward   = 1.0   # event reward multiplier (Freire)
+        # Dewey burst state
+        self._dewey_burst_timer = 0.0
 
         # Quiz system
         self._quiz_active         = False
@@ -318,7 +335,7 @@ class Game:
 
     @property
     def alumni_rate(self) -> int:
-        return 3
+        return max(1, int(3 * self._cw_alumni_cost))
 
     def do_alumni(self):
         if self.endowments < self.alumni_rate:
@@ -475,16 +492,19 @@ class Game:
 
     @property
     def combo_mult(self) -> float:
-        return 1.0 + self.combo * 0.25
+        per_step = 0.25 * (1.5 if self._cw_vygotsky else 1.0)
+        return 1.0 + self.combo * per_step
 
     # ── Honor conversion rate ─────────────────────────────────────────────────
 
     @property
     def honor_rate(self) -> int:
+        base = 15
         for s in SKILLS:
             if s.id in self.skills_purchased and s.effect_type == "honor_rate":
-                return int(s.effect_value)
-        return 15
+                base = int(s.effect_value)
+                break
+        return max(1, int(base * self._cw_honor_rate))
 
     # ── KPS / click ───────────────────────────────────────────────────────────
 
@@ -519,7 +539,8 @@ class Game:
         faculty_bonus = self.faculty_bonuses.get(bname, 0.0)
         star_mult     = self._building_star_mult(bname)
         hero_tech_bonus = self._hero_stat("tech_power") * 0.005
-        return upg_mult * (1.0 + skill_bonus + syn_bonus + scholar_bonus + faculty_bonus + hero_tech_bonus) * star_mult
+        ellen_key_mult  = 1.20 if self._cw_ellen_key else 1.0
+        return upg_mult * (1.0 + skill_bonus + syn_bonus + scholar_bonus + faculty_bonus + hero_tech_bonus) * star_mult * ellen_key_mult
 
     def _global_mult(self) -> float:
         diploma_mult        = 1.0 + math.log1p(self.diplomas) * 1.5
@@ -544,11 +565,12 @@ class Game:
         # Hero passive: Intelligence → global KPS, Transcendence → all-zone wisdom
         hero_int_mult   = 1.0 + self._hero_stat("intelligence") * 0.005
         hero_trans_mult = 1.0 + self._hero_stat("transcendence") * 0.004
+        piaget_mult = _safe_pow(1.05, min(self.prestige_count, 20)) if self._cw_piaget else 1.0
         return (diploma_mult * honor_mult * endow_mult * alumni_direct_mult
                 * (1.0 + pct_bonus + honor_kps_bonus + endow_kps_bonus + scholar_bonus)
                 * skill_mult * dipl_mult * honor_upg_mult * endow_upg_mult
                 * alumni_upg_mult * research_grant_mult * strike_mult * self.zone_bonus_mult
-                * quiz_perm_mult * million_mult * hero_int_mult * hero_trans_mult)
+                * quiz_perm_mult * million_mult * hero_int_mult * hero_trans_mult * piaget_mult)
 
     def _event_kps_mult(self) -> float:
         if self.active_boost and self.active_boost["type"] == "kps_boost":
@@ -569,6 +591,8 @@ class Game:
         mult = self._global_mult() * self._event_kps_mult() * self._focus_kps_mult() * self._season_kps_mult()
         if self.focus_debuff_timer > 0:
             mult *= 0.90
+        if self._dewey_burst_timer > 0:
+            mult *= 1.15
         return raw * mult
 
     def building_cost(self, bname: str) -> float:
@@ -734,8 +758,10 @@ class Game:
             self.combo = min(self.combo + 1, eff_max)
         else:
             self.combo = 1
-        self.combo_timer = COMBO_WINDOW
+        self.combo_timer = COMBO_WINDOW * (1.5 if self._cw_vygotsky else 1.0)
         self.max_combo_reached = max(self.max_combo_reached, self.combo)
+        if self._cw_dewey:
+            self._dewey_burst_timer = 5.0
 
         gained = self.click_power
         self.kp          += gained
@@ -785,8 +811,11 @@ class Game:
             if self.combo_timer <= 0:
                 self.combo = 0
 
+        if self._dewey_burst_timer > 0:
+            self._dewey_burst_timer = max(0.0, self._dewey_burst_timer - dt)
+
         if self.pending_event is None and self.active_boost is None:
-            self.event_timer -= dt
+            self.event_timer -= dt * (1.0 / max(0.1, self._cw_event_timer))
             if self.event_timer <= 0:
                 self._spawn_event()
 
@@ -946,16 +975,17 @@ class Game:
     def claim_quiz_reward(self, tier: str) -> None:
         if not self._quiz_showing_reward or tier not in QUIZ_REWARDS:
             return
-        reward = QUIZ_REWARDS[tier]
-        rtype  = reward["type"]
+        reward  = QUIZ_REWARDS[tier]
+        rtype   = reward["type"]
+        q_mult  = 2.0 if self._cw_socrates else 1.0
         if rtype in ("kps_boost", "click_boost"):
-            self.active_boost = {"type": rtype, "value": reward["value"],
+            self.active_boost = {"type": rtype, "value": reward["value"] * q_mult,
                                  "remaining": reward["duration"], "duration": reward["duration"],
                                  "name": f"Quiz: {reward['name']}!"}
         elif rtype == "perm_kps":
-            self.quiz_perm_kps_bonus += reward["value"]
+            self.quiz_perm_kps_bonus += reward["value"] * q_mult
         elif rtype == "perm_diploma":
-            self.quiz_perm_diploma_bonus += int(reward["value"])
+            self.quiz_perm_diploma_bonus += int(reward["value"] * q_mult)
         elif rtype == "free_prestige":
             self._free_prestige()
 
@@ -1041,9 +1071,10 @@ class Game:
         return True
 
     def convert_to_endowments(self) -> bool:
-        if self.honors < 5:
+        cost = max(1, int(5 * self._cw_endow_rate))
+        if self.honors < cost:
             return False
-        self.honors    -= 5
+        self.honors    -= cost
         self.endowments += 1
         self.total_endow_earned += 1
         self._check_achievements()
@@ -1087,7 +1118,11 @@ class Game:
     # ── Events ────────────────────────────────────────────────────────────────
 
     def _spawn_event(self):
-        weights = [EVENT_RARITY_WEIGHTS.get(e.get("rarity", "common"), 60) for e in EVENTS]
+        rare_mult = self._cw_rare_weight
+        weights = [
+            w * rare_mult if e.get("rarity") == "rare" else w
+            for e, w in ((e, EVENT_RARITY_WEIGHTS.get(e.get("rarity", "common"), 60)) for e in EVENTS)
+        ]
         ev = random.choices(EVENTS, weights=weights, k=1)[0].copy()
         if ev["type"] == "kp_bonus":
             ev["kp_amount"] = self.kps() * ev["value_mult"]
@@ -1123,12 +1158,12 @@ class Game:
         self.pending_event = None
         t = ev["type"]
         if t == "kp_bonus":
-            amount = ev.get("kp_amount", 0)
+            amount = ev.get("kp_amount", 0) * self._cw_event_reward
             self.kp          += amount
             self.total_kp    += amount
             self.all_time_kp += amount
         elif t == "merit_bonus":
-            amt = int(ev["value"])
+            amt = max(1, int(ev["value"] * self._cw_event_reward))
             self.merit_points += amt
         elif t == "faculty":
             bname = ev.get("target")
@@ -1270,7 +1305,8 @@ class Game:
         # ~8 at 2M KP, ~48 at 1B, ~80 at 1T, ~112 at 1Qa, hard cap ~200
         base  = max(1, math.floor(math.log10(max(10.0, self.total_kp / 100_000)) * 8)) + self._cw_diploma_bonus + self.quiz_perm_diploma_bonus + round(self._hero_stat("reputation") * 0.5)
         bonus = self._skill_sum("prestige_bonus")
-        return max(1, math.floor(base * (1 + bonus) * self._season_diploma_mult()))
+        sun_tzu_mult = 1.30 if self._cw_sun_tzu else 1.0
+        return max(1, math.floor(base * (1 + bonus) * self._season_diploma_mult() * sun_tzu_mult))
 
     def do_prestige(self):
         if not self.prestige_eligible:
@@ -1366,8 +1402,9 @@ class Game:
         cap_hours = 8.0 + self._skill_sum("offline_cap") + self._dipl_sum("offline_cap_bonus")
         effective  = min(elapsed, cap_hours * 3600)
         hours      = effective / 3600
+        montessori_mult = 1.5 if self._cw_montessori else 1.0
         efficiency = (0.5 + self._dipl_sum("offline_eff") + self._honor_sum("offline_eff")
-                      + self._endow_sum("offline_eff")) * self._season_offline_mult()
+                      + self._endow_sum("offline_eff")) * self._season_offline_mult() * montessori_mult
         gained     = self.kps() * effective * efficiency
         self.kp          += gained
         self.total_kp    += gained

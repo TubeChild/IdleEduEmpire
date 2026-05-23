@@ -23,7 +23,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.19.4"
+VERSION    = "0.20.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -1688,73 +1688,105 @@ class App:
 
     def _draw_cw_shop(self, x: int, y: int, w: int, h: int):
         """Multiverse Shop — purchase upgrades with Cosmic Wisdom."""
-        g = self.game
         ww = self.world
 
         self._t(F_LG, "✦  Multiverse Shop", (180, 140, 255), x + 10, y + 6)
-        cw_str = f"Cosmic Wisdom: {ww.cosmic_wisdom} CW"
-        self._t(F_MD, cw_str, (200, 180, 255), x + 10, y + 32)
+        self._t(F_MD, f"Cosmic Wisdom: {ww.cosmic_wisdom} CW", (200, 180, 255), x + 10, y + 32)
         self._t(F_XS, "Earn CW by prestiging and converting in any zone.",
                 (130, 120, 160), x + 10, y + 52)
 
-        ITEM_W = (w - 24) // 2
-        ITEM_H = 88
-        ITEM_G = 6
-        col0   = x + 6
-        col1   = x + 6 + ITEM_W + ITEM_G
-        iy     = y + 72
+        CARD_W  = (w - 24) // 2
+        CARD_H  = 88
+        ST_H    = 110   # Spirit Teacher cards are taller
+        GAP     = 6
+        col0    = x + 6
+        col1    = x + 6 + CARD_W + GAP
+        iy      = y + 72
+        cur_sec = None
+        col_idx = 0     # tracks 2-column position for non-teacher items
 
-        for i, item in enumerate(CW_SHOP):
-            cx = col0 if i % 2 == 0 else col1
-            if i % 2 == 0 and i > 0:
-                iy += ITEM_H + ITEM_G
+        for item in CW_SHOP:
+            sec = item.get("section", "")
+            is_teacher = item["effect"] == "spirit_teacher"
 
-            owned    = item["id"] in ww.cw_purchased
-            req_ok   = item.get("req") is None or item["req"] in ww.cw_purchased
-            can_buy  = not owned and req_ok and ww.cosmic_wisdom >= item["cost"]
+            # Section header — flush any dangling odd column first
+            if sec != cur_sec:
+                if cur_sec is not None and col_idx % 2 == 1:
+                    iy += CARD_H + GAP
+                    col_idx = 0
+                cur_sec = sec
+                iy += 4
+                self._t(F_SM, sec, (160, 140, 210), col0, iy)
+                pygame.draw.line(self.screen, (100, 80, 140),
+                                 (col0, iy + 17), (col0 + w - 18, iy + 17))
+                iy += 22
+                col_idx = 0
 
-            if owned:
-                bg = (50, 70, 50)
-                bc = (80, 160, 80)
-            elif can_buy:
-                bg = (40, 35, 65)
-                bc = (150, 120, 220)
+            owned   = item["id"] in ww.cw_purchased
+            req_ok  = item.get("req") is None or item["req"] in ww.cw_purchased
+            can_buy = not owned and req_ok and ww.cosmic_wisdom >= item["cost"]
+
+            if owned:   bg, bc = (50, 70, 50),  (80, 160, 80)
+            elif can_buy: bg, bc = (40, 35, 65), (150, 120, 220)
+            else:         bg, bc = (35, 30, 50), (80, 70, 100)
+
+            if is_teacher:
+                # Full-width card with quote
+                card = pygame.Rect(col0, iy, w - 12, ST_H)
+                self._r(bg, card, radius=6, border=1, bc=bc)
+                name_col = (255, 220, 120) if not owned else (140, 200, 140)
+                self._t(F_SM, item["name"], name_col, col0 + 8, iy + 6)
+                quote = item.get("quote", "")
+                if len(quote) > 62:
+                    quote = quote[:62] + "…"
+                self._t(F_XS, f'"{quote}"', (160, 150, 180), col0 + 8, iy + 26)
+                self._t(F_XS, item["desc"], (200, 190, 220), col0 + 8, iy + 44)
+                if owned:
+                    self._t(F_XS, "✓ Active", (100, 220, 100), col0 + 8, iy + 62)
+                elif not req_ok:
+                    req_name = next((it["name"] for it in CW_SHOP if it["id"] == item["req"]), "?")
+                    self._t(F_XS, f"Requires: {req_name}", (180, 140, 100), col0 + 8, iy + 62)
+                else:
+                    cost_col = (255, 210, 80) if can_buy else (160, 140, 100)
+                    self._t(F_XS, f"Cost: {item['cost']} CW", cost_col, col0 + 8, iy + 62)
+                    btn = pygame.Rect(col0 + w - 72, iy + ST_H - 28, 60, 22)
+                    btn_col = (120, 80, 200) if can_buy else (60, 50, 80)
+                    self._r(btn_col, btn, radius=4)
+                    self._tc(F_XS, "Summon" if can_buy else "—", WHITE, btn)
+                    if can_buy:
+                        self._buy_items.append((btn, item["id"], "cw_buy"))
+                iy += ST_H + GAP
             else:
-                bg = (35, 30, 50)
-                bc = (80, 70, 100)
+                # 2-column card
+                cx = col0 if col_idx % 2 == 0 else col1
+                if col_idx % 2 == 0 and col_idx > 0:
+                    iy += CARD_H + GAP
+                col_idx += 1
 
-            card = pygame.Rect(cx, iy, ITEM_W, ITEM_H)
-            self._r(bg, card, radius=6, border=1, bc=bc)
+                card = pygame.Rect(cx, iy, CARD_W, CARD_H)
+                self._r(bg, card, radius=6, border=1, bc=bc)
+                name_col = (220, 200, 255) if not owned else (140, 200, 140)
+                self._t(F_SM, item["name"], name_col, cx + 8, iy + 6)
+                if owned:
+                    self._t(F_XS, "✓ Purchased", (100, 200, 100), cx + 8, iy + 26)
+                elif not req_ok:
+                    req_name = next((it["name"] for it in CW_SHOP if it["id"] == item["req"]), "?")
+                    self._t(F_XS, f"Requires: {req_name}", (180, 140, 100), cx + 8, iy + 26)
+                else:
+                    cost_col = (255, 210, 80) if can_buy else (160, 140, 100)
+                    self._t(F_XS, f"Cost: {item['cost']} CW", cost_col, cx + 8, iy + 26)
+                desc = item["desc"] if len(item["desc"]) <= 38 else item["desc"][:38] + "…"
+                self._t(F_XS, desc, (180, 170, 200), cx + 8, iy + 42)
+                if not owned and req_ok:
+                    btn_col = (100, 70, 180) if can_buy else (60, 50, 80)
+                    btn = pygame.Rect(cx + CARD_W - 58, iy + CARD_H - 26, 52, 20)
+                    self._r(btn_col, btn, radius=4)
+                    self._tc(F_XS, "Buy" if can_buy else "—", WHITE, btn)
+                    if can_buy:
+                        self._buy_items.append((btn, item["id"], "cw_buy"))
 
-            name_col = (220, 200, 255) if not owned else (140, 200, 140)
-            self._t(F_SM, item["name"], name_col, cx + 8, iy + 6)
-
-            if owned:
-                self._t(F_XS, "✓ Purchased", (100, 200, 100), cx + 8, iy + 26)
-            elif not req_ok:
-                req_name = next((it["name"] for it in CW_SHOP if it["id"] == item["req"]), "?")
-                self._t(F_XS, f"Requires: {req_name}", (180, 140, 100), cx + 8, iy + 26)
-            else:
-                cost_col = (255, 210, 80) if can_buy else (160, 140, 100)
-                self._t(F_XS, f"Cost: {item['cost']} CW", cost_col, cx + 8, iy + 26)
-
-            # Wrap description to 2 lines
-            desc = item["desc"]
-            if len(desc) > 38:
-                desc = desc[:38] + "…"
-            self._t(F_XS, desc, (180, 170, 200), cx + 8, iy + 42)
-
-            if not owned and req_ok:
-                btn_col = (100, 70, 180) if can_buy else (60, 50, 80)
-                btn = pygame.Rect(cx + ITEM_W - 58, iy + ITEM_H - 26, 52, 20)
-                self._r(btn_col, btn, radius=4)
-                self._tc(F_XS, "Buy" if can_buy else "—", WHITE, btn)
-                if can_buy:
-                    self._buy_items.append((btn, item["id"], "cw_buy"))
-
-        # Handle bottom of last row (if odd number of items, move iy forward)
-        if len(CW_SHOP) % 2 == 1:
-            iy += ITEM_H + ITEM_G
+        if col_idx % 2 == 1:
+            iy += CARD_H + GAP
 
     def _draw_zone_overview(self, zid, zg, zdef, x, y0, w, h):
         m  = zdef["mechanic"]
@@ -3409,10 +3441,23 @@ class App:
             self.floats = [f for f in self.floats if f.alive]
             pygame.display.flip()
 
-            # Apply cross-zone CW bonuses to Zone 1 each frame
-            self.game.zone_bonus_mult   = self.world.cross_zone_mult()
-            self.game._cw_click_mult    = self.world.zone1_click_mult()
-            self.game._cw_diploma_bonus = self.world.zone1_diploma_bonus()
+            # Apply CW bonuses to Zone 1 each frame
+            self.game.zone_bonus_mult    = self.world.zone1_bonus_mult()
+            self.game._cw_click_mult     = self.world.zone1_click_mult()
+            self.game._cw_diploma_bonus  = self.world.zone1_diploma_bonus()
+            self.game._cw_vygotsky       = self.world.spirit_teacher_active("vygotsky")
+            self.game._cw_dewey          = self.world.spirit_teacher_active("dewey")
+            self.game._cw_ellen_key      = self.world.spirit_teacher_active("ellen_key")
+            self.game._cw_montessori     = self.world.spirit_teacher_active("montessori")
+            self.game._cw_sun_tzu        = self.world.spirit_teacher_active("sun_tzu")
+            self.game._cw_socrates       = self.world.spirit_teacher_active("socrates")
+            self.game._cw_piaget         = self.world.spirit_teacher_active("piaget")
+            self.game._cw_honor_rate     = self.world.cw_honor_rate_mult()
+            self.game._cw_endow_rate     = self.world.cw_endow_rate_mult()
+            self.game._cw_alumni_cost    = self.world.cw_alumni_cost_mult()
+            self.game._cw_event_timer    = self.world.cw_event_timer_mult()
+            self.game._cw_rare_weight    = self.world.cw_rare_weight_mult()
+            self.game._cw_event_reward   = self.world.cw_event_reward_mult()
             self.game.update(dt)
             self._check_tutorial_advance(dt)
             self.world.update(dt, self.game)
