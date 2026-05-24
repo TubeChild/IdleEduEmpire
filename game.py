@@ -12,6 +12,8 @@ from data import (BUILDINGS, UPGRADES, SKILLS, ACHIEVEMENTS, EVENTS, STORY,
                   ALUMNI_UPGRADES, SCHOLARS, EVENT_RARITY_WEIGHTS,
                   DYNAMIC_NEWS_BUILDING, DYNAMIC_NEWS_ACHIEVEMENT,
                   DYNAMIC_NEWS_PRESTIGE, DYNAMIC_NEWS_MILESTONE,
+                  DYNAMIC_NEWS_SEASON, DYNAMIC_NEWS_EVENT_COLLECT,
+                  DYNAMIC_NEWS_STRIKE_RESOLVE,
                   BUILDING_SACRIFICE, QUIZ_QUESTIONS, QUIZ_REWARDS,
                   HERO_CREATION_COST, HERO_PATH_STATS)
 
@@ -244,6 +246,7 @@ class Game:
         self._total_faculty_hires     = 0
         self._total_daily_done        = 0
         self._seasons_seen: Set[str]  = set()
+        self._last_season: str        = ""
         self.best_kps                 = 0.0
         self.best_run_kp              = 0.0
         self._total_events_collected  = 0
@@ -785,7 +788,13 @@ class Game:
         self.all_time_kp += gained
         self._kp_today   += gained
         self.game_time   += dt
-        self._seasons_seen.add(self.season)
+        cur_season = self.season
+        self._seasons_seen.add(cur_season)
+        if cur_season != self._last_season and self._last_season != "":
+            templates = DYNAMIC_NEWS_SEASON.get(cur_season, [])
+            if templates:
+                self._queue_news(random.choice(templates))
+        self._last_season = cur_season
         now_t = time.time()
         if now_t - self._last_sample_t >= 60.0:
             self._kps_samples.append((self.game_time, self.kps()))
@@ -882,6 +891,7 @@ class Game:
         self._staff_strike_active = False
         self._staff_strike_timer  = 0.0
         self._strike_notify       = False
+        self._queue_news(random.choice(DYNAMIC_NEWS_STRIKE_RESOLVE))
         return True
 
     def start_inspection(self) -> None:
@@ -1156,6 +1166,7 @@ class Game:
             return
         self._total_events_collected += 1
         self.pending_event = None
+        self._queue_news(random.choice(DYNAMIC_NEWS_EVENT_COLLECT))
         t = ev["type"]
         if t == "kp_bonus":
             amount = ev.get("kp_amount", 0) * self._cw_event_reward

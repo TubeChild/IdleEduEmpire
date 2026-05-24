@@ -12,7 +12,7 @@ from data import (BUILDINGS, UPGRADES, SKILLS, ACHIEVEMENTS, NEWS,
                   EVENTS, STORY, SYNERGIES, DIPLOMA_UPGRADES,
                   HONOR_UPGRADES, ENDOW_UPGRADES, ALUMNI_UPGRADES, SCHOLARS,
                   BUILDING_SACRIFICE, CW_SHOP, COSMETIC_THEMES,
-                  QUIZ_QUESTIONS, QUIZ_REWARDS)
+                  QUIZ_QUESTIONS, QUIZ_REWARDS, DYNAMIC_NEWS_SPIRIT_TEACHER)
 from game import Game, fmt, COMBO_WINDOW, FOCUS_ABILITIES
 from world import WorldManager
 from zones_data import ZONE_DEFS
@@ -23,7 +23,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.20.0"
+VERSION    = "0.20.1"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -3330,6 +3330,12 @@ class App:
                         elif kind == "cw_buy":
                             if self.world.buy_cw_upgrade(obj):
                                 self.world.save()
+                                item = next((it for it in CW_SHOP if it["id"] == obj), None)
+                                if item and item["effect"] == "spirit_teacher":
+                                    tid = item["value"]
+                                    tmpl = DYNAMIC_NEWS_SPIRIT_TEACHER.get(tid, "")
+                                    if tmpl:
+                                        g._queue_news(tmpl)
                         elif kind == "set_theme":
                             self.game.cosmetic_theme = obj
                             self.game.save()

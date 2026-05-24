@@ -1270,6 +1270,7 @@ DYNAMIC_NEWS_MILESTONE: dict[str, list[str]] = {
 # ── News Ticker ───────────────────────────────────────────────────────────────
 
 NEWS: list[str] = [
+    # Admin & daily life
     "Principal announces record-breaking enrolment numbers this term!",
     "Library card renewals now open — ask at the front desk.",
     "Science fair entries due by end of term. Good luck!",
@@ -1295,4 +1296,117 @@ NEWS: list[str] = [
     "World Campus live-streams lectures to 50 countries.",
     "Quantum Institute achieves first quantum entanglement experiment.",
     "The Nexus of Knowledge has been named a World Heritage Site.",
+    # Staff room
+    "Staff room microwave reported missing. Investigation ongoing.",
+    "Mr Johansson's legendary coffee flask found — drama averted.",
+    "Teachers' lounge now has a new sofa. Productivity up 12%.",
+    "Reminder: please label your lunch in the staff fridge.",
+    "The deputy head has allegedly started a book club. Six members already.",
+    "Staff meeting rescheduled — again. No one is surprised.",
+    "The photocopier is fixed. The whole school can relax.",
+    "Grading marathon in progress — the staffroom light never goes off.",
+    "Annual teacher talent show: sign-up sheet in the corridor.",
+    "Caretaker reports suspicious chalk drawings on the playground. Ongoing.",
+    # Student life
+    "A student reportedly solved a puzzle in record time. Rumours of genius.",
+    "Year 9 petition for longer lunch breaks reaches 200 signatures.",
+    "Anonymous tip: someone put googly eyes on every portrait in the main hall.",
+    "The school newspaper hits a new readership high this week.",
+    "Student duo wins regional debate championship. Campus cheers.",
+    "Three students claim to have found a secret room. Principal unavailable for comment.",
+    "Campus radio station launches — first broadcast goes surprisingly well.",
+    "The school chess club is officially undefeated this season.",
+    "A student's science project has been cited in an actual journal.",
+    "Sixth-form student invents new study technique. Demand is high.",
+    "Lost: one very large plush bear. If found, please return to room 14.",
+    "Peer tutoring programme sees record sign-ups this term.",
+    # Cafeteria
+    "Mystery Tuesday soup returns. Students nervous but curious.",
+    "Cafeteria introduces 'World Cuisine Wednesdays'. Mixed reviews.",
+    "Dinner lady Mrs Petrov has baked 10,000 scones since 1987. A legend.",
+    "New vending machine installed. The queue forms immediately.",
+    "Cafeteria offers extra portions today — no reason given.",
+    "Rumour: the pizza on Fridays is better than it looks.",
+    "Chocolate pudding returns to the menu. Students rejoice.",
+    # Academic & inspirational
+    "Curiosity is the engine of achievement — keep asking questions.",
+    "A school is not a building. It is a living, breathing community.",
+    "The more you learn, the more places you'll go.",
+    "Every question asked is a step forward for all of us.",
+    "Education is the most powerful weapon you can use to change the world.",
+    "Mediocrity is not an option here. Excellence is the standard.",
+    "The next great idea is probably forming in a classroom right now.",
+    "Failure is just data. Keep experimenting.",
+    "Diplomas are earned, not given. You're proof of that.",
+    "Think big, study hard, rest when needed, repeat.",
+    # Weird & charming
+    "A pair of geese have taken up residence outside the Science Lab. No one knows why.",
+    "Campus cat 'Professor Mittens' spotted sleeping on Year 10 coursework — again.",
+    "The school flag blew off the roof. It has been replaced with a bedsheet.",
+    "Groundskeeper claims the oak tree 'has been here longer than education itself.'",
+    "The fire alarm test has been postponed. Students simultaneously relieved and suspicious.",
+    "An extremely enthusiastic parent volunteered to repaint the gym. It is now orange.",
+    "The school's weather station recorded 'a very localised drizzle' over the art block.",
+    "Someone has been leaving motivational sticky notes in the toilets. Appreciated.",
+    "The class hamster, Archimedes, has escaped again. All staff on alert.",
+    "A time capsule buried in 1998 has been uncovered during groundwork. Contents: confusing.",
+    # Buildings & infrastructure
+    "New roof on the main building — no more buckets in the corridor!",
+    "Sixth new classroom this year — enrolment continues to soar.",
+    "Energy audit: this school now runs greener than ever before.",
+    "Planners approve a rooftop garden. Green thumbs wanted.",
+    "The old boiler has finally been replaced. Warmth returns to Block C.",
+    "Architects unveiled plans for a new atrium. Students are excited.",
+]
+
+DYNAMIC_NEWS_SPIRIT_TEACHER: dict[str, str] = {
+    "vygotsky": "The spirit of Lev Vygotsky walks these halls — the zone of proximal development now reaches every desk.",
+    "dewey":    "John Dewey's presence stirs the campus. 'Education is life itself,' echoes in every corridor.",
+    "ellen_key": "Ellen Key's vision takes root here — this school is now truly a Century of the Child.",
+    "montessori": "Maria Montessori's spirit settles over campus. Students are already working as if no one is watching.",
+    "sun_tzu":  "Sun Tzu's strategic wisdom flows through {school}. Every prestige is now a calculated campaign.",
+    "freire":   "Paulo Freire's spirit ignites {school} — education here is an act of freedom.",
+    "socrates": "Socrates himself wanders the halls, asking questions. The answers have never multiplied faster.",
+    "piaget":   "Jean Piaget's spirit takes root at {school} — each prestige builds upon the last.",
+}
+
+DYNAMIC_NEWS_SEASON: dict[str, list[str]] = {
+    "Winter": [
+        "Winter arrives at {school} — snowflakes outside, hot cocoa in the staff room.",
+        "The campus is blanketed in snow. Attendance somehow at a record high.",
+        "Winter term begins — students arrive wrapped in scarves, ready to learn.",
+        "Ice on the paths, fire in the classrooms. {school} carries on.",
+    ],
+    "Spring": [
+        "Spring is here — the school grounds are bursting with colour and energy.",
+        "Kubb sets out on the field, cherry blossom overhead. A fine day at {school}.",
+        "Spring term kicks off with record optimism and pollen counts.",
+        "The smell of fresh-cut grass drifts through the classroom windows. Focus is difficult.",
+    ],
+    "Summer": [
+        "Summer term at {school} — the football pitch is busy and the learning never stops.",
+        "Sun blazes over campus. Sunscreen recommended. Curiosity: mandatory.",
+        "Longest school day of the year — and every minute counts at {school}.",
+        "Summer reading lists distributed. The library is operating extended hours.",
+    ],
+    "Autumn": [
+        "Autumn sweeps through {school} — leaves fall, enthusiasm rises.",
+        "Halloween costumes spotted in the corridors. The principal is pretending not to notice.",
+        "Autumn term begins. Notebooks open. The future is being written.",
+        "Conkers, hot soup, and freshly sharpened pencils — autumn is here.",
+    ],
+}
+
+DYNAMIC_NEWS_EVENT_COLLECT: list[str] = [
+    "Students erupt in celebration as a bonus arrives at {school}!",
+    "Windfall! Staff and students at {school} enjoy an unexpected boost.",
+    "Something remarkable just happened at {school}. Cheers heard from the main hall.",
+    "A special moment at {school} — captured, celebrated, and filed under 'excellent'.",
+    "Bonus secured! The {school} principal is seen doing a small fist-pump.",
+]
+
+DYNAMIC_NEWS_STRIKE_RESOLVE: list[str] = [
+    "Negotiations conclude at {school} — staff and management shake hands. Normal service resumes.",
+    "The staff strike at {school} is over. Lessons resume. Everyone is relieved.",
+    "Peace restored at {school} after tense industrial action. The staffroom kettle is back on.",
 ]
