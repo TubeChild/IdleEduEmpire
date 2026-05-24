@@ -1890,14 +1890,31 @@ class SpriteManager:
             self.bus.draw(surf)
 
         elif zone == 7:
-            # Zone 7: pterodactyls instead of birds
+            # Zone 7: warm amber prehistoric sky + lush ground + pterodactyls
+            pygame.draw.rect(surf, (196, 128, 52),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            pygame.draw.rect(surf, (58, 108, 34),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
+            # Volcano silhouette on the right
+            pts_v = [(LEFT_W, TOP_H + 270), (LEFT_W - 60, TOP_H + 130),
+                     (LEFT_W - 110, TOP_H + 270)]
+            pygame.draw.polygon(surf, (80, 48, 22), pts_v)
+            # Orange glow at volcano crater
+            pygame.draw.circle(surf, (220, 80, 20), (LEFT_W - 60, TOP_H + 132), 8)
             for c in self.clouds:
                 c.draw(surf)
             for p in self.pterodactyls:
                 p.draw(surf)
 
         elif zone == 8:
-            # Zone 8: angel wings float upward, plus angels and halo walkers
+            # Zone 8: golden heaven sky + cloud floor + angels
+            pygame.draw.rect(surf, (245, 235, 190),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            pygame.draw.rect(surf, (255, 252, 240),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
+            # Sun disc
+            pygame.draw.circle(surf, (255, 215, 40), (LEFT_W // 2, TOP_H + 55), 28)
+            pygame.draw.circle(surf, (255, 235, 130), (LEFT_W // 2, TOP_H + 55), 36, 4)
             for c in self.clouds:
                 c.draw(surf)
             for w in self.wing_sprites:
@@ -1908,7 +1925,15 @@ class SpriteManager:
                 hw.draw(surf)
 
         elif zone == 9:
-            # Zone 9: lava particles drifting up, plus demons and crosses
+            # Zone 9: charred dark-red hellscape sky + scorched ground
+            pygame.draw.rect(surf, (26, 6, 6),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            pygame.draw.rect(surf, (42, 10, 6),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
+            # Glowing lava seams on ground
+            for lx in (40, 100, 190, 270):
+                pygame.draw.ellipse(surf, (200, 50, 10),
+                                    (lx - 18, TOP_H + 272, 36, 8))
             for lp in self.lava_particles:
                 lp.draw(surf)
             for fd in self.flying_demons:
@@ -1919,14 +1944,32 @@ class SpriteManager:
                 cf.draw(surf)
 
         elif zone == 6:
-            # Zone 6: sparkle clouds + wizard battles
+            # Zone 6: deep mystical purple sky + glowing arcane ground
+            pygame.draw.rect(surf, (22, 8, 48),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            pygame.draw.rect(surf, (18, 44, 18),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
+            # Magic crystal pillars in background
+            for px in (35, 120, 245):
+                pygame.draw.polygon(surf, (100, 40, 160),
+                                    [(px, TOP_H + 270), (px - 8, TOP_H + 180),
+                                     (px, TOP_H + 165), (px + 8, TOP_H + 180)])
+                pygame.draw.circle(surf, (200, 120, 255), (px, TOP_H + 163), 5)
             for c in self.clouds:
                 c.draw(surf)
             for wb in self.wizard_battles:
                 wb.draw(surf)
 
         elif zone == 3:
-            # Zone 3: futuristic sky — flying cars and spaceship battle
+            # Zone 3: industrial smoggy brown-grey sky + metallic ground
+            pygame.draw.rect(surf, (90, 84, 78),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            pygame.draw.rect(surf, (65, 62, 58),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
+            # Smokestacks in background
+            for sx in (40, 130, 220):
+                pygame.draw.rect(surf, (50, 48, 45), (sx - 6, TOP_H + 170, 12, 100))
+                pygame.draw.ellipse(surf, (80, 76, 70), (sx - 8, TOP_H + 165, 16, 10))
             for c in self.clouds:
                 c.draw(surf)
             for fc in self.flying_cars:
@@ -1934,7 +1977,18 @@ class SpriteManager:
             self.spaceship_fighters.draw(surf)
 
         elif zone == 10:
-            # Zone 10: flying heroes soar above ground fighters
+            # Zone 10: modern blue sky + city skyline silhouette
+            pygame.draw.rect(surf, (80, 130, 200),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            # City buildings silhouette
+            city_rects = [(10, 200, 38, 70), (52, 220, 28, 50), (84, 190, 22, 80),
+                          (112, 215, 32, 55), (150, 180, 26, 90), (182, 210, 20, 60),
+                          (208, 195, 34, 75), (248, 220, 30, 50), (284, 185, 38, 85)]
+            for rx, rh, rw, rheight in city_rects:
+                pygame.draw.rect(surf, (35, 50, 75),
+                                 (rx, TOP_H + 270 - rheight, rw, rheight))
+            pygame.draw.rect(surf, (55, 80, 110),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
             for c in self.clouds:
                 c.draw(surf)
             for fh in self.flying_heroes:
@@ -1943,14 +1997,36 @@ class SpriteManager:
                 gf.draw(surf)
 
         elif zone == 2:
-            # Zone 2: clouds + drifting ghosts
+            # Zone 2: warm sandy ancient sky + crumbling stone ground
+            pygame.draw.rect(surf, (200, 172, 118),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            pygame.draw.rect(surf, (140, 118, 78),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
+            # Ruined column stumps
+            for cx in (45, 145, 255):
+                pygame.draw.rect(surf, (168, 148, 98),
+                                 (cx - 8, TOP_H + 200, 16, 70))
+                pygame.draw.rect(surf, (145, 128, 84),
+                                 (cx - 10, TOP_H + 198, 20, 8))
+                # Cracks
+                pygame.draw.line(surf, (120, 100, 62),
+                                 (cx - 2, TOP_H + 210), (cx + 4, TOP_H + 240), 1)
             for c in self.clouds:
                 c.draw(surf)
             for gf in self.ghost_figures:
                 gf.draw(surf)
 
         elif zone == 4:
-            # Zone 4: clouds + ancient warriors + trojan horse
+            # Zone 4: Mediterranean blue sky + marble plaza ground
+            pygame.draw.rect(surf, (96, 162, 210),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            pygame.draw.rect(surf, (215, 205, 178),
+                             (0, TOP_H + 270, LEFT_W, H - TOP_H - TICKER_H - 270))
+            # Marble columns (intact, taller than Zone 2's ruins)
+            for cx in (30, 150, 280):
+                pygame.draw.rect(surf, (235, 228, 208), (cx - 7, TOP_H + 150, 14, 120))
+                pygame.draw.rect(surf, (215, 205, 185), (cx - 10, TOP_H + 148, 20, 8))
+                pygame.draw.rect(surf, (215, 205, 185), (cx - 9,  TOP_H + 265, 18, 7))
             for c in self.clouds:
                 c.draw(surf)
             for aw in self.ancient_warriors:

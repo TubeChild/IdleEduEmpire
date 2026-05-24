@@ -23,7 +23,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.20.2"
+VERSION    = "0.21.0"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -183,7 +183,8 @@ class App:
         self.b_scroll  = 0
         self.u_scroll  = 0
         self.sk_scroll = 0
-        self.ac_scroll = 0
+        self.ac_scroll   = 0
+        self._ach_filter = "all"   # "all" | "unlocked" | "locked"
         self.lg_scroll_h = 0
         self.lg_scroll_e = 0
         self.lg_subtab   = "Honors"
@@ -1104,16 +1105,35 @@ class App:
                                  (mx + 4, dm_card_y + dm_h - 9, int((dm_w - 8) * pct), 5),
                                  border_radius=2)
 
-        ach_y0 = dm_card_y + dm_h + 6   # achievements start below daily missions
+        # ── Achievement filter buttons ─────────────────────────────────────────
+        filter_y = dm_card_y + dm_h + 8
+        filt_opts = [("all", "All"), ("unlocked", "Unlocked"), ("locked", "Locked")]
+        filt_w, filt_h_btn, filt_gap = 108, 24, 6
+        for fi, (fk, fl) in enumerate(filt_opts):
+            fx = x + 10 + fi * (filt_w + filt_gap)
+            active = self._ach_filter == fk
+            fbg = (95, 60, 148) if active else (195, 188, 215)
+            fbc = (75, 45, 118) if active else (165, 158, 185)
+            fbtn = pygame.Rect(fx, filter_y, filt_w, filt_h_btn)
+            self._r(fbg, fbtn, radius=5, border=1, bc=fbc)
+            self._tc(F_XS, fl, WHITE if active else (80, 60, 110), fbtn)
+            self._buy_items.append((fbtn, fk, "ach_filter"))
+
+        ach_y0 = filter_y + filt_h_btn + 6
+        filt = self._ach_filter
+        vis_achs = [a for a in ACHIEVEMENTS
+                    if (filt == "all")
+                    or (filt == "unlocked" and a.id in g.achievements_unlocked)
+                    or (filt == "locked"   and a.id not in g.achievements_unlocked)]
         ach_vis_h = h - (ach_y0 - y0)
-        n_ach_rows = (len(ACHIEVEMENTS) + 1) // 2
+        n_ach_rows = (len(vis_achs) + 1) // 2
         _ach_ch, _ach_gap = 78, 6
         self._scroll_max["ReportCard"] = max(0, n_ach_rows * (_ach_ch + _ach_gap) - ach_vis_h)
 
         self._clip(pygame.Rect(x, ach_y0, w, ach_vis_h))
         cw, ch = (w - 12) // 2, 78
         gap    = 6
-        for i, a in enumerate(ACHIEVEMENTS):
+        for i, a in enumerate(vis_achs):
             col = i % 2
             row = i // 2
             cx2 = x + col * (cw + gap)
@@ -1403,6 +1423,8 @@ class App:
         vis_h = h - HEADER_H
         self._clip(pygame.Rect(x, y0 + HEADER_H, w, vis_h))
 
+        _hero_lvl = g.hero.get("level", 0) if g.hero else 0
+        _hero_dom = g.hero.get("dominant_path", "—") if g.hero else "—"
         stats = [
             ("KP this run",     fmt(g.total_kp)),
             ("All-time KP",     fmt(g.all_time_kp)),
@@ -1410,6 +1432,9 @@ class App:
             ("Best KP/s",       fmt(g.best_kps)),
             ("Total clicks",    str(g.total_clicks)),
             ("Max combo",       str(g.max_combo_reached)),
+            ("Events collected",str(g._total_events_collected)),
+            ("Focus uses",      str(g._total_focus_uses)),
+            ("Daily days done", str(g._total_daily_done)),
             ("Prestige count",  str(g.prestige_count)),
             ("Diplomas",        str(g.diplomas)),
             ("Honors",          str(g.honors)),
@@ -1418,6 +1443,9 @@ class App:
             ("Merit points",    str(g.merit_points)),
             ("Achievements",    f"{len(g.achievements_unlocked)}/{len(ACHIEVEMENTS)}"),
             ("Skills",          f"{len(g.skills_purchased)}/{len(SKILLS)}"),
+            ("Hero level",      str(_hero_lvl) if _hero_lvl else "No hero"),
+            ("Hero path",       _hero_dom),
+            ("Scholars hired",  f"{len(g.scholars_purchased)}/{len(SCHOLARS)}"),
             ("Session time",    fmt_time(g.session_seconds)),
         ]
         col_w  = (w - 20) // 2
@@ -3336,6 +3364,9 @@ class App:
                                     tmpl = DYNAMIC_NEWS_SPIRIT_TEACHER.get(tid, "")
                                     if tmpl:
                                         g._queue_news(tmpl)
+                        elif kind == "ach_filter":
+                            self._ach_filter = obj
+                            self.ac_scroll = 0
                         elif kind == "set_theme":
                             self.game.cosmetic_theme = obj
                             self.game.save()
@@ -3477,6 +3508,7 @@ class App:
             _ws["total_prestige"]    = sum(_zg.prestige_count for _zg in self.world.zones.values())
             _ws["zones_with_prestige"] = sum(1 for _zg in self.world.zones.values() if _zg.prestige_count > 0)
             _ws["cw_earned"]         = self.world.total_cw_earned
+            _ws["spirit_teachers"]   = sum(1 for _k in self.world.cw_purchased if _k.startswith("st_"))
             _ws["z7_discoveries"]    = sum(self.world.zones[7]._ancestral_discoveries.values())
             _ws["z9_sin"]            = self.world.zones[9].mechanic_value
             _z4 = self.world.zones[4]

@@ -234,6 +234,8 @@ class Game:
         self._kp_today:      float = 0.0
         self._clicks_today:  int   = 0
         self._buys_today:    int   = 0
+        self._events_today:  int   = 0
+        self._focus_today:   int   = 0
 
         # Game clock (real elapsed seconds; drives season / campus sync)
         self.game_time = 0.0
@@ -454,17 +456,38 @@ class Game:
         self._kp_today      = 0.0
         self._clicks_today  = 0
         self._buys_today    = 0
-        self.daily_missions = [
+        self._events_today  = 0
+        self._focus_today   = 0
+        # Pick 3 unique missions from the full pool, seeded by date for consistency
+        rng = random.Random(today)
+        pool = [
             {"type": "clicks_today", "label": "Dedicated Student",
              "desc": f"Click {self._mission_click_target()} times",
-             "target": self._mission_click_target(), "reward": 3, "completed": False},
+             "target": self._mission_click_target(), "reward": 3},
             {"type": "kp_today",     "label": "Knowledge Seeker",
              "desc": f"Earn {fmt(self._mission_kp_target())} KP",
-             "target": self._mission_kp_target(),   "reward": 4, "completed": False},
+             "target": self._mission_kp_target(),   "reward": 4},
             {"type": "buys_today",   "label": "Campus Builder",
              "desc": f"Buy {self._mission_buy_target()} buildings",
-             "target": self._mission_buy_target(),  "reward": 3, "completed": False},
+             "target": self._mission_buy_target(),  "reward": 3},
+            {"type": "events_today", "label": "Event Chaser",
+             "desc": "Collect 3 events today",
+             "target": 3,   "reward": 4},
+            {"type": "focus_today",  "label": "Focused Mind",
+             "desc": "Use a Focus ability 2 times",
+             "target": 2,   "reward": 3},
+            {"type": "clicks_today", "label": "Speed Learner",
+             "desc": f"Click {max(20, self._mission_click_target() // 2)} times",
+             "target": max(20, self._mission_click_target() // 2), "reward": 2},
+            {"type": "buys_today",   "label": "Expansion Drive",
+             "desc": f"Buy {max(3, self._mission_buy_target() * 2)} buildings",
+             "target": max(3, self._mission_buy_target() * 2), "reward": 5},
+            {"type": "kp_today",     "label": "Grand Scholar",
+             "desc": f"Earn {fmt(self._mission_kp_target() * 3.0)} KP",
+             "target": self._mission_kp_target() * 3.0, "reward": 6},
         ]
+        chosen = rng.sample(pool, 3)
+        self.daily_missions = [{**m, "completed": False} for m in chosen]
 
     def _check_daily_missions(self):
         self._refresh_daily_missions()
@@ -485,6 +508,8 @@ class Game:
         if mission_type == "clicks_today": return float(self._clicks_today)
         if mission_type == "kp_today":     return self._kp_today
         if mission_type == "buys_today":   return float(self._buys_today)
+        if mission_type == "events_today": return float(self._events_today)
+        if mission_type == "focus_today":  return float(self._focus_today)
         return 0.0
 
     # ── Combo ─────────────────────────────────────────────────────────────────
@@ -568,12 +593,13 @@ class Game:
         # Hero passive: Intelligence → global KPS, Transcendence → all-zone wisdom
         hero_int_mult   = 1.0 + self._hero_stat("intelligence") * 0.005
         hero_trans_mult = 1.0 + self._hero_stat("transcendence") * 0.004
+        hero_perm_mult  = 1.0 + (self.hero.get("perm_kps_bonus", 0.0) if self.hero else 0.0)
         piaget_mult = _safe_pow(1.05, min(self.prestige_count, 20)) if self._cw_piaget else 1.0
         return (diploma_mult * honor_mult * endow_mult * alumni_direct_mult
                 * (1.0 + pct_bonus + honor_kps_bonus + endow_kps_bonus + scholar_bonus)
                 * skill_mult * dipl_mult * honor_upg_mult * endow_upg_mult
                 * alumni_upg_mult * research_grant_mult * strike_mult * self.zone_bonus_mult
-                * quiz_perm_mult * million_mult * hero_int_mult * hero_trans_mult * piaget_mult)
+                * quiz_perm_mult * million_mult * hero_int_mult * hero_trans_mult * hero_perm_mult * piaget_mult)
 
     def _event_kps_mult(self) -> float:
         if self.active_boost and self.active_boost["type"] == "kps_boost":
@@ -677,6 +703,7 @@ class Game:
             return False
         self.focus_points -= ab["cost"]
         self._total_focus_uses += 1
+        self._focus_today += 1
         if ab["duration"] > 0:
             self.focus_active = {"id": ability_id, "timer": ab["duration"]}
         elif ab["type"] == "event":
@@ -1127,7 +1154,28 @@ class Game:
 
     # ── Events ────────────────────────────────────────────────────────────────
 
+    _HERO_EVENTS = [
+        {"name": "Hero's Inspiring Lecture!",  "desc": "+5 min KP — the hero rallies the campus",
+         "type": "kp_bonus", "value_mult": 300},
+        {"name": "Hero Defeats a Rival!",      "desc": "×3 KPS for 60s — morale surges",
+         "type": "kps_boost", "value": 3.0, "duration": 60},
+        {"name": "Hero Mentors Students!",     "desc": "+4 min KP — one-on-one tuition session",
+         "type": "kp_bonus", "value_mult": 240},
+        {"name": "Campus Defence Triumph!",    "desc": "×2.5 KPS for 45s — hero repels a distraction",
+         "type": "kps_boost", "value": 2.5, "duration": 45},
+        {"name": "Hero's Training Arc!",       "desc": "+8 Merit Points — the hero's dedication inspires all",
+         "type": "merit_bonus", "value": 8},
+    ]
+
     def _spawn_event(self):
+        # Hero events replace 25% of normal events when the hero is level 5+
+        if self.hero and self.hero.get("level", 0) >= 5 and random.random() < 0.25:
+            ev = random.choice(self._HERO_EVENTS).copy()
+            if ev["type"] == "kp_bonus":
+                ev["kp_amount"] = self.kps() * ev["value_mult"]
+            self.pending_event = ev
+            self.event_timer   = random.uniform(90, 150)
+            return
         rare_mult = self._cw_rare_weight
         weights = [
             w * rare_mult if e.get("rarity") == "rare" else w
@@ -1165,6 +1213,7 @@ class Game:
         if not ev:
             return
         self._total_events_collected += 1
+        self._events_today += 1
         self.pending_event = None
         self._queue_news(random.choice(DYNAMIC_NEWS_EVENT_COLLECT))
         t = ev["type"]
@@ -1225,6 +1274,12 @@ class Game:
                     hit = self._zone_stats.get(f"z{tgt}_prestige", 0) >= ch.get("value", 1)
                 else:
                     hit = self._zone_stats.get("total_prestige", 0) >= ch.get("value", 1)
+            elif c == "hero_exists":
+                hit = self.hero is not None
+            elif c == "cw_earned":
+                hit = self._zone_stats.get("cw_earned", 0) >= ch.get("value", 1)
+            elif c == "spirit_teacher":
+                hit = self._zone_stats.get("spirit_teachers", 0) >= ch.get("value", 1)
             else:
                 hit = False
             if hit:
@@ -1284,6 +1339,8 @@ class Game:
                     hit = self._zone_stats.get("zones_with_prestige", 0) >= a.check_value
                 case "cw_earned":
                     hit = self._zone_stats.get("cw_earned", 0) >= a.check_value
+                case "spirit_teachers":
+                    hit = self._zone_stats.get("spirit_teachers", 0) >= a.check_value
                 case "zone_all_choices":
                     hit = self._zone_stats.get(f"z{a.check_target}_all_choices", False)
                 case "z7_discoveries":
@@ -1353,11 +1410,33 @@ class Game:
             self.hero["xp"] -= needed
             self.hero["level"] += 1
             self.hero["stat_points"] += 1
-            if self.hero["level"] % 5 == 0:
+            lvl = self.hero["level"]
+            if lvl % 5 == 0:
                 self._queue_news(
-                    f"{self.hero['name']} reached Level {self.hero['level']}! "
+                    f"{self.hero['name']} reached Level {lvl}! "
                     f"({self.hero['stat_points']} stat point(s) to spend)"
                 )
+            # Milestone ability unlocks
+            rewarded = self.hero.setdefault("milestones_rewarded", [])
+            if lvl >= 5 and 5 not in rewarded:
+                rewarded.append(5)
+                self.merit_points += 10
+                self._queue_news(f"{self.hero['name']} hit Level 5 — Milestone: +10 Merit Points awarded!")
+            if lvl >= 10 and 10 not in rewarded:
+                rewarded.append(10)
+                bonus = self.kps() * 300
+                self.kp += bonus; self.total_kp += bonus; self.all_time_kp += bonus
+                self._queue_news(f"{self.hero['name']} hit Level 10 — Milestone: 5 min KP burst granted!")
+            if lvl >= 15 and 15 not in rewarded:
+                rewarded.append(15)
+                self.merit_points += 25
+                self._queue_news(f"{self.hero['name']} hit Level 15 — Milestone: +25 Merit Points awarded!")
+            if lvl >= 20 and 20 not in rewarded:
+                rewarded.append(20)
+                # Permanent +5% global KPS perk stored on hero
+                self.hero["perm_kps_bonus"] = self.hero.get("perm_kps_bonus", 0.0) + 0.05
+                self._queue_news(f"{self.hero['name']} hit Level 20 — Milestone: Permanent +5% KPS unlocked!")
+            self._check_achievements()
 
     def train_hero_stat(self, stat_key: str) -> bool:
         if self.hero is None or self.hero.get("stat_points", 0) <= 0:
@@ -1403,6 +1482,7 @@ class Game:
                 bname = "Hero Academy"
                 zg.building_counts[bname] = zg.building_counts.get(bname, 0) + 1
         self._queue_news(f"A hero has risen from {self.school_name}! The first Hero Academy opens its doors.")
+        self._check_achievements()
         self.save()
         return True
 
@@ -1473,6 +1553,8 @@ class Game:
             "kp_today":                 self._kp_today,
             "clicks_today":             self._clicks_today,
             "buys_today":               self._buys_today,
+            "events_today":             self._events_today,
+            "focus_today":              self._focus_today,
             "total_faculty_hires":      self._total_faculty_hires,
             "total_daily_done":         self._total_daily_done,
             "seasons_seen":             list(self._seasons_seen),
@@ -1545,6 +1627,8 @@ class Game:
             self._kp_today                  = d.get("kp_today", 0.0)
             self._clicks_today              = d.get("clicks_today", 0)
             self._buys_today                = d.get("buys_today", 0)
+            self._events_today              = d.get("events_today", 0)
+            self._focus_today               = d.get("focus_today", 0)
             self._total_faculty_hires       = d.get("total_faculty_hires", 0)
             self._total_daily_done          = d.get("total_daily_done", 0)
             self._seasons_seen              = set(d.get("seasons_seen", []))

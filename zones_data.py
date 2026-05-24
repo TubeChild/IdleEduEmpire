@@ -577,6 +577,20 @@ ZONE_BY_ID: dict[int, dict] = {z["id"]: z for z in ZONE_DEFS}
 
 # Zone-specific event pools — blended with the generic events in _spawn_event()
 ZONE_EVENTS: dict[int, list[dict]] = {
+    1: [  # Home Campus
+        {"name": "Exam Season!",           "desc": "Students cram all night — +3 min KP from focused study",
+         "type": "kp_bonus", "value_mult": 180},
+        {"name": "Guest Lecturer!",        "desc": "A renowned professor visits — ×2 KPS for 60s",
+         "type": "kps_boost", "value": 2.0, "duration": 60},
+        {"name": "Bake Sale!",             "desc": "The student council raises funds — +2 min KP",
+         "type": "kp_bonus", "value_mult": 120},
+        {"name": "Study Marathon!",        "desc": "48-hour study hall in session — ×2.5 KPS for 45s",
+         "type": "kps_boost", "value": 2.5, "duration": 45},
+        {"name": "Graduation Day!",        "desc": "Alumni return and donate — +4 min KP in gifts",
+         "type": "kp_bonus", "value_mult": 240},
+        {"name": "Research Grant!",        "desc": "A surprise grant arrives — ×2 KPS for 30s",
+         "type": "kps_boost", "value": 2.0, "duration": 30},
+    ],
     2: [  # The Ruins
         {"name": "Archaeological Find!",  "desc": "+3 min KP unearthed from the rubble",
          "type": "kp_bonus", "value_mult": 180},

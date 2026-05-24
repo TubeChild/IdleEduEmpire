@@ -461,6 +461,19 @@ ACHIEVEMENTS: list[AchievementDef] = [
     AchievementDef("hero_lv5",      "Battle Ready",         "Hero reaches Level 5",                             "A",  "hero_level",        "",   5,    3),
     AchievementDef("hero_lv10",     "Veteran Hero",         "Hero reaches Level 10",                            "A+", "hero_level",        "",   10,   5),
     AchievementDef("hero_lv20",     "Legendary Hero",       "Hero reaches Level 20",                            "S",  "hero_level",        "",   20,   8),
+
+    # ── Spirit Teacher achievements ──────────────────────────────────────────
+    AchievementDef("st_first",      "First Summon",         "Summon your first Spirit Teacher",                 "A",  "spirit_teachers",   "",   1,    4),
+    AchievementDef("st_three",      "Philosophical Triangle","Summon 3 Spirit Teachers",                        "A+", "spirit_teachers",   "",   3,    6),
+    AchievementDef("st_all",        "Grand Symposium",      "Summon all 8 Spirit Teachers",                     "S+", "spirit_teachers",   "",   8,    15),
+
+    # ── Expanded CW milestones ───────────────────────────────────────────────
+    AchievementDef("cw_25",         "Wisdom Seeker",        "Earn 25 Cosmic Wisdom",                            "B+", "cw_earned",         "",   25,   3),
+    AchievementDef("cw_100",        "Multiversal Sage",     "Earn 100 Cosmic Wisdom",                           "S+", "cw_earned",         "",   100,  12),
+    AchievementDef("cw_200",        "Cosmic Grandmaster",   "Earn 200 Cosmic Wisdom",                           "S+", "cw_earned",         "",   200,  20),
+
+    # ── All-zones prestige ───────────────────────────────────────────────────
+    AchievementDef("zones_all",     "Omniversal Scholar",   "Prestige in all 9 zones at least once",            "S+", "zones_with_prestige","",  9,    20),
 ]
 
 # ── Building Synergies ────────────────────────────────────────────────────────
@@ -869,6 +882,59 @@ STORY: list[dict] = [
          "And somehow — it is making you better."
      ),
      "check": "zone_prestige", "target": "9", "value": 1},
+
+    {"id": "zch10", "title": "Rise of Heroes",
+     "text": (
+         "They came from every corner of the multiverse —\n"
+         "drawn not by power, but by the idea of a school\n"
+         "that believed every student is a hero waiting to happen.\n\n"
+         "In Hero World, learning is combat.\n"
+         "Every lesson is a quest. Every exam, a boss fight.\n\n"
+         "You never expected to build a school here.\n"
+         "But then, you never expected any of this."
+     ),
+     "check": "zone_prestige", "target": "10", "value": 1},
+
+    {"id": "ch_hero", "title": "The Hero Awakens",
+     "text": (
+         "You didn't plan for this.\n"
+         "The diplomas piled up. The curriculum deepened.\n"
+         "And then, from the accumulated weight of it all,\n"
+         "something extraordinary emerged.\n\n"
+         "A hero — born not from battle, but from learning.\n"
+         "They carry your school's name into places\n"
+         "no lesson plan has ever reached.\n\n"
+         "What happens next is up to them.\n"
+         "What happens next is up to you."
+     ),
+     "check": "hero_exists"},
+
+    {"id": "ch_cw", "title": "The Cosmic Shift",
+     "text": (
+         "You've been collecting something strange.\n"
+         "Not knowledge — something older, stranger.\n"
+         "The residue of worlds studied and left behind.\n\n"
+         "Cosmic Wisdom, they call it.\n"
+         "It accumulates wherever genuine learning touches reality.\n\n"
+         "The Multiverse Shop has noticed.\n"
+         "And what it offers in return is beyond any textbook\n"
+         "you have ever opened."
+     ),
+     "check": "cw_earned", "value": 10},
+
+    {"id": "ch_spirit", "title": "A Familiar Voice",
+     "text": (
+         "The Multiverse is old. Older than schools.\n"
+         "Older than language.\n\n"
+         "And yet — here stands one who taught before any of it.\n"
+         "A Spirit Teacher, summoned not from a book\n"
+         "but from the memory of what knowledge meant\n"
+         "before we had a word for it.\n\n"
+         "They don't speak immediately.\n"
+         "They just walk the halls, watching.\n"
+         "And in their wake, something shifts."
+     ),
+     "check": "spirit_teacher", "value": 1},
 ]
 
 # ── Random Events (14 total, with rarity weighting) ──────────────────────────
@@ -1110,6 +1176,35 @@ QUIZ_QUESTIONS: list[dict] = [
     {"type": "history",  "q": "First President of the United States?",     "a": "Washington",    "choices": ["Adams", "Jefferson", "Washington", "Franklin"]},
     {"type": "history",  "q": "What year did the first human reach space?","a": "1961",          "choices": ["1957", "1959", "1961", "1963"]},
     {"type": "history",  "q": "Who proposed the theory of relativity?",    "a": "Einstein",      "choices": ["Newton", "Darwin", "Einstein", "Hawking"]},
+    # Science
+    {"type": "science",  "q": "Chemical symbol for water?",                "a": "H₂O",           "choices": ["HO", "H₂O", "H₂O₂", "OH"]},
+    {"type": "science",  "q": "How many bones in the adult human body?",   "a": "206",           "choices": ["186", "196", "206", "216"]},
+    {"type": "science",  "q": "Speed of light (approx) in km/s?",         "a": "300,000",       "choices": ["30,000", "300,000", "3,000,000", "3,000"]},
+    {"type": "science",  "q": "What planet is closest to the Sun?",        "a": "Mercury",       "choices": ["Venus", "Mercury", "Earth", "Mars"]},
+    {"type": "science",  "q": "What gas do plants absorb from the air?",   "a": "CO₂",           "choices": ["O₂", "N₂", "CO₂", "H₂"]},
+    {"type": "science",  "q": "Atomic number of carbon?",                  "a": "6",             "choices": ["4", "6", "8", "12"]},
+    {"type": "science",  "q": "What is the powerhouse of the cell?",       "a": "Mitochondria",  "choices": ["Nucleus", "Ribosome", "Mitochondria", "Vacuole"]},
+    {"type": "science",  "q": "How many planets are in our solar system?", "a": "8",             "choices": ["7", "8", "9", "10"]},
+    {"type": "science",  "q": "What force keeps us on Earth?",             "a": "Gravity",       "choices": ["Magnetism", "Friction", "Gravity", "Inertia"]},
+    {"type": "science",  "q": "Which element has symbol Fe?",              "a": "Iron",          "choices": ["Gold", "Silver", "Copper", "Iron"]},
+    # Geography
+    {"type": "geography","q": "What is the capital of France?",            "a": "Paris",         "choices": ["Lyon", "Marseille", "Paris", "Bordeaux"]},
+    {"type": "geography","q": "What is the largest continent?",            "a": "Asia",          "choices": ["Africa", "Asia", "Europe", "Americas"]},
+    {"type": "geography","q": "What country has the most people?",         "a": "India",         "choices": ["China", "India", "USA", "Indonesia"]},
+    {"type": "geography","q": "What is the longest river in the world?",   "a": "Nile",          "choices": ["Amazon", "Nile", "Mississippi", "Yangtze"]},
+    {"type": "geography","q": "What is the smallest country in the world?","a": "Vatican City",  "choices": ["Monaco", "San Marino", "Liechtenstein", "Vatican City"]},
+    {"type": "geography","q": "What is the capital of Japan?",             "a": "Tokyo",         "choices": ["Osaka", "Kyoto", "Tokyo", "Hiroshima"]},
+    {"type": "geography","q": "Which ocean is the largest?",               "a": "Pacific",       "choices": ["Atlantic", "Pacific", "Indian", "Arctic"]},
+    {"type": "geography","q": "How many countries are in the EU? (2024)",  "a": "27",            "choices": ["25", "27", "28", "30"]},
+    {"type": "geography","q": "Capital of Australia?",                     "a": "Canberra",      "choices": ["Sydney", "Melbourne", "Brisbane", "Canberra"]},
+    {"type": "geography","q": "What mountain is the tallest in the world?","a": "Everest",       "choices": ["K2", "Kangchenjunga", "Everest", "Makalu"]},
+    # Extra math
+    {"type": "math",     "q": "What is 9²?",                               "a": "81",            "choices": ["72", "81", "90", "99"]},
+    {"type": "math",     "q": "How many sides does a hexagon have?",       "a": "6",             "choices": ["5", "6", "7", "8"]},
+    {"type": "math",     "q": "What is 25% of 80?",                        "a": "20",            "choices": ["15", "20", "25", "30"]},
+    {"type": "math",     "q": "What is 3! (3 factorial)?",                 "a": "6",             "choices": ["3", "6", "9", "12"]},
+    {"type": "math",     "q": "What is the area of a circle, radius 5?",  "a": "≈78.5",         "choices": ["≈50.3", "≈62.8", "≈78.5", "≈88.2"]},
+    {"type": "math",     "q": "What is 1/3 as a decimal (rounded)?",       "a": "0.333",         "choices": ["0.3", "0.333", "0.303", "0.033"]},
 ]
 
 QUIZ_REWARDS: dict[str, dict] = {
