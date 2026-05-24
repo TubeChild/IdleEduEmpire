@@ -1514,6 +1514,104 @@ class KubbPin:
             pygame.draw.rect(surf, edge, (x-4, y-14, 8, 14), 1)
 
 
+# ── Zone 5: Moon Colony ──────────────────────────────────────────────────────
+
+class MoonStar:
+    """Twinkling star in Zone 5's dark sky."""
+    def __init__(self):
+        self.x   = random.randint(4, LEFT_W - 4)
+        self.y   = random.randint(TOP_H + 4, TOP_H + 210)
+        self.r   = random.choices([1, 2], weights=[3, 1])[0]
+        self.t   = random.uniform(0, math.pi * 2)
+        self.spd = random.uniform(0.4, 1.4)
+        b        = random.randint(180, 255)
+        self.col = (b, b, min(255, b + random.randint(0, 30)))
+
+    def update(self, dt: float):
+        self.t += self.spd * dt
+
+    def draw(self, surf: pygame.Surface):
+        bright = int(self.col[0] * (0.45 + 0.55 * (0.5 + 0.5 * math.sin(self.t))))
+        pygame.draw.circle(surf, (bright, bright, min(255, bright + 20)), (self.x, self.y), self.r)
+
+
+class MoonRock:
+    """Static grey rock on the lunar surface."""
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+        self.w = random.randint(10, 26)
+        self.h = random.randint(5, 12)
+        g      = random.randint(120, 170)
+        self.col = (g - 10, g, g + 10)
+
+    def draw(self, surf: pygame.Surface):
+        pygame.draw.ellipse(surf, self.col,
+                            (self.x - self.w // 2, self.y - self.h, self.w, self.h))
+        pygame.draw.ellipse(surf, (max(0, self.col[0] - 30),) * 3,
+                            (self.x - self.w // 2, self.y - self.h, self.w, self.h), 1)
+
+
+class MoonFlag:
+    """Edu Empire flag planted on the moon surface."""
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+        self.t = 0.0
+
+    def update(self, dt: float):
+        self.t += dt * 0.6
+
+    def draw(self, surf: pygame.Surface):
+        x, y = self.x, self.y
+        pygame.draw.line(surf, (200, 200, 210), (x, y), (x, y - 30), 2)
+        pygame.draw.line(surf, (200, 200, 210), (x, y - 30), (x + 18, y - 30), 2)
+        wave = int(math.sin(self.t) * 2)
+        pts  = [(x, y - 30), (x + 18, y - 28 + wave), (x + 18, y - 22 + wave), (x, y - 24)]
+        pygame.draw.polygon(surf, (40, 70, 200), pts)
+        # Star on flag
+        pygame.draw.circle(surf, (255, 210, 30), (x + 9, y - 26 + wave // 2), 3)
+
+
+class Astronaut(WalkingPerson):
+    """Spacesuit-clad astronaut with low-gravity bouncy walk for Zone 5."""
+    _SUIT   = (228, 228, 232)
+    _VISOR  = (60,  150, 220)
+    _DARK   = (160, 160, 168)
+
+    def __init__(self, y: int):
+        super().__init__(y, shirt=Astronaut._SUIT)
+        self.speed    = random.uniform(10, 18)   # slower in bulky suits
+        self._bounce  = random.uniform(0, math.pi * 2)
+
+    def update(self, dt: float):
+        super().update(dt)
+        self._bounce += dt * 0.9   # low-gravity rhythm
+
+    def draw(self, surf: pygame.Surface):
+        x  = int(self.x)
+        y  = int(self.y) - int(abs(math.sin(self._bounce)) * 7)
+        wk = math.sin(self.t)
+        # Helmet
+        pygame.draw.circle(surf, self._SUIT,  (x, y - 15), 8)
+        pygame.draw.ellipse(surf, self._VISOR, (x - 4, y - 18, 9, 7))
+        # Life-support backpack
+        pygame.draw.rect(surf, self._DARK, (x + 4, y - 8, 5, 9), border_radius=1)
+        # Torso
+        pygame.draw.rect(surf, self._SUIT, (x - 6, y - 7, 11, 10), border_radius=2)
+        # Arms (stubby)
+        arm = int(wk * 3)
+        pygame.draw.line(surf, self._SUIT, (x - 6, y - 5), (x - 10, y - 1 + arm), 3)
+        pygame.draw.line(surf, self._SUIT, (x + 5, y - 5), (x + 9,  y - 1 - arm), 3)
+        # Legs
+        leg = int(wk * 4)
+        pygame.draw.line(surf, self._DARK, (x - 3, y + 3), (x - 4 + leg, y + 12), 3)
+        pygame.draw.line(surf, self._DARK, (x + 3, y + 3), (x + 4 - leg, y + 12), 3)
+        # Boots
+        pygame.draw.rect(surf, (120, 120, 130), (x - 7 + leg, y + 11, 6, 3), border_radius=1)
+        pygame.draw.rect(surf, (120, 120, 130), (x + 1 - leg, y + 11, 6, 3), border_radius=1)
+
+
 class SpriteManager:
     """Coordinates all animated sprites."""
 
@@ -1565,6 +1663,12 @@ class SpriteManager:
         self.flying_demons: list = [FlyingDemon(i) for i in range(3)]
         self.ground_demons: list = [GroundDemon(TOP_H + y, i) for i, y in enumerate([250, 290, 320])]
         self.crucified: list = [CrucifiedFigure(x, TOP_H + 235) for x in [55, 170, 285]]
+        # Zone 5: Moon Colony
+        _moon_gy = TOP_H + 295
+        self.moon_stars:  list = [MoonStar() for _ in range(40)]
+        self.moon_rocks:  list = [MoonRock(x, _moon_gy) for x in (40, 90, 145, 200, 260, 310)]
+        self.moon_flag         = MoonFlag(60, _moon_gy)
+        self.astronauts:  list = [Astronaut(_moon_gy) for _ in range(3)]
         # Seasonal sprites (zone 1)
         self._season = "Spring"
         _gy = 378
@@ -1718,6 +1822,14 @@ class SpriteManager:
                 aw.update(dt)
             self.trojan_horse.update(dt)
 
+        # Zone 5: moon colony
+        if zone_id == 5:
+            for ms in self.moon_stars:
+                ms.update(dt)
+            self.moon_flag.update(dt)
+            for ast in self.astronauts:
+                ast.update(dt)
+
         if kps > 0.5:
             rate = min(kps / 25.0, 5.0)
             self._p_acc += rate * dt
@@ -1845,9 +1957,20 @@ class SpriteManager:
                 aw.draw(surf)
             self.trojan_horse.draw(surf)
 
-        else:
-            # Zone 5: no clouds (moon has no atmosphere)
-            pass
+        elif zone == 5:
+            # Zone 5: dark space sky, stars, moon surface, astronauts
+            pygame.draw.rect(surf, (6, 6, 18),
+                             (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            for ms in self.moon_stars:
+                ms.draw(surf)
+            # Grey moon surface strip
+            pygame.draw.rect(surf, (130, 128, 140),
+                             (0, TOP_H + 296, LEFT_W, H - TOP_H - TICKER_H - 296))
+            for mr in self.moon_rocks:
+                mr.draw(surf)
+            self.moon_flag.draw(surf)
+            for ast in self.astronauts:
+                ast.draw(surf)
 
         surf.set_clip(None)
 

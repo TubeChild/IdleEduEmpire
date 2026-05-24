@@ -574,3 +574,79 @@ ZONE_DEFS: list[dict] = [
 
 # Quick lookup
 ZONE_BY_ID: dict[int, dict] = {z["id"]: z for z in ZONE_DEFS}
+
+# Zone-specific event pools — blended with the generic events in _spawn_event()
+ZONE_EVENTS: dict[int, list[dict]] = {
+    2: [  # The Ruins
+        {"name": "Archaeological Find!",  "desc": "+3 min KP unearthed from the rubble",
+         "type": "kp_bonus", "value_mult": 180},
+        {"name": "Ghost Sighting!",       "desc": "Curious students flock in — ×2 KPS for 45s",
+         "type": "kps_boost", "value": 2.0, "duration": 45},
+        {"name": "Wall Restored!",        "desc": "A restored wing draws a donation — +1 Restoration Cert",
+         "type": "l1_bonus", "value": 1},
+    ],
+    3: [  # The Future
+        {"name": "Algorithm Breakthrough!", "desc": "AI solves a century-old problem — ×2.5 KPS for 40s",
+         "type": "kps_boost", "value": 2.5, "duration": 40},
+        {"name": "Quantum Upload!",         "desc": "+4 min KP transferred in milliseconds",
+         "type": "kp_bonus", "value_mult": 240},
+        {"name": "Automation Surge!",       "desc": "Systems run themselves — +1 Automation Credit",
+         "type": "l1_bonus", "value": 1},
+    ],
+    4: [  # Ancient Academy
+        {"name": "Olympic Games!",          "desc": "City-states compete — ×2 KPS for 60s",
+         "type": "kps_boost", "value": 2.0, "duration": 60},
+        {"name": "Philosophical Treatise!", "desc": "Scholars donate 4 min KP to the academy",
+         "type": "kp_bonus", "value_mult": 240},
+        {"name": "Patron Donation!",        "desc": "A wealthy patron funds the academy — +1 Discourse Token",
+         "type": "l1_bonus", "value": 1},
+    ],
+    5: [  # Moon Colony
+        {"name": "Supply Rocket Arrives!", "desc": "Fresh equipment lands — +1 Lunar Credit",
+         "type": "l1_bonus", "value": 1},
+        {"name": "Lunar Discovery!",       "desc": "Rare minerals found — +3 min KP bonus",
+         "type": "kp_bonus", "value_mult": 180},
+        {"name": "Low-Gravity Sprint!",    "desc": "Lessons in 1/6th gravity — ×2 KPS for 50s",
+         "type": "kps_boost", "value": 2.0, "duration": 50},
+    ],
+    6: [  # Magical Realm
+        {"name": "Enchanted Library!",    "desc": "Books read themselves — +5 min KP",
+         "type": "kp_bonus", "value_mult": 300},
+        {"name": "Mana Surge!",           "desc": "Wild magic fills the halls — ×2 KPS for 45s",
+         "type": "kps_boost", "value": 2.0, "duration": 45},
+        {"name": "Spell Mastered!",       "desc": "A rare spell discovered — +1 Mana Gem",
+         "type": "l1_bonus", "value": 1},
+    ],
+    7: [  # Prehistoric
+        {"name": "Mammoth Hunt!",          "desc": "Tribe returns victorious — +4 min KP",
+         "type": "kp_bonus", "value_mult": 240},
+        {"name": "Cave Painting Found!",   "desc": "Ancient wisdom unlocked — +1 Discovery Mark",
+         "type": "l1_bonus", "value": 1},
+        {"name": "Fire Ceremony!",         "desc": "The tribe gathers — ×2.5 KPS for 40s",
+         "type": "kps_boost", "value": 2.5, "duration": 40},
+    ],
+    8: [  # The Heavens
+        {"name": "Divine Blessing!",       "desc": "The heavens smile — ×3 KPS for 30s",
+         "type": "kps_boost", "value": 3.0, "duration": 30},
+        {"name": "Celestial Choir!",       "desc": "Harmonics resonate — +5 min KP from on high",
+         "type": "kp_bonus", "value_mult": 300},
+        {"name": "Prayer Answered!",       "desc": "The divine respond — +1 Grace Token",
+         "type": "l1_bonus", "value": 1},
+    ],
+    9: [  # The Underworld
+        {"name": "Forbidden Knowledge!",   "desc": "Dark tomes opened — +4 min KP absorbed",
+         "type": "kp_bonus", "value_mult": 240},
+        {"name": "Dark Deal!",             "desc": "A bargain struck — ×2.5 KPS for 35s",
+         "type": "kps_boost", "value": 2.5, "duration": 35},
+        {"name": "Soul Harvest!",          "desc": "The abyss provides — +1 Sin Shard",
+         "type": "l1_bonus", "value": 1},
+    ],
+    10: [  # The Hero World
+        {"name": "Villain Defeated!",      "desc": "Campus celebrates — +4 min KP bonus",
+         "type": "kp_bonus", "value_mult": 240},
+        {"name": "Hero Team-Up!",          "desc": "United powers surge — ×2.5 KPS for 40s",
+         "type": "kps_boost", "value": 2.5, "duration": 40},
+        {"name": "Power Badge Awarded!",   "desc": "Heroism recognised — +1 Power Badge",
+         "type": "l1_bonus", "value": 1},
+    ],
+}

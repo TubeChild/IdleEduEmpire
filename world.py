@@ -6,7 +6,7 @@ import sys
 import random
 import time
 
-from zones_data import ZONE_DEFS, ZONE_BY_ID
+from zones_data import ZONE_DEFS, ZONE_BY_ID, ZONE_EVENTS
 from data import CW_SHOP
 
 
@@ -542,15 +542,20 @@ class ZoneGame:
                 self._spawn_event()
 
     def _spawn_event(self):
-        events = [
-            {"name": "Inspired Student!",   "desc": "+2 min KP bonus",
+        generic = [
+            {"name": "Inspired Student!", "desc": "+2 min KP bonus",
              "type": "kp_bonus", "value_mult": 120},
-            {"name": "Guest Lecturer!",      "desc": "+3 min KPS boost for 60s",
+            {"name": "Guest Lecturer!",   "desc": "+3 min KPS boost for 60s",
              "type": "kps_boost", "value": 2.0, "duration": 60},
-            {"name": f"{self.zone_name} Grant!","desc": f"+1 {self.l1_name}",
+            {"name": f"{self.zone_name} Grant!", "desc": f"+1 {self.l1_name}",
              "type": "l1_bonus", "value": 1},
         ]
-        ev = random.choice(events).copy()
+        zone_pool = ZONE_EVENTS.get(self.zone_id, [])
+        # 65% zone-specific if available, otherwise pure generic
+        if zone_pool and random.random() < 0.65:
+            ev = random.choice(zone_pool).copy()
+        else:
+            ev = random.choice(generic).copy()
         if ev["type"] == "kp_bonus":
             ev["kp_amount"] = self.kps() * ev["value_mult"]
         self.pending_event = ev
