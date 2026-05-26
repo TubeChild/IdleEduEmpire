@@ -26,6 +26,66 @@ _YELLOW  = (240, 210,  40)
 _BUS_WIN = (190, 230, 255)
 
 
+_CHAR_DIR = _os.path.join(_ASSETS_DIR, "characters")
+_CHAR_SCALE = 0.30   # 96×128 → ~29×38 px
+
+
+class ToonWalker:
+    """Animated Toon Character walker using Kenney PNG walk frames."""
+
+    _cache: dict = {}   # char_name → (frames_right, frames_left)
+
+    @classmethod
+    def _load(cls, char: str) -> tuple:
+        if char in cls._cache:
+            return cls._cache[char]
+        folder = _os.path.join(_CHAR_DIR, char)
+        frames_r = []
+        for i in range(8):
+            path = _os.path.join(folder, f"walk{i}.png")
+            if _os.path.exists(path):
+                raw = pygame.image.load(path).convert_alpha()
+                w = int(raw.get_width()  * _CHAR_SCALE)
+                h = int(raw.get_height() * _CHAR_SCALE)
+                frames_r.append(pygame.transform.smoothscale(raw, (w, h)))
+        frames_l = [pygame.transform.flip(f, True, False) for f in frames_r]
+        cls._cache[char] = (frames_r, frames_l)
+        return frames_r, frames_l
+
+    def __init__(self, y: int, char: str, speed_range=(20, 38)):
+        self.x     = float(random.randint(20, LEFT_W - 20))
+        self.y     = float(y)
+        self.dir   = random.choice([-1, 1])
+        self.speed = random.uniform(*speed_range)
+        self.t     = random.uniform(0, 8.0)
+        self._char = char
+        self._fr, self._fl = self.__class__._load(char)
+        self._w    = self._fr[0].get_width() if self._fr else 29
+        self._h    = self._fr[0].get_height() if self._fr else 38
+
+    def update(self, dt: float):
+        self.x += self.dir * self.speed * dt
+        self.t += dt * 8.0
+        if self.x >= LEFT_W - 14:
+            self.dir = -1
+        elif self.x <= 14:
+            self.dir = 1
+
+    def steer_toward(self, target_x: float):
+        """Redirect toward target_x when it's clearly on the other side."""
+        if target_x < self.x - 18:
+            self.dir = -1
+        elif target_x > self.x + 18:
+            self.dir = 1
+
+    def draw(self, surf: pygame.Surface):
+        frames = self._fr if self.dir > 0 else self._fl
+        if not frames:
+            return
+        frame = frames[int(self.t) % len(frames)]
+        surf.blit(frame, (int(self.x) - self._w // 2, int(self.y) - self._h))
+
+
 class WalkingPerson:
     """Stick-figure person that walks back and forth across the left panel."""
 
@@ -106,22 +166,27 @@ class MovingCloud:
 
 
 class SchoolBus:
-    """Pixel-art school bus that occasionally drives across the bottom of the panel."""
+    """School bus that drives across Zone 1 — front-facing right, direction of travel."""
+
+    _BW = 102   # bus width
+    _BH = 28    # bus body height
 
     def __init__(self):
         self._bus_timer = random.uniform(25, 60)
         self.active     = False
-        self.x          = -90.0
+        self.x          = float(-self._BW - 10)
         self.y          = float(TOP_H + 316)
+        self._t         = 0.0
 
     def update(self, dt: float):
         if not self.active:
             self._bus_timer -= dt
             if self._bus_timer <= 0:
                 self.active = True
-                self.x      = -90.0
+                self.x      = float(-self._BW - 10)
             return
-        self.x += 68.0 * dt
+        self._t += dt
+        self.x  += 72.0 * dt
         if self.x > LEFT_W + 10:
             self.active     = False
             self._bus_timer = random.uniform(40, 90)
@@ -130,15 +195,64 @@ class SchoolBus:
         if not self.active:
             return
         x, y = int(self.x), int(self.y)
-        pygame.draw.rect(surf, _YELLOW,  (x,      y - 18, 80, 18))
-        pygame.draw.rect(surf, (180, 140, 10), (x, y - 18, 80, 18), 1)
-        pygame.draw.rect(surf, _DARK,    (x,      y - 18, 18, 18))
-        for wx in (22, 38, 54, 68):
-            pygame.draw.rect(surf, _BUS_WIN, (x + wx, y - 15, 10, 10))
-        pygame.draw.circle(surf, _DARK, (x + 14, y + 2), 6)
-        pygame.draw.circle(surf, _DARK, (x + 62, y + 2), 6)
-        pygame.draw.circle(surf, (80, 80, 80), (x + 14, y + 2), 3)
-        pygame.draw.circle(surf, (80, 80, 80), (x + 62, y + 2), 3)
+        bw, bh = self._BW, self._BH
+
+        # ── Main body ──────────────────────────────────────────────
+        pygame.draw.rect(surf, _YELLOW,         (x,      y - bh, bw,  bh), border_radius=3)
+        pygame.draw.rect(surf, (165, 128, 10),  (x,      y - bh, bw,  bh), 2,  border_radius=3)
+
+        # ── Black belt stripe along middle ─────────────────────────
+        pygame.draw.rect(surf, (25, 25, 25), (x + 2, y - bh//2 - 1, bw - 24, 3))
+
+        # ── Passenger windows (4) ──────────────────────────────────
+        for i in range(4):
+            wx = x + 4 + i * 19
+            pygame.draw.rect(surf, _BUS_WIN,       (wx, y - bh + 3, 14, 15), border_radius=2)
+            pygame.draw.rect(surf, (145, 198, 230), (wx, y - bh + 3, 14, 15), 1, border_radius=2)
+            pygame.draw.line(surf, (220, 248, 255),
+                             (wx + 2, y - bh + 4), (wx + 2, y - bh + 14), 1)
+
+        # ── Front cab (right side — direction of travel) ───────────
+        pygame.draw.rect(surf, (215, 175, 18), (x + bw - 24, y - bh, 24, bh), border_radius=3)
+        pygame.draw.rect(surf, (165, 128, 10), (x + bw - 24, y - bh, 24, bh), 2, border_radius=3)
+
+        # Windshield
+        pygame.draw.rect(surf, _BUS_WIN,        (x + bw - 22, y - bh + 2, 17, 16), border_radius=2)
+        pygame.draw.rect(surf, (145, 198, 230),  (x + bw - 22, y - bh + 2, 17, 16), 1, border_radius=2)
+        pygame.draw.line(surf, (220, 248, 255),
+                         (x + bw - 20, y - bh + 3), (x + bw - 20, y - bh + 16), 1)
+
+        # Headlight
+        pygame.draw.ellipse(surf, (255, 248, 160), (x + bw - 8,  y - 8, 10, 6))
+        pygame.draw.ellipse(surf, (255, 220, 60),  (x + bw - 8,  y - 8, 10, 6), 1)
+
+        # Front bumper
+        pygame.draw.rect(surf, (85, 85, 95), (x + bw - 2, y - 10, 5, 8), border_radius=1)
+
+        # ── Rear details ───────────────────────────────────────────
+        # Rear lights (red taillights)
+        pygame.draw.rect(surf, (210, 40, 40), (x, y - bh + 4, 4, 6), border_radius=1)
+        # Exhaust pipe
+        pygame.draw.rect(surf, (72, 72, 78), (x - 5, y - 6, 7, 3), border_radius=1)
+        # Rear bumper
+        pygame.draw.rect(surf, (85, 85, 95), (x - 5, y - 10, 5, 8), border_radius=1)
+
+        # ── Stop sign (small, on side) ─────────────────────────────
+        _ss_x = x + bw - 26
+        pygame.draw.rect(surf, (210, 30, 30), (_ss_x, y - bh - 6, 8, 8), border_radius=1)
+        pygame.draw.rect(surf, (255, 255, 255), (_ss_x + 1, y - bh - 5, 6, 6), 1, border_radius=1)
+
+        # ── Wheels ────────────────────────────────────────────────
+        wheel_angle = self._t * 5.0
+        for wx_c in (x + 20, x + bw - 20):
+            pygame.draw.circle(surf, (22, 22, 22), (wx_c, y + 3), 10)
+            pygame.draw.circle(surf, (72, 72, 76),  (wx_c, y + 3),  6)
+            pygame.draw.circle(surf, (152, 152, 158),(wx_c, y + 3),  2)
+            for _sa in range(0, 3):
+                _ang = wheel_angle + _sa * (math.pi * 2 / 3)
+                _ex  = wx_c + int(math.cos(_ang) * 5)
+                _ey  = y + 3 + int(math.sin(_ang) * 5)
+                pygame.draw.line(surf, (55, 55, 60), (wx_c, y + 3), (_ex, _ey), 1)
 
 
 class FlyingBird:
@@ -564,19 +678,31 @@ class WizardBattle:
 
     def draw(self, surf: pygame.Surface):
         y = self.y
-        # Left wizard — purple robes
-        pygame.draw.rect(surf, (100,30,140), (10, y-20, 14, 22))
-        pygame.draw.circle(surf, (220,180,140), (17, y-24), 6)
-        pygame.draw.polygon(surf, (80,20,120), [(12,y-30),(17,y-42),(22,y-30)])
-        # Right wizard — dark red warlock
-        pygame.draw.rect(surf, (140,20,20), (LEFT_W-24, y-20, 14, 22))
-        pygame.draw.circle(surf, (220,180,140), (LEFT_W-17, y-24), 6)
-        pygame.draw.polygon(surf, (120,10,10), [(LEFT_W-22,y-30),(LEFT_W-17,y-42),(LEFT_W-12,y-30)])
-        # Spell projectile
+        skin = (220, 185, 145)
+        lx, rx = 20, LEFT_W - 20
+        # Left wizard — bright orange-gold (contrasts with purple crystals)
+        pygame.draw.rect(surf, (215, 100, 18), (lx - 11, y - 38, 22, 38))
+        pygame.draw.rect(surf, (255, 160, 0),  (lx - 13, y - 54, 26, 5))   # hat brim
+        pygame.draw.polygon(surf, (200, 85, 10),
+                            [(lx - 13, y - 54), (lx, y - 82), (lx + 13, y - 54)])
+        pygame.draw.circle(surf, skin, (lx, y - 44), 10)
+        pygame.draw.line(surf, skin, (lx + 11, y - 30), (lx + 26, y - 20), 3)
+        # Right wizard — electric blue (contrasts with orange + crystals)
+        pygame.draw.rect(surf, (20, 85, 215),  (rx - 11, y - 38, 22, 38))
+        pygame.draw.rect(surf, (55, 150, 255), (rx - 13, y - 54, 26, 5))   # hat brim
+        pygame.draw.polygon(surf, (15, 60, 185),
+                            [(rx - 13, y - 54), (rx, y - 82), (rx + 13, y - 54)])
+        pygame.draw.circle(surf, skin, (rx, y - 44), 10)
+        pygame.draw.line(surf, skin, (rx - 11, y - 30), (rx - 26, y - 20), 3)
+        # Spell projectile with soft glow
         if self.spell_timer >= self.cast_cooldown * 0.3:
             col = self.spell_color
-            pygame.draw.circle(surf, col, (int(self.spell_x), y-12), 4)
-            pygame.draw.circle(surf, (255,255,255), (int(self.spell_x), y-12), 2)
+            sx, sy = int(self.spell_x), y - 20
+            glow = pygame.Surface((28, 28), pygame.SRCALPHA)
+            pygame.draw.circle(glow, (*col, 70), (14, 14), 14)
+            surf.blit(glow, (sx - 14, sy - 14))
+            pygame.draw.circle(surf, col,           (sx, sy), 8)
+            pygame.draw.circle(surf, (255, 255, 255),(sx, sy), 4)
 
 
 class FloatingDeco:
@@ -1149,19 +1275,39 @@ class HockeyPlayer(WalkingPerson):
 
 
 class HockeyPuck:
-    """Black rubber puck sliding on ice."""
+    """Black rubber puck — only slides when a player hits it."""
 
     def __init__(self, ground_y: int):
-        self._gy = float(ground_y)
-        self.x   = float(random.randint(30, LEFT_W - 30))
-        self.vx  = random.uniform(-75, 75)
+        self._gy    = float(ground_y)
+        self.x      = float(LEFT_W // 2)
+        self.vx     = 0.0
+        self._hit_cd = 0.0
 
-    def update(self, dt: float):
+    def update(self, dt: float, players=None):
+        self._hit_cd = max(0.0, self._hit_cd - dt)
+
+        # Slide with ice friction (very low friction)
+        if self.vx != 0:
+            sign     = 1 if self.vx > 0 else -1
+            self.vx -= sign * min(abs(self.vx), 28 * dt)
+            if abs(self.vx) < 2:
+                self.vx = 0.0
         self.x += self.vx * dt
+
+        # Wall bounce
         if self.x < 16:
-            self.x, self.vx = 16.0, abs(self.vx)
+            self.x, self.vx = 16.0, abs(self.vx) * 0.85
         elif self.x > LEFT_W - 16:
-            self.x, self.vx = float(LEFT_W - 16), -abs(self.vx)
+            self.x, self.vx = float(LEFT_W - 16), -abs(self.vx) * 0.85
+
+        # Hit detection — player stick reaches ~18 px ahead
+        if players and self._hit_cd <= 0:
+            for p in players:
+                stick_x = p.x + p.dir * 18
+                if abs(stick_x - self.x) < 16 and abs(p.y - self._gy) < 16:
+                    self.vx      = p.dir * random.uniform(90, 170)
+                    self._hit_cd = 1.0
+                    break
 
     def draw(self, surf: pygame.Surface):
         pygame.draw.ellipse(surf, (28, 28, 28),
@@ -1300,31 +1446,58 @@ class SoccerGoal:
 
 
 class SoccerBall:
-    """Bouncing football."""
+    """Football that only moves when a player kicks it."""
 
     def __init__(self, ground_y: int):
-        self._gy = float(ground_y - 5)
-        self.x   = float(random.randint(40, LEFT_W - 40))
-        self.y   = self._gy
-        self.vx  = random.uniform(-85, 85)
-        self.vy  = 0.0
-        self.t   = 0.0
+        self._gy    = float(ground_y - 5)
+        self.x      = float(LEFT_W // 2)
+        self.y      = self._gy
+        self.vx     = 0.0
+        self.vy     = 0.0
+        self.t      = 0.0
+        self._kick_cd = 0.0
 
-    def update(self, dt: float):
-        self.t  += dt * 5.0
-        self.vy += 280 * dt
-        self.y  += self.vy * dt
-        self.x  += self.vx * dt
+    def update(self, dt: float, players=None):
+        self.t       += dt * 5.0
+        self._kick_cd = max(0.0, self._kick_cd - dt)
+
+        # Gravity when airborne
+        if self.y < self._gy or self.vy < 0:
+            self.vy += 280 * dt
+
+        self.y += self.vy * dt
+        self.x += self.vx * dt
+
+        # Ground
         if self.y >= self._gy:
-            self.y  = self._gy
-            self.vy = -abs(self.vy) * 0.55
-            if abs(self.vy) < 15:
-                self.vy = -random.uniform(28, 75)
-                self.vx = random.uniform(-85, 85)
+            self.y = self._gy
+            if abs(self.vy) > 25:
+                self.vy = -abs(self.vy) * 0.52
+            else:
+                self.vy = 0.0
+
+        # Rolling friction
+        if self.vx != 0:
+            sign = 1 if self.vx > 0 else -1
+            self.vx -= sign * min(abs(self.vx), 60 * dt)
+            if abs(self.vx) < 2:
+                self.vx = 0.0
+
+        # Walls
         if self.x < 26:
-            self.x, self.vx = 26.0, abs(self.vx) * 0.8
+            self.x, self.vx = 26.0, abs(self.vx) * 0.7
         elif self.x > LEFT_W - 26:
-            self.x, self.vx = float(LEFT_W - 26), -abs(self.vx) * 0.8
+            self.x, self.vx = float(LEFT_W - 26), -abs(self.vx) * 0.7
+
+        # Kick when a player walks into the ball
+        if players and self._kick_cd <= 0:
+            for p in players:
+                if abs(p.x - self.x) < 22 and abs(p.y - (self._gy + 5)) < 20:
+                    pdir = getattr(p, 'dir', 1)
+                    self.vx = pdir * random.uniform(75, 140)
+                    self.vy = -random.uniform(55, 105)
+                    self._kick_cd = 1.4
+                    break
 
     def draw(self, surf: pygame.Surface):
         x, y = int(self.x), int(self.y)
@@ -1619,12 +1792,13 @@ class SpriteManager:
     _HORIZON_Y = TOP_H + 110
 
     def __init__(self):
-        self.students: list[WalkingPerson] = [
-            WalkingPerson(378, _BLUE),
-            WalkingPerson(372, _RED),
-            WalkingPerson(384, _BLUE),
+        self.students: list = [
+            ToonWalker(378, "male_person"),
+            ToonWalker(372, "female_person"),
+            ToonWalker(384, "male_person"),
+            ToonWalker(378, "female_person"),
         ]
-        self.teacher               = TeacherCharacter(368)
+        self.teacher               = ToonWalker(368, "male_person", speed_range=(14, 22))
         self.clouds: list[MovingCloud] = [
             MovingCloud(TOP_H + 12, 7.0),
             MovingCloud(TOP_H + 30, 4.5),
@@ -1642,21 +1816,15 @@ class SpriteManager:
         self._wing_acc = 0.0
         self.lava_particles: list[LavaParticle] = []
         self._lava_acc = 0.0
-        self.wizard_battles: list[WizardBattle] = [
-            WizardBattle(TOP_H + 293),
-            WizardBattle(TOP_H + 280),
-            WizardBattle(TOP_H + 265),
-        ]
+        self.wizard_battles: list[WizardBattle] = [WizardBattle(TOP_H + 295)]
         self.flying_cars: list[FlyingCar] = [FlyingCar() for _ in range(3)]
         self.spaceship_fighters = SpaceshipFighters()
         self.flying_heroes: list[FlyingHero] = [FlyingHero(i) for i in range(3)]
-        self.ground_fighters: list[GroundFighter] = [
-            GroundFighter(TOP_H + 215, 0),
-            GroundFighter(TOP_H + 250, 1),
-            GroundFighter(TOP_H + 285, 2),
-        ]
-        self.ghost_figures: list = [GhostFigure(i) for i in range(3)]
+        self.ground_fighters: list = [GroundFighter(TOP_H + 295, i) for i in range(3)]
+        self.ghost_figures: list = [ToonWalker(TOP_H + 295, "zombie") for _ in range(3)]
         self.ancient_warriors: list = [AncientWarrior(TOP_H + 295, i) for i in range(4)]
+        # Zone 3: robot ground characters
+        self.z3_robots: list = [ToonWalker(TOP_H + 295, "robot") for _ in range(3)]
         self.trojan_horse = TrojanHorse()
         self.flying_angels: list = [FlyingAngel(i) for i in range(3)]
         self.halo_walkers: list = [HaloWalker(TOP_H + 295, i) for i in range(3)]
@@ -1673,16 +1841,16 @@ class SpriteManager:
         # Seasonal sprites (zone 1)
         self._season = "Spring"
         _gy = 378
+        _persons = ["male_person", "female_person"]
         self.snowflakes: list       = [Snowflake()        for _ in range(12)]
-        self.hockey_players: list   = [HockeyPlayer(_gy)  for _ in range(3)]
+        self.hockey_players: list   = [ToonWalker(_gy, random.choice(_persons)) for _ in range(3)]
         self.hockey_puck            = HockeyPuck(_gy)
         self.christmas_tree         = ChristmasTree(36, _gy)
-        self.santa_sleigh           = SantaSleigh()
-        self.soccer_players: list   = [SoccerPlayer(_gy)  for _ in range(3)]
+        self.soccer_players: list   = [ToonWalker(_gy, random.choice(_persons)) for _ in range(3)]
         self.soccer_goals: list     = [SoccerGoal(10, _gy, True),
                                         SoccerGoal(LEFT_W - 10, _gy, False)]
         self.soccer_ball            = SoccerBall(_gy)
-        self.halloween_students: list = [HalloweenStudent(_gy, i) for i in range(3)]
+        self.halloween_students: list = [ToonWalker(_gy, random.choice(_persons)) for _ in range(3)]
         self.leaf_piles: list       = [LeafPile(x, _gy) for x in (62, 152, 262)]
         self.falling_leaves: list   = [FallingLeaf()      for _ in range(8)]
         self.kubb_players: list     = [
@@ -1695,6 +1863,18 @@ class SpriteManager:
             KubbPin(LEFT_W // 2, _gy, is_king=True),
         ]
         self._kubb_throw_timer = random.uniform(3, 8)
+        # Zone 1: foliage trees (Kenney Foliage Pack, side-view)
+        _foliage_dir = _os.path.join(_ASSETS_DIR, "kenney_foliage-pack", "PNG", "Default size")
+        self._trees: list = []
+        for _fname, _th in [("foliagePack_005.png", 68), ("foliagePack_006.png", 65), ("foliagePack_011.png", 72)]:
+            _path = _os.path.join(_foliage_dir, _fname)
+            try:
+                _raw = pygame.image.load(_path).convert_alpha()
+                _scale = _th / _raw.get_height()
+                _tw = int(_raw.get_width() * _scale)
+                self._trees.append(pygame.transform.smoothscale(_raw, (_tw, _th)))
+            except Exception:
+                pass
         self._spawn_decos("Buildings")
 
     def _spawn_decos(self, tab: str):
@@ -1735,15 +1915,17 @@ class SpriteManager:
             if season == "Winter":
                 for sf in self.snowflakes:
                     sf.update(dt)
+                puck_x = self.hockey_puck.x
                 for hp in self.hockey_players:
+                    if abs(hp.x - puck_x) < 140:
+                        hp.steer_toward(puck_x)
                     hp.update(dt)
-                self.hockey_puck.update(dt)
+                self.hockey_puck.update(dt, self.hockey_players)
                 self.christmas_tree.update(dt)
-                self.santa_sleigh.update(dt)
             elif season == "Summer":
                 for sp in self.soccer_players:
                     sp.update(dt)
-                self.soccer_ball.update(dt)
+                self.soccer_ball.update(dt, self.soccer_players)
             elif season == "Autumn":
                 for hs in self.halloween_students:
                     hs.update(dt)
@@ -1757,11 +1939,13 @@ class SpriteManager:
                     self._kubb_throw_timer = random.uniform(3, 8)
                     random.choice(self.kubb_players).throw(duration=1.4)
 
-        # Zone 3: flying cars and spaceship battles
+        # Zone 3: flying cars, spaceship battles, and robot ground walkers
         if zone_id == 3:
             for fc in self.flying_cars:
                 fc.update(dt)
             self.spaceship_fighters.update(dt)
+            for rb in self.z3_robots:
+                rb.update(dt)
 
         # Zone 6: wizard battles
         if zone_id == 6:
@@ -1847,6 +2031,52 @@ class SpriteManager:
         if len(self.particles) > 60:
             self.particles = self.particles[-60:]
 
+    @staticmethod
+    def _draw_hat(surf: pygame.Surface, walker, season: str):
+        """Draw a small season-appropriate hat on top of a ToonWalker character."""
+        if not hasattr(walker, '_h'):
+            return
+        cx   = int(walker.x)
+        ty   = int(walker.y) - walker._h   # sprite top-left y (screen coords)
+        hw   = walker._w // 2              # half character width (~14 px)
+        nhw  = hw - 6                      # narrowed half-width: 2px hat on each side
+        # Character head content starts at ~ty+9; hat sits just above it
+        ht   = ty + 6
+        face = getattr(walker, 'dir', 1)   # +1 facing right, -1 left
+
+        if season == "Winter":
+            # Red beanie with white band and white pompom
+            pygame.draw.ellipse(surf, (190, 22, 22),  (cx - nhw, ht,     nhw*2, 8))
+            pygame.draw.rect(surf,   (190, 22, 22),   (cx - nhw, ht + 4, nhw*2, 4))
+            pygame.draw.rect(surf,   (240, 240, 245), (cx - nhw, ht + 7, nhw*2, 2))
+            pygame.draw.circle(surf, (248, 248, 252), (cx, ht - 1), 3)
+
+        elif season == "Summer":
+            # Orange baseball cap dome + directional brim
+            pygame.draw.ellipse(surf, (255, 148, 10), (cx - nhw, ht + 1, nhw*2, 7))
+            pygame.draw.rect(surf,   (230, 128,  8),  (cx - nhw, ht + 5, nhw*2, 3))
+            if face >= 0:
+                pygame.draw.rect(surf, (210, 108, 6), (cx + nhw - 1, ht + 6, 7, 2))
+            else:
+                pygame.draw.rect(surf, (210, 108, 6), (cx - nhw - 6, ht + 6, 7, 2))
+
+        elif season == "Autumn":
+            # Warm orange/brown beanie with leaf pip
+            pygame.draw.ellipse(surf, (172, 78, 16),  (cx - nhw, ht,     nhw*2, 8))
+            pygame.draw.rect(surf,   (172, 78, 16),   (cx - nhw, ht + 4, nhw*2, 4))
+            pygame.draw.rect(surf,   (208, 108, 30),  (cx - nhw, ht + 7, nhw*2, 2))
+            # Small orange leaf on side
+            pygame.draw.circle(surf, (205, 72, 12), (cx + nhw, ht + 3), 3)
+            pygame.draw.circle(surf, (230, 110, 22),(cx + nhw, ht + 3), 1)
+
+        elif season == "Spring":
+            # Flower crown — three small blooms in pink / yellow / green
+            for _ox, _pc in ((-nhw + 2, (255, 105, 160)),
+                              (0,        (255, 218, 48)),
+                              ( nhw - 2, (100, 205,  95))):
+                pygame.draw.circle(surf, _pc,           (cx + _ox, ht + 3), 3)
+                pygame.draw.circle(surf, (255, 255, 210),(cx + _ox, ht + 3), 1)
+
     def draw_left(self, surf: pygame.Surface):
         """Birds, students — clipped to the left panel. Zone-aware."""
         zone = self._view_zone
@@ -1856,13 +2086,19 @@ class SpriteManager:
             season = self._season
             for c in self.clouds:
                 c.draw(surf)
+            # Foliage trees at campus edges (drawn before characters)
+            _tree_gy = TOP_H + 308
+            for _tx, _ti in ((14, 0), (62, 2), (262, 1), (316, 0)):
+                if _ti < len(self._trees):
+                    _t = self._trees[_ti]
+                    surf.blit(_t, (_tx - _t.get_width() // 2, _tree_gy - _t.get_height()))
             if season == "Winter":
                 for sf in self.snowflakes:
                     sf.draw(surf)
-                self.santa_sleigh.draw(surf)
                 self.christmas_tree.draw(surf)
                 for hp in self.hockey_players:
                     hp.draw(surf)
+                    self._draw_hat(surf, hp, "Winter")
                 self.hockey_puck.draw(surf)
             elif season == "Summer":
                 for b in self.birds:
@@ -1871,6 +2107,7 @@ class SpriteManager:
                     goal.draw(surf)
                 for sp in self.soccer_players:
                     sp.draw(surf)
+                    self._draw_hat(surf, sp, "Summer")
                 self.soccer_ball.draw(surf)
             elif season == "Autumn":
                 for b in self.birds:
@@ -1881,6 +2118,7 @@ class SpriteManager:
                     fl.draw(surf)
                 for hs in self.halloween_students:
                     hs.draw(surf)
+                    self._draw_hat(surf, hs, "Autumn")
             else:  # Spring
                 for b in self.birds:
                     b.draw(surf)
@@ -1888,7 +2126,12 @@ class SpriteManager:
                     pin.draw(surf)
                 for kp in self.kubb_players:
                     kp.draw(surf)
+                    self._draw_hat(surf, kp, "Spring")
+            for s in self.students:
+                s.draw(surf)
+                self._draw_hat(surf, s, season)
             self.teacher.draw(surf)
+            self._draw_hat(surf, self.teacher, season)
             self.bus.draw(surf)
 
         elif zone == 7:
@@ -2093,6 +2336,8 @@ class SpriteManager:
             for fc in self.flying_cars:
                 fc.draw(surf)
             self.spaceship_fighters.draw(surf)
+            for rb in self.z3_robots:
+                rb.draw(surf)
 
         elif zone == 10:
             # Zone 10: let campus view show through — heroes on top

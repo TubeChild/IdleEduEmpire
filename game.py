@@ -948,12 +948,11 @@ class Game:
     def start_quiz(self) -> None:
         if self._quiz_active or self._quiz_cooldown > 0:
             return
-        per_type = {"math": [], "spelling": [], "history": []}
+        per_type: dict = {}
         for q in QUIZ_QUESTIONS:
-            per_type[q["type"]].append(q)
+            per_type.setdefault(q["type"], []).append(q)
         selected = []
-        for t in ("math", "spelling", "history"):
-            pool = per_type[t]
+        for pool in per_type.values():
             if pool:
                 selected.append(random.choice(pool))
         random.shuffle(selected)

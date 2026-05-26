@@ -1,4 +1,5 @@
 import math
+import os as _os
 import random
 import pygame
 import sys
@@ -23,7 +24,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.21.1"
+VERSION    = "0.21.2"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -232,6 +233,8 @@ class App:
 
         self._mouse_held      = False
         self._hold_acc        = 0.0
+        self._vol_dragging    = False
+        self._vol_slider_rect: "pygame.Rect | None" = None
         self._hold_float_timer = 0.0
 
         # Multi-zone (Worlds tab)
@@ -246,6 +249,46 @@ class App:
 
         self.sprites = spr.SpriteManager()
         self.campus  = CampusView()
+
+        # Building icons (Kenney Board Game Icons + Game Icons, 40×40 px)
+        _ICON_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                                  "assets", "icons")
+        _BLD_ICON_MAP = {
+            "Classroom":          "bld_classroom.png",
+            "Library":            "bld_library.png",
+            "Science Lab":        "bld_science_lab.png",
+            "Computer Lab":       "bld_computer_lab.png",
+            "Sports Hall":        "bld_sports_hall.png",
+            "Art Studio":         "bld_art_studio.png",
+            "University Wing":    "bld_university_wing.png",
+            "Research Centre":    "bld_research_centre.png",
+            "Innovation Hub":     "bld_innovation_hub.png",
+            "Space Academy":      "bld_space_academy.png",
+            "World Campus":       "bld_world_campus.png",
+            "Quantum Institute":  "bld_quantum_institute.png",
+            "Nexus of Knowledge": "bld_nexus.png",
+        }
+        self._bld_icons: dict = {}
+        for bname, fname in _BLD_ICON_MAP.items():
+            path = _os.path.join(_ICON_DIR, fname)
+            try:
+                raw = pygame.image.load(path).convert_alpha()
+                self._bld_icons[bname] = pygame.transform.smoothscale(raw, (40, 40))
+            except Exception:
+                pass
+        # Instructor sprites — Kenney Toon Character idle frames for matching zones
+        _char_dir = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "assets", "characters")
+        self._instructor_sprites: dict = {}
+        for _zid, _char in {1: "male_person", 2: "zombie", 3: "robot",
+                             4: "male_adventurer", 9: "zombie", 10: "male_adventurer"}.items():
+            _path = _os.path.join(_char_dir, _char, "idle.png")
+            try:
+                _raw = pygame.image.load(_path).convert_alpha()
+                _th  = 120
+                _tw  = int(_raw.get_width() * _th / _raw.get_height())
+                self._instructor_sprites[_zid] = pygame.transform.smoothscale(_raw, (_tw, _th))
+            except Exception:
+                pass
         self.campus._time = self.game.game_time   # sync campus calendar to saved game clock
         self._shadow_cache: dict = {}
 
@@ -914,34 +957,46 @@ class App:
 
             self._shadow(card)
             self._r(CARD_OK if ok else CARD_DIM, card, radius=8, border=1, bc=(173,167,155))
-            self._t(F_MD, f"{b.name}   ×{cnt}", DARK, x+14, iy+8)
+            icon_surf = self._bld_icons.get(b.name)
+            tx = x + 14
+            if icon_surf:
+                icon_y = iy + (self.ITEM_H - 40) // 2
+                # Tinted slightly dim when not affordable
+                if not ok:
+                    tinted = icon_surf.copy()
+                    tinted.fill((160, 160, 160, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                    self.screen.blit(tinted, (x + 8, icon_y))
+                else:
+                    self.screen.blit(icon_surf, (x + 8, icon_y))
+                tx = x + 56
+            self._t(F_MD, f"{b.name}   ×{cnt}", DARK, tx, iy+8)
             star_level = self.game.star_milestones_hit.get(b.name, 0)
             if star_level > 0:
                 star_surf = F_SM.render("★" * star_level, True, GOLD)
                 name_w    = F_MD.size(f"{b.name}   ×{cnt}")[0]
-                self.screen.blit(star_surf, (x + 14 + name_w + 6, iy + 10))
-            self._t(F_SM, b.desc, (95, 95, 95), x+14, iy+30)
+                self.screen.blit(star_surf, (tx + name_w + 6, iy + 10))
+            self._t(F_SM, b.desc, (95, 95, 95), tx, iy+30)
             if cnt > 0:
                 kps_val = g.building_kps(b.name)
                 fac = g.faculty_bonuses.get(b.name, 0.0)
                 fac_tag = f"  [+{fac*100:.0f}% faculty]" if fac > 0 else ""
-                self._t(F_SM, f"Producing: {fmt(kps_val)} KP/s{fac_tag}", (48, 126, 55), x+14, iy+44)
+                self._t(F_SM, f"Producing: {fmt(kps_val)} KP/s{fac_tag}", (48, 126, 55), tx, iy+44)
             btn = pygame.Rect(x + w - 168, iy + (self.ITEM_H-36)//2, 160, 36)
             self._r(GREEN if ok else GRAY, btn, radius=6)
             self._tc(F_SM, btn_label, WHITE, btn)
             self._buy_items.append((btn, b.name, "building"))
             if not ok:
                 pct = min(1.0, g.kp / max(1, total_cost))
-                pygame.draw.rect(self.screen, (175,168,155), (x+14, iy+self.ITEM_H-6, 220, 4), border_radius=2)
-                pygame.draw.rect(self.screen, (100,180,100), (x+14, iy+self.ITEM_H-6, int(220*pct), 4), border_radius=2)
+                pygame.draw.rect(self.screen, (175,168,155), (tx, iy+self.ITEM_H-6, 220, 4), border_radius=2)
+                pygame.draw.rect(self.screen, (100,180,100), (tx, iy+self.ITEM_H-6, int(220*pct), 4), border_radius=2)
             # Sacrifice requirement badge — drawn last so it sits on top
             if sac and not g.sandbox_mode:
                 need = n_buy * sac[1]
                 met = sac_have >= need
                 badge_col = (38, 120, 45) if met else (165, 38, 38)
-                badge_r = pygame.Rect(x+10, iy+60, 234, 16)
+                badge_r = pygame.Rect(tx - 4, iy+60, 234, 16)
                 pygame.draw.rect(self.screen, badge_col, badge_r, border_radius=3)
-                self._t(F_XS, f"⚡ Needs {need} {sac[0]}  (have {sac_have})", WHITE, x+14, iy+62)
+                self._t(F_XS, f"⚡ Needs {need} {sac[0]}  (have {sac_have})", WHITE, tx, iy+62)
             if card.collidepoint(pygame.mouse.get_pos()) and cnt > 0:
                 upg_names = [u.name for u in UPGRADES if u.target == b.name and u.name in g.upgrades_purchased]
                 syn_parts = [
@@ -1530,7 +1585,38 @@ class App:
         self._r((140, 55, 55) if muted else (55, 140, 75), mu_rect, radius=8)
         self._t(F_MD, "Unmute Audio" if muted else "Mute Audio", WHITE, mu_rect.x+14, mu_rect.y+9)
         self._buy_items.append((mu_rect, None, "toggle_mute"))
-        cy += 48
+        cy += 46
+
+        # ── Volume slider ──────────────────────────────────────────────────────
+        vol = audio.get_volume()
+        self._t(F_XS, "Volume", (80, 80, 80), x + 10, cy + 2)
+        _vx = x + 68
+        # − button
+        vm_r = pygame.Rect(_vx, cy, 28, 28)
+        self._r((90, 90, 100), vm_r, radius=6)
+        self._t(F_MD, "−", WHITE, vm_r.x + 8, vm_r.y + 4)
+        self._buy_items.append((vm_r, None, "vol_down"))
+        # slider bar (clickable)
+        _sl_x, _sl_w = _vx + 34, w - 152
+        sl_bg  = pygame.Rect(_sl_x, cy + 9, _sl_w, 10)
+        sl_fill = pygame.Rect(_sl_x, cy + 9, max(0, int(_sl_w * vol)), 10)
+        pygame.draw.rect(self.screen, (180, 175, 165), sl_bg,  border_radius=5)
+        pygame.draw.rect(self.screen, ACCENT,          sl_fill, border_radius=5)
+        pygame.draw.rect(self.screen, (120, 115, 105), sl_bg,  border_radius=5, width=1)
+        # knob
+        _kx = _sl_x + int(_sl_w * vol)
+        pygame.draw.circle(self.screen, WHITE,  (_kx, cy + 14), 8)
+        pygame.draw.circle(self.screen, ACCENT, (_kx, cy + 14), 8, 2)
+        self._vol_slider_rect = sl_bg
+        self._buy_items.append((sl_bg.inflate(0, 16), sl_bg, "vol_slider"))
+        # + button
+        vp_r = pygame.Rect(_sl_x + _sl_w + 6, cy, 28, 28)
+        self._r((90, 90, 100), vp_r, radius=6)
+        self._t(F_MD, "+", WHITE, vp_r.x + 7, vp_r.y + 4)
+        self._buy_items.append((vp_r, None, "vol_up"))
+        # percentage label
+        self._t(F_SM, f"{int(vol*100)}%", DARK, vp_r.right + 8, cy + 6)
+        cy += 42
 
         hm_on   = g.show_headmaster
         hm_rect = pygame.Rect(x + 10, cy, 260, 38)
@@ -2417,8 +2503,10 @@ class App:
             # ── Question screen ──────────────────────────────────────
             qi = g._quiz_idx
             q  = g._quiz_questions[qi]
-            type_labels = {"math": "Math", "spelling": "Spelling", "history": "History"}
-            type_col    = {"math": (80, 180, 255), "spelling": (80, 220, 120), "history": (255, 180, 60)}
+            type_labels = {"math": "Math", "spelling": "Spelling", "history": "History",
+                           "science": "Science", "geography": "Geography"}
+            type_col    = {"math": (80, 180, 255), "spelling": (80, 220, 120), "history": (255, 180, 60),
+                           "science": (80, 220, 200), "geography": (120, 200, 80)}
 
             prog_str = f"Question {qi + 1} of {len(g._quiz_questions)}"
             ps = F_SM.render(prog_str, True, (180, 180, 200))
@@ -2630,6 +2718,11 @@ class App:
         return 1
 
     def _draw_instructor(self, cx: int, cy: int, zone_id: int):
+        sprite = self._instructor_sprites.get(zone_id)
+        if sprite:
+            sw, sh = sprite.get_size()
+            self.screen.blit(sprite, (cx - sw // 2, cy - 80))
+            return
         s  = self.screen
         PI = 3.14159
         SKIN = (232, 198, 162)
@@ -3080,10 +3173,16 @@ class App:
                         pygame.quit()
                         sys.exit()
 
+            if ev.type == pygame.MOUSEMOTION:
+                if self._vol_dragging and self._vol_slider_rect:
+                    frac = (ev.pos[0] - self._vol_slider_rect.x) / max(1, self._vol_slider_rect.width)
+                    audio.set_volume(frac)
+
             if ev.type == pygame.MOUSEBUTTONUP:
                 if ev.button == 1:
-                    self._mouse_held = False
-                    self._hold_acc   = 0.0
+                    self._mouse_held   = False
+                    self._hold_acc     = 0.0
+                    self._vol_dragging = False
 
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if ev.button == 4: self._scroll(-1)
@@ -3250,6 +3349,15 @@ class App:
                             self._owned_expanded = not self._owned_expanded
                         elif kind == "toggle_mute":
                             audio.toggle_mute()
+                        elif kind == "vol_down":
+                            audio.set_volume(audio.get_volume() - 0.10)
+                        elif kind == "vol_up":
+                            audio.set_volume(audio.get_volume() + 0.10)
+                        elif kind == "vol_slider":
+                            sl_rect = obj
+                            frac = (mx - sl_rect.x) / max(1, sl_rect.width)
+                            audio.set_volume(frac)
+                            self._vol_dragging = True
                         elif kind == "zone_select":
                             zid = obj
                             if zid != self.worlds_sel_zone:
@@ -3522,6 +3630,7 @@ class App:
             self.sprites.update(dt, self.game.kps(), self.tab,
                                 zone_id=_spr_zone, season=self.game.season)
             self.campus.update(dt)
+            audio.tick(dt)
             self.campus._time = self.game.game_time  # keep campus calendar in sync
 
             # Auto-click gain floats — drain queue and spawn near study button
