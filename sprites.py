@@ -396,6 +396,165 @@ class SpritePterodactyl(Pterodactyl):
         pygame.draw.line(surf, c_dark, (tx, y + 1), (tx - self.dir * 7, y + 4), 2)
 
 
+class GroundDino:
+    """Procedurally drawn ground dinosaur with animated legs, tail, and head."""
+
+    def __init__(self, ground_y: int, kind: str = "trex"):
+        self._gy   = float(ground_y)
+        self._kind = kind
+        self.x     = float(random.randint(60, LEFT_W - 60))
+        self.dir   = random.choice([-1, 1])
+        self.speed = random.uniform(20, 36)
+        self._t    = random.uniform(0, math.pi * 2)
+
+    def update(self, dt: float):
+        self._t += dt * 4.5
+        self.x  += self.dir * self.speed * dt
+        if self.x < 55:
+            self.x, self.dir = 55.0, 1
+        elif self.x > LEFT_W - 55:
+            self.x, self.dir = float(LEFT_W - 55), -1
+
+    def draw(self, surf: pygame.Surface):
+        x, y, d, t = int(self.x), int(self._gy), self.dir, self._t
+        if self._kind == "trex":
+            self._draw_trex(surf, x, y, d, t)
+        elif self._kind == "triceratops":
+            self._draw_triceratops(surf, x, y, d, t)
+        else:
+            self._draw_sauropod(surf, x, y, d, t)
+
+    @staticmethod
+    def _leg(surf, hx, hy, swing, mid_y, gy, thick, col):
+        """Draw a 2-segment leg: hip -> knee -> foot."""
+        kx = hx + int(swing)
+        ky = mid_y
+        fx = kx + int(swing * 0.3)
+        fy = gy - 2
+        pygame.draw.line(surf, col, (hx, hy), (kx, ky), thick)
+        pygame.draw.line(surf, col, (kx, ky), (fx, fy), max(1, thick - 1))
+        pygame.draw.ellipse(surf, col, (fx - 3, fy - 1, 6, 4))
+
+    @staticmethod
+    def _draw_trex(surf, x, y, d, t):
+        C  = (55, 85, 40)    # body green
+        CB = (82, 118, 58)   # belly
+        CK = (38, 60, 22)    # dark / limbs
+        ls = math.sin(t) * 11
+        bob = int(math.sin(t * 2) * 1)
+        by = y - 38 + bob    # body centre y
+
+        # Legs (drawn first, behind body)
+        GroundDino._leg(surf, x + d * 7,  y - 38 + bob, ls,      y - 20, y, 5, CK)
+        GroundDino._leg(surf, x - d * 5,  y - 38 + bob, -ls,     y - 20, y, 5, CK)
+
+        # Body
+        pygame.draw.ellipse(surf, C,  (x - 24, by - 11, 48, 22))
+        pygame.draw.ellipse(surf, CB, (x - 14, by - 6,  28, 12))
+
+        # Tail — curves away from head, tip waves
+        tw = int(math.sin(t * 1.2) * 5)
+        p0 = (x - d * 12, by + 6)
+        p1 = (x - d * 28, by + 14 + tw)
+        p2 = (x - d * 42, by + 18 + tw)
+        pygame.draw.line(surf, C,  p0, p1, 6)
+        pygame.draw.line(surf, CK, p1, p2, 4)
+
+        # Neck + head
+        nx, ny = x + d * 18, by - 6
+        hx, hy = x + d * 32, by - 18
+        pygame.draw.line(surf, C, (x + d * 10, by - 4), (hx, hy + 4), 7)
+        pygame.draw.ellipse(surf, C,  (hx - 8,  hy - 6,  18, 13))
+        # Jaw (opens slightly)
+        jaw = max(0, int(math.sin(t * 0.7) * 3))
+        pygame.draw.ellipse(surf, CK, (hx - 4,  hy + 4,  13, 4 + jaw))
+        pygame.draw.line(surf, (215, 210, 185), (hx - 2 + d * 2, hy + 4), (hx + 4 + d * 2, hy + 4), 1)
+        # Eye
+        pygame.draw.circle(surf, (215, 185, 40), (hx + d * 3, hy - 1), 3)
+        pygame.draw.circle(surf, (20, 20, 20),   (hx + d * 3, hy - 1), 1)
+        # Tiny arm
+        pygame.draw.line(surf, CK, (x + d * 12, by - 2), (x + d * 16, by + 6), 2)
+
+    @staticmethod
+    def _draw_triceratops(surf, x, y, d, t):
+        C  = (68, 90, 55)
+        CB = (92, 118, 72)
+        CK = (45, 62, 34)
+        CF = (148, 60, 45)   # frill
+        ls = math.sin(t) * 8
+        bob = int(math.sin(t * 2) * 1)
+        by = y - 30 + bob
+
+        # 4 legs — front pair and back pair alternating
+        for lx_off, ls_v in ((d * 14, ls), (d * 4, ls), (-d * 4, -ls), (-d * 14, -ls)):
+            GroundDino._leg(surf, x + lx_off, y - 28 + bob, ls_v * 0.5, y - 14, y, 5, CK)
+
+        # Body
+        pygame.draw.ellipse(surf, C,  (x - 28, by - 12, 56, 24))
+        pygame.draw.ellipse(surf, CB, (x - 18, by - 6,  36, 14))
+
+        # Tail
+        tw = int(math.sin(t * 1.1) * 4)
+        pygame.draw.line(surf, CK, (x - d * 26, by + 6), (x - d * 40, by + 14 + tw), 4)
+        pygame.draw.line(surf, CK, (x - d * 40, by + 14 + tw), (x - d * 50, by + 18 + tw // 2), 3)
+
+        # Neck
+        pygame.draw.line(surf, C, (x + d * 18, by - 6), (x + d * 28, by - 18), 9)
+
+        # Frill (behind head)
+        fcx, fcy = x + d * 30, by - 24
+        pygame.draw.circle(surf, CF, (fcx, fcy), 14)
+        pygame.draw.circle(surf, (175, 78, 60), (fcx, fcy), 14, 2)
+
+        # Head
+        pygame.draw.ellipse(surf, C, (fcx - 8 + d * 2, fcy - 6, 20, 12))
+        # 3 horns
+        for hox, hoy_end in ((d * 8, -16), (d * 4, -14), (-d * 3, -12)):
+            pygame.draw.line(surf, (210, 200, 165),
+                             (fcx + hox, fcy - 6), (fcx + hox, fcy + hoy_end), 2)
+        # Eye
+        pygame.draw.circle(surf, (50, 38, 20), (fcx + d * 5, fcy - 1), 2)
+
+    @staticmethod
+    def _draw_sauropod(surf, x, y, d, t):
+        C  = (88, 105, 58)
+        CB = (115, 135, 76)
+        CK = (60, 78, 36)
+        ls = math.sin(t) * 6
+        bob = int(math.sin(t * 2) * 1)
+        by = y - 38 + bob
+        neck_sway = int(math.sin(t * 0.55) * 6)
+
+        # 4 thick legs
+        for lx_off, ls_v in ((d * 18, ls), (d * 6, -ls), (-d * 6, ls), (-d * 18, -ls)):
+            GroundDino._leg(surf, x + lx_off, y - 36 + bob, ls_v * 0.4, y - 18, y, 6, CK)
+
+        # Large body
+        pygame.draw.ellipse(surf, C,  (x - 32, by - 14, 64, 28))
+        pygame.draw.ellipse(surf, CB, (x - 20, by - 7,  40, 16))
+
+        # Tail — long, sweeping
+        tw = int(math.sin(t * 0.9) * 7)
+        pygame.draw.line(surf, C,  (x - d * 28, by + 8),  (x - d * 46, by + tw),       7)
+        pygame.draw.line(surf, CK, (x - d * 46, by + tw), (x - d * 58, y - 12 + tw),   5)
+        pygame.draw.line(surf, CK, (x - d * 58, y - 12 + tw), (x - d * 66, y - 4 + tw // 2), 3)
+
+        # Long neck (3 segments, gently swaying)
+        n0 = (x + d * 20, by - 8)
+        n1 = (x + d * 26 + neck_sway // 2, by - 32)
+        n2 = (x + d * 22 + neck_sway,      by - 58)
+        n3 = (x + d * 18 + neck_sway,      by - 78)
+        pygame.draw.line(surf, C, n0, n1, 10)
+        pygame.draw.line(surf, C, n1, n2,  8)
+        pygame.draw.line(surf, C, n2, n3,  6)
+
+        # Small head
+        hx, hy = n3
+        pygame.draw.ellipse(surf, C, (hx - 7, hy - 5, 14, 9))
+        pygame.draw.circle(surf, (50, 38, 18), (hx + d * 3, hy - 1), 2)
+        pygame.draw.line(surf, CK, (hx + d * 4, hy + 2), (hx + d * 7, hy + 2), 1)
+
+
 class SpriteStudent(WalkingPerson):
     """Walking student using roguelike character sprites; falls back to procedural."""
     _chars: list = []  # list of (right_surf, left_surf)
@@ -1832,6 +1991,41 @@ class SpriteManager:
         self.ground_demons: list = [GroundDemon(TOP_H + y, i) for i, y in enumerate([283, 285, 287])]
         self.crucified: list = [CrucifiedFigure(x, TOP_H + 245) for x in [198, 242, 296]]
         self._z5_t = 0.0   # celestial drift timer for Zone 5
+        self._z7_t = 0.0   # smoke/animation timer for Zone 7
+        # Zone 7: ground dinosaurs
+        _z7_gy = TOP_H + 295
+        self.ground_dinos: list = [
+            GroundDino(_z7_gy, "trex"),
+            GroundDino(_z7_gy, "triceratops"),
+            GroundDino(_z7_gy, "sauropod"),
+        ]
+        # Zone 7: jungle foliage trees (tall background canopy)
+        self._z7_trees: list = []
+        _fdir = _os.path.join(_ASSETS_DIR, "kenney_foliage-pack", "PNG", "Default size")
+        for _fname, _th in [("foliagePack_004.png", 108),
+                             ("foliagePack_027.png", 112),
+                             ("foliagePack_025.png",  96)]:
+            _path = _os.path.join(_fdir, _fname)
+            try:
+                _raw = pygame.image.load(_path).convert_alpha()
+                _sc  = _th / _raw.get_height()
+                _tw  = int(_raw.get_width() * _sc)
+                self._z7_trees.append(pygame.transform.smoothscale(_raw, (_tw, _th)))
+            except Exception:
+                pass
+        # Zone 2: small foliage for ruins cracks
+        self._z2_plants: list = []
+        for _fname, _th in [("foliagePack_021.png", 28),
+                             ("foliagePack_020.png", 26),
+                             ("foliagePack_018.png", 30)]:
+            _path = _os.path.join(_fdir, _fname)
+            try:
+                _raw = pygame.image.load(_path).convert_alpha()
+                _sc  = _th / _raw.get_height()
+                _tw  = int(_raw.get_width() * _sc)
+                self._z2_plants.append(pygame.transform.smoothscale(_raw, (_tw, _th)))
+            except Exception:
+                pass
         # Zone 5: Moon Colony
         _moon_gy = TOP_H + 295
         self.moon_stars:  list = [MoonStar() for _ in range(40)]
@@ -1952,10 +2146,13 @@ class SpriteManager:
             for wb in self.wizard_battles:
                 wb.update(dt)
 
-        # Zone 7: pterodactyls
+        # Zone 7: pterodactyls + ground dinos
         if zone_id == 7:
+            self._z7_t += dt
             for p in self.pterodactyls:
                 p.update(dt)
+            for gd in self.ground_dinos:
+                gd.update(dt)
 
         # Zone 8: floating wing sprites + angels + halo walkers
         if zone_id == 8:
@@ -2135,9 +2332,54 @@ class SpriteManager:
             self.bus.draw(surf)
 
         elif zone == 7:
-            # Zone 7: let campus view show through — pterodactyls on top
-            for c in self.clouds:
-                c.draw(surf)
+            # Zone 7: Prehistoric — amber sky, volcano, jungle canopy, ground dinos
+            _GY = TOP_H + 295
+            # Sky — warm amber/orange haze in layers
+            pygame.draw.rect(surf, (165, 108, 52),  (0, TOP_H,       LEFT_W, 60))
+            pygame.draw.rect(surf, (188, 128, 62),  (0, TOP_H + 60,  LEFT_W, 60))
+            pygame.draw.rect(surf, (205, 148, 78),  (0, TOP_H + 120, LEFT_W, 60))
+            pygame.draw.rect(surf, (215, 162, 90),  (0, TOP_H + 180, LEFT_W, 60))
+            pygame.draw.rect(surf, (210, 158, 85),  (0, TOP_H + 240, LEFT_W, 55))
+            # Distant jungle silhouette — soft dark-green humps on horizon
+            for _jx, _jw, _jh in ((0,80,55),(55,90,48),(110,70,60),(160,100,52),
+                                   (230,85,58),(295,80,50),(340,60,46)):
+                pygame.draw.ellipse(surf, (62, 78, 38),
+                                    (_jx - _jw//2, _GY - _jh, _jw, _jh * 2))
+            # Volcano — dark conical silhouette right-center
+            _vx, _vy = 260, _GY
+            pygame.draw.polygon(surf, (52, 38, 28),
+                                [(_vx - 58, _vy), (_vx, _vy - 130), (_vx + 58, _vy)])
+            # Lava glow at crater rim
+            pygame.draw.ellipse(surf, (200, 60, 10), (_vx - 10, _vy - 132, 20, 8))
+            pygame.draw.ellipse(surf, (255, 120, 20),(_vx - 6,  _vy - 130, 12, 5))
+            # Animated smoke puffs rising from crater
+            _st = self._z7_t
+            for _si, (_sox, _soy_off, _sph) in enumerate(
+                    ((-4, 0, 0.0), (4, 0, 1.1), (0, 0, 2.3))):
+                _pct  = (_st * 0.28 + _sph) % 1.0
+                _py   = _vy - 135 - int(_pct * 55)
+                _pr   = 5 + int(_pct * 10)
+                _alph = int(200 * (1.0 - _pct))
+                _sc_s = pygame.Surface((_pr * 2 + 2, _pr * 2 + 2), pygame.SRCALPHA)
+                pygame.draw.circle(_sc_s, (205, 188, 172, _alph),
+                                   (_pr + 1, _pr + 1), _pr)
+                surf.blit(_sc_s, (_vx + _sox - _pr - 1, _py - _pr - 1))
+            # Earthy ground
+            pygame.draw.rect(surf, (82, 58, 32),  (0, _GY,     LEFT_W, H - _GY - TICKER_H))
+            pygame.draw.rect(surf, (102, 74, 42), (0, _GY,     LEFT_W, 5))
+            # Mud puddle patches
+            for _mx, _mw in ((30, 38), (140, 28), (230, 34)):
+                pygame.draw.ellipse(surf, (62, 44, 26), (_mx, _GY + 4, _mw, 7))
+            # Jungle foliage trees along edges
+            _tgy = _GY + 2
+            for _tx, _ti in ((0, 0), (28, 2), (LEFT_W - 10, 1), (LEFT_W - 38, 0)):
+                if _ti < len(self._z7_trees):
+                    _t = self._z7_trees[_ti]
+                    surf.blit(_t, (_tx - _t.get_width() // 2, _tgy - _t.get_height()))
+            # Ground dinosaurs
+            for gd in self.ground_dinos:
+                gd.draw(surf)
+            # Pterodactyls in sky
             for p in self.pterodactyls:
                 p.draw(surf)
 
@@ -2349,29 +2591,62 @@ class SpriteManager:
                 gf.draw(surf)
 
         elif zone == 2:
-            # Zone 2: sandy sky, stone ground, ruined columns with cracks
+            # Zone 2: dusty ruins — hazy sky, ruined arch, cracked columns, sparse vegetation
             _GY = TOP_H + 295
-            pygame.draw.rect(surf, (196, 162, 102), (0, TOP_H, LEFT_W, H - TOP_H - TICKER_H))
+            # Hazy sand-dust sky
+            pygame.draw.rect(surf, (210, 178, 118), (0, TOP_H,       LEFT_W, 60))
+            pygame.draw.rect(surf, (204, 170, 108), (0, TOP_H + 60,  LEFT_W, 60))
+            pygame.draw.rect(surf, (198, 162, 98),  (0, TOP_H + 120, LEFT_W, 60))
+            pygame.draw.rect(surf, (194, 158, 94),  (0, TOP_H + 180, LEFT_W, 55))
+            pygame.draw.rect(surf, (190, 154, 90),  (0, TOP_H + 235, LEFT_W, 60))
+            # Pale washed-out sun (upper left)
+            pygame.draw.circle(surf, (238, 215, 155), (52, TOP_H + 44), 22)
+            pygame.draw.circle(surf, (245, 228, 180), (52, TOP_H + 44), 16)
+            # Distant ruined city silhouette — broken skyline behind columns
+            for _bx, _bw, _bh in ((5,22,68),(22,18,52),(36,24,80),(56,16,58),
+                                   (70,20,72),(92,14,44),(104,22,66),(122,18,50),
+                                   (138,26,78),(162,20,54),(182,16,62),(196,24,48)):
+                pygame.draw.rect(surf, (168, 138, 85), (_bx, _GY - _bh, _bw, _bh))
+                # Broken top: missing chunk
+                if (_bx * 3 + _bw) % 3 == 0:
+                    _notch = _bw // 3
+                    pygame.draw.rect(surf, (210, 178, 118),
+                                     (_bx + _notch, _GY - _bh, _notch, _bh // 3))
+            # Sandy ground
             pygame.draw.rect(surf, (145, 118, 72),  (0, _GY, LEFT_W, H - _GY - TICKER_H))
             pygame.draw.rect(surf, (108, 86, 50),   (0, _GY, LEFT_W, 4))
-            # Scattered rubble along ground edge
+            # Scattered rubble
             for rx in range(12, LEFT_W - 12, 30):
                 rw2 = 8 + ((rx * 7) % 10)
                 rh2 = 4 + ((rx * 11) % 5)
                 pygame.draw.rect(surf, (165, 138, 88), (rx, _GY - rh2, rw2, rh2))
-            # Ruined columns — tall, reaching into sky
-            for cx in (42, 148, 258):
-                col_top = TOP_H + 70
-                pygame.draw.rect(surf, (172, 150, 100), (cx - 7, col_top, 14, _GY - col_top))
-                # Capital (top slab)
-                pygame.draw.rect(surf, (152, 130, 84), (cx - 10, col_top - 6, 20, 8))
-                # Base
-                pygame.draw.rect(surf, (152, 130, 84), (cx - 9, _GY - 5, 18, 6))
-                # Cracks
+            # Fallen column section on ground (left area)
+            pygame.draw.rect(surf, (162, 140, 92), (14, _GY - 12, 48, 14))
+            pygame.draw.line(surf, (118, 96, 58), (14, _GY - 6), (62, _GY - 6), 1)
+            # Broken arch — center-right background
+            _ax = 195
+            pygame.draw.rect(surf, (158, 136, 88), (_ax - 6,  _GY - 105, 12, 105))  # left leg
+            pygame.draw.rect(surf, (158, 136, 88), (_ax + 38, _GY - 95,  12, 95))   # right leg (shorter, broken)
+            pygame.draw.arc(surf,  (158, 136, 88),
+                            (_ax - 6, _GY - 130, 56, 56), 0, math.pi, 10)           # arch top
+            pygame.draw.rect(surf, (138, 115, 70), (_ax + 38, _GY - 97, 18, 6))     # broken top shard
+            # Standing cracked columns — tall, reaching into sky
+            for _cx in (48, 148):
+                col_top = TOP_H + 72
+                pygame.draw.rect(surf, (172, 150, 100), (_cx - 7, col_top, 14, _GY - col_top))
+                pygame.draw.rect(surf, (152, 130, 84),  (_cx - 10, col_top - 6, 20, 8))
+                pygame.draw.rect(surf, (152, 130, 84),  (_cx - 9,  _GY - 5,    18, 6))
                 pygame.draw.line(surf, (118, 96, 58),
-                                 (cx - 1, col_top + 40), (cx + 5, col_top + 90), 1)
+                                 (_cx - 1, col_top + 40), (_cx + 5, col_top + 90), 1)
                 pygame.draw.line(surf, (118, 96, 58),
-                                 (cx + 2, col_top + 100), (cx - 3, col_top + 140), 1)
+                                 (_cx + 2, col_top + 100), (_cx - 3, col_top + 140), 1)
+            # Small vegetation growing through cracks
+            _plant_spots = ((44, _GY - 2, 0), (152, _GY - 2, 1), (72, _GY - 2, 2),
+                            (210, _GY - 2, 0), (290, _GY - 2, 1))
+            for _px, _py, _pi in _plant_spots:
+                if _pi < len(self._z2_plants):
+                    _pl = self._z2_plants[_pi]
+                    surf.blit(_pl, (_px - _pl.get_width() // 2, _py - _pl.get_height()))
             for c in self.clouds:
                 c.draw(surf)
             for gf in self.ghost_figures:

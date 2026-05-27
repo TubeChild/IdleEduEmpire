@@ -24,7 +24,7 @@ pygame.font.init()
 audio.init()
 
 # ── Window ────────────────────────────────────────────────────────────────────
-VERSION    = "0.21.2"
+VERSION    = "0.21.3"
 W, H       = 1280, 760
 LEFT_W     = 340
 TOP_H      = 72
@@ -222,6 +222,10 @@ class App:
         self._hm_timer    = 0.0
 
         self._tutorial_auto_timer = 0.0
+        self._show_welcome = (self.game.tutorial_step == 0
+                              and self.game.total_clicks == 0
+                              and sum(self.game.building_counts.values()) == 0)
+        self._pulse_t = 0.0   # shared timer for highlight pulse animation
 
         self.buy_mult: int | str = 1
         self.b_filter: str = "all"   # "all" | "affordable" | "owned"
@@ -740,6 +744,95 @@ class App:
         pygame.draw.line(s, (75, 75, 75), (cx, cy-105), (cx, cy-148), 2)
         pygame.draw.polygon(s, (208, 42, 42),
                             [(cx, cy-148), (cx+30, cy-136), (cx, cy-124)])
+
+    # ── Onboarding ────────────────────────────────────────────────────────────
+
+    def _draw_welcome_overlay(self):
+        """Full-screen welcome modal shown on very first launch."""
+        # Dim background
+        dim = pygame.Surface((W, H), pygame.SRCALPHA)
+        dim.fill((0, 0, 0, 175))
+        self.screen.blit(dim, (0, 0))
+
+        cw, ch = 500, 340
+        cx, cy = (W - cw) // 2, (H - ch) // 2
+        card = pygame.Rect(cx, cy, cw, ch)
+        self._r((24, 44, 72), card, radius=14)
+        pygame.draw.rect(self.screen, (55, 100, 165), card, 2, border_radius=14)
+
+        # Title
+        self._tc(F_LG, "Welcome to Idle Edu Empire!", (255, 215, 60),
+                 pygame.Rect(cx, cy + 18, cw, 32))
+
+        # Tagline
+        self._tc(F_SM, "Build a single classroom into a world-spanning education empire.",
+                 (185, 215, 245), pygame.Rect(cx, cy + 56, cw, 20))
+
+        # How-to bullets
+        bullets = [
+            ("Click STUDY", "to earn Knowledge Points (KP)"),
+            ("Buy Buildings", "for automatic KP every second"),
+            ("Upgrade & Prestige", "to unlock permanent power boosts"),
+            ("Explore Worlds", "10 unique zones with their own stories"),
+        ]
+        by = cy + 90
+        for title, desc in bullets:
+            pygame.draw.circle(self.screen, (85, 165, 235), (cx + 22, by + 7), 5)
+            self._t(F_SM, title,  (255, 215, 60),   cx + 36, by)
+            tw = F_SM.size(title)[0]
+            self._t(F_SM, f" — {desc}", (170, 200, 230), cx + 36 + tw, by)
+            by += 26
+
+        # Separator
+        pygame.draw.line(self.screen, (55, 90, 140),
+                         (cx + 20, cy + ch - 68), (cx + cw - 20, cy + ch - 68), 1)
+
+        # Start button
+        btn = pygame.Rect(cx + cw // 2 - 90, cy + ch - 56, 180, 40)
+        mx, my = pygame.mouse.get_pos()
+        hov = btn.collidepoint(mx, my)
+        self._r((35, 155, 90) if hov else (28, 130, 75), btn, radius=8)
+        self._tc(F_MD, "Start Learning!", WHITE, btn)
+        self._buy_items.append((btn, None, "welcome_start"))
+
+    def _draw_tutorial_highlight(self):
+        """Pulsing ring around the UI element relevant to the current tutorial step."""
+        g = self.game
+        step = g.tutorial_step
+        target: Optional[pygame.Rect] = None
+
+        if step == 0:
+            target = self._study_btn
+        elif step == 1:
+            for r, name in self._tab_rects:
+                if name == "Buildings":
+                    target = r
+                    break
+        elif step == 2:
+            for r, name in self._tab_rects:
+                if name == "Upgrades":
+                    target = r
+                    break
+
+        if target is None:
+            return
+
+        pulse = (math.sin(self._pulse_t * 3.5) + 1) / 2   # 0..1
+        radius = int(target.width // 2 + 8 + pulse * 6)
+        alpha  = int(120 + pulse * 100)
+        cx_    = target.centerx
+        cy_    = target.centery
+
+        ring = pygame.Surface((radius * 2 + 4, radius * 2 + 4), pygame.SRCALPHA)
+        pygame.draw.circle(ring, (255, 215, 60, alpha),
+                           (radius + 2, radius + 2), radius, 3)
+        self.screen.blit(ring, (cx_ - radius - 2, cy_ - radius - 2))
+
+        # Small bouncing arrow below the target
+        arr_y = target.bottom + 6 + int(pulse * 5)
+        arr_x = target.centerx
+        pygame.draw.polygon(self.screen, (255, 215, 60),
+                            [(arr_x - 8, arr_y), (arr_x + 8, arr_y), (arr_x, arr_y + 8)])
 
     # ── Goals panel ───────────────────────────────────────────────────────────
 
@@ -3083,6 +3176,12 @@ class App:
         self._draw_milestone_flash(dt)
         self._draw_headmaster(dt)
 
+        # Onboarding — drawn last so they sit on top of everything
+        if self.game.tutorial_step < 99 and not self._show_welcome:
+            self._draw_tutorial_highlight()
+        if self._show_welcome:
+            self._draw_welcome_overlay()
+
         pygame.display.flip()
         return popup_btns, story_btns
 
@@ -3233,6 +3332,7 @@ class App:
                             self._reset_confirm = False
 
                     if self._study_btn and self._study_btn.collidepoint(mx, my):
+                        self._show_welcome = False
                         gained = g.click()
                         audio.play("click")
                         self.floats.append(Float(mx - 30, my - 25, f"+{fmt(gained)} KP"))
@@ -3497,11 +3597,15 @@ class App:
                                 audio.play("upgrade")
                             else:
                                 audio.play("error")
+                        elif kind == "welcome_start":
+                            self._show_welcome = False
+                            audio.play("click")
                         elif kind == "tutorial_advance":
                             self.game.tutorial_step = min(99, self.game.tutorial_step + 1)
                             self._tutorial_auto_timer = 0.0
                         elif kind == "tutorial_skip":
                             self.game.tutorial_step = 99
+                            self._show_welcome = False
                         elif kind == "toggle_fullscreen":
                             self._fullscreen = not self._fullscreen
                             flags = pygame.SCALED
@@ -3604,6 +3708,7 @@ class App:
             self.game._cw_rare_weight    = self.world.cw_rare_weight_mult()
             self.game._cw_event_reward   = self.world.cw_event_reward_mult()
             self.game.update(dt)
+            self._pulse_t += dt
             self._check_tutorial_advance(dt)
             self.world.update(dt, self.game)
             self.game._zone_building_counts = self.world.all_zone_building_counts()
